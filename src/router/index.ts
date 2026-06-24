@@ -58,6 +58,14 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                     title: 'Cajas'
                 }
+            },
+            {
+                path: 'movimientos',
+                name: 'movimientos',
+                component: () => import('@/views/movimientos/MovimientosView.vue'),
+                meta: {
+                    title: 'Movimientos de Efectivo'
+                }
             }
         ]
     },
