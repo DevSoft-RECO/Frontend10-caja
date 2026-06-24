@@ -42,6 +42,22 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                     title: 'Gestiones'
                 }
+            },
+            {
+                path: 'ajustes/denominaciones',
+                name: 'denominaciones',
+                component: () => import('@/views/ajustes/DenominacionesView.vue'),
+                meta: {
+                    title: 'Denominaciones'
+                }
+            },
+            {
+                path: 'ajustes/cajas',
+                name: 'cajas',
+                component: () => import('@/views/ajustes/CajasView.vue'),
+                meta: {
+                    title: 'Cajas'
+                }
             }
         ]
     },
