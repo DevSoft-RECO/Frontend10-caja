@@ -66,6 +66,30 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                     title: 'Movimientos de Efectivo'
                 }
+            },
+            {
+                path: 'movimientos/arqueo',
+                name: 'arqueo',
+                component: () => import('@/views/movimientos/ArqueoParcialView.vue'),
+                meta: {
+                    title: 'Arqueo Parcial de Caja'
+                }
+            },
+            {
+                path: 'movimientos/cierre',
+                name: 'cierre',
+                component: () => import('@/views/movimientos/CierreJornadaView.vue'),
+                meta: {
+                    title: 'Cierre de Jornada'
+                }
+            },
+            {
+                path: 'movimientos/reporte-cierres',
+                name: 'reporte-cierres',
+                component: () => import('@/views/movimientos/ReporteCierresView.vue'),
+                meta: {
+                    title: 'Reporte de Cierres'
+                }
             }
         ]
     },
