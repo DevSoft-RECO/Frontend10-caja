@@ -270,9 +270,14 @@ const menuItems = computed(() => {
         {
             id: 'movimientos',
             label: 'Movimientos',
-            route: '/admin/movimientos',
             iconSvg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />',
-            show: true
+            show: true,
+            children: [
+                { label: 'Historial', route: '/admin/movimientos' },
+                { label: 'Arqueo Parcial', route: '/admin/movimientos/arqueo' },
+                { label: 'Cierre de Caja', route: '/admin/movimientos/cierre' },
+                { label: 'Historial de Cierres', route: '/admin/movimientos/reporte-cierres' }
+            ]
         },
         {
             id: 'ajustes',
