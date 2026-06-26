@@ -140,10 +140,11 @@
             <!-- Acciones -->
             <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700/60">
               <button
-                @click="resetForm"
-                class="px-5 py-2.5 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-semibold rounded-xl text-sm transition-all cursor-pointer"
+                @click="limpiarArqueo"
+                :disabled="submitting"
+                class="px-5 py-2.5 bg-red-50 hover:bg-red-100 text-red-650 font-semibold rounded-xl text-sm border border-red-200 transition-all cursor-pointer disabled:opacity-40"
               >
-                Limpiar
+                Limpiar Arqueo Activo
               </button>
               <button
                 @click="submitArqueo"
@@ -262,6 +263,42 @@ watch(deshabilitaDeterioradoPorCaja, (newVal) => {
   }
 })
 
+// Cargar el conteo existente si ya hay uno para la caja elegida
+watch(selectedCajaId, async (newId) => {
+  error.value = ''
+  successMsg.value = ''
+  if (!newId) {
+    resetForm()
+    return
+  }
+
+  try {
+    const res = await axios.get(`/cajas/conteos-parciales?caja_id=${newId}`)
+    const conteos = res.data
+    
+    // Si hay registros, tomamos el primero (ya que es único por caja)
+    if (conteos && conteos.length > 0) {
+      const activeArqueo = conteos[0]
+      localDenominaciones.value.forEach(d => {
+        // Encontrar los detalles del arqueo para esta denominación
+        const detBueno = activeArqueo.detalles.find((det: any) => det.denominacion_id === d.id && det.estado_dinero === 'bueno')
+        const detDet = activeArqueo.detalles.find((det: any) => det.denominacion_id === d.id && det.estado_dinero === 'deteriorado')
+        
+        d.cantidad_buena = detBueno ? detBueno.cantidad : 0
+        d.cantidad_deteriorada = detDet ? detDet.cantidad : 0
+      })
+    } else {
+      // Si no hay arqueo previo, limpiar los inputs
+      localDenominaciones.value.forEach(d => {
+        d.cantidad_buena = 0
+        d.cantidad_deteriorada = 0
+      })
+    }
+  } catch (err) {
+    error.value = 'No se pudo verificar el historial de arqueo parcial para esta caja.'
+  }
+})
+
 // Acciones
 const resetForm = () => {
   localDenominaciones.value = denominaciones.value.map(d => ({
@@ -271,6 +308,23 @@ const resetForm = () => {
   }))
   error.value = ''
   successMsg.value = ''
+}
+
+const limpiarArqueo = async () => {
+  if (!selectedCajaId.value) return
+  error.value = ''
+  successMsg.value = ''
+  submitting.value = true
+
+  try {
+    await axios.delete(`/cajas/conteos-parciales/${selectedCajaId.value}`)
+    successMsg.value = 'Arqueo Parcial limpiado correctamente en el sistema.'
+    resetForm()
+  } catch (err: any) {
+    error.value = err.response?.data?.message || 'Error al intentar limpiar el arqueo de esta caja.'
+  } finally {
+    submitting.value = false
+  }
 }
 
 const fetchData = async () => {
@@ -331,7 +385,6 @@ const submitArqueo = async () => {
     })
 
     successMsg.value = '¡Arqueo Parcial guardado exitosamente!'
-    resetForm()
   } catch (err: any) {
     error.value = err.response?.data?.message || 'Error al procesar el arqueo.'
   } finally {
