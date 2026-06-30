@@ -11,15 +11,38 @@
         </p>
       </div>
 
-      <button
-        @click="fetchData"
-        class="inline-flex items-center justify-center p-2.5 bg-azul-cope text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all gap-1.5 text-xs cursor-pointer"
-      >
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18" />
-        </svg>
-        Actualizar Datos
-      </button>
+      <div class="flex items-center gap-3">
+        <button
+          @click="fetchData"
+          class="inline-flex items-center justify-center p-2.5 bg-azul-cope text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all gap-1.5 text-xs cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 8H18" />
+          </svg>
+          Actualizar Datos
+        </button>
+
+        <button
+          v-if="bovedas.length > 0 && !bovedaCerradaHoy"
+          @click="openCierreBovedaModal"
+          class="inline-flex items-center justify-center p-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all gap-1.5 text-xs cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          Cerrar Bóveda
+        </button>
+
+        <span
+          v-else-if="bovedas.length > 0 && bovedaCerradaHoy"
+          class="inline-flex items-center justify-center p-2.5 bg-green-100 dark:bg-green-950/20 text-green-700 dark:text-green-400 font-bold rounded-xl gap-1.5 text-xs select-none border border-green-200 dark:border-green-900/30"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          Bóveda Cerrada
+        </span>
+      </div>
     </div>
 
     <!-- Loading State -->
@@ -391,8 +414,16 @@
 
               <!-- Fila Deteriorado -->
               <tr class="hover:bg-slate-50/40 dark:hover:bg-gray-750/30 transition-colors">
-                <td class="p-3.5 border-r border-gray-200 dark:border-gray-700 font-bold text-gray-900 dark:text-white pl-4">
-                  Efectivo Deteriorado
+                <td class="p-3.5 border-r border-gray-200 dark:border-gray-700 font-bold text-gray-900 dark:text-white pl-4 flex items-center justify-between gap-2">
+                  <span>Efectivo Deteriorado</span>
+                  <button
+                    v-if="bovedas.length > 0"
+                    @click="openInventarioDeteriorado(bovedas[0].id)"
+                    class="px-2 py-1 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 dark:hover:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40 rounded-lg text-[10px] font-black tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1"
+                    title="Ver desglose físico"
+                  >
+                    🔍 Detalle
+                  </button>
                 </td>
                 
                 <!-- Bóveda data -->
@@ -477,6 +508,273 @@
         </div>
       </div>
     </div>
+    <!-- MODAL DE CIERRE DE BÓVEDA -->
+    <div v-if="cierreModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+      <div class="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-150 dark:border-gray-700 max-h-[90vh] flex flex-col overflow-hidden">
+        <!-- Header -->
+        <div class="p-6 border-b border-gray-150 dark:border-gray-750 flex items-center justify-between bg-gradient-to-r from-red-500/10 via-white to-red-500/10 dark:from-red-950/20 dark:via-gray-800 dark:to-red-950/20">
+          <div class="flex items-center gap-3 text-red-600 dark:text-red-400">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <h2 class="text-xl font-black">Cierre de Jornada - Bóveda Principal</h2>
+          </div>
+          <button @click="cierreModalOpen = false" class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700/60 cursor-pointer">
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6 overflow-y-auto space-y-6 flex-1">
+          <div v-if="cierreError" class="p-4 bg-red-50 dark:bg-red-950/10 border border-red-200 dark:border-red-900/30 rounded-xl text-xs font-semibold text-red-800 dark:text-red-300">
+            {{ cierreError }}
+          </div>
+
+          <div v-if="cierreSuccess" class="p-4 bg-green-50 dark:bg-green-950/10 border border-green-200 dark:border-green-900/30 rounded-xl text-xs font-bold text-green-800 dark:text-green-300">
+            {{ cierreSuccess }}
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Billetes -->
+            <div class="space-y-3">
+              <h3 class="text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">Billetes</h3>
+              <div class="border border-gray-150 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 text-xs font-bold text-gray-550 dark:text-gray-400 uppercase tracking-wider select-none">
+                      <th class="p-3">Denominación</th>
+                      <th class="p-3 text-center">Cant. Buena</th>
+                      <th class="p-3 text-center">Cant. Deteriorada</th>
+                      <th class="p-3 text-right">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-sm">
+                    <tr v-for="denom in localBilletesList" :key="denom.id">
+                      <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
+                        {{ denom.nombre }} ({{ formatCurrency(denom.valor) }})
+                      </td>
+                      <td class="p-3">
+                        <input
+                          v-model.number="denom.cantidad_buena"
+                          type="number"
+                          min="0"
+                          class="block w-20 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-650 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white text-sm"
+                        />
+                      </td>
+                      <td class="p-3">
+                        <input
+                          v-model.number="denom.cantidad_deteriorada"
+                          type="number"
+                          min="0"
+                          class="block w-20 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-650 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white text-sm"
+                        />
+                      </td>
+                      <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-24">
+                        {{ formatCurrency(calculaSubtotal(denom)) }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Monedas -->
+            <div class="space-y-3">
+              <h3 class="text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">Monedas</h3>
+              <div class="border border-gray-150 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+                <table class="w-full text-left border-collapse">
+                  <thead>
+                    <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 text-xs font-bold text-gray-550 dark:text-gray-400 uppercase tracking-wider select-none">
+                      <th class="p-3">Denominación</th>
+                      <th class="p-3 text-center">Cant. Buena</th>
+                      <th class="p-3 text-center">Cant. Deteriorada</th>
+                      <th class="p-3 text-right">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-sm">
+                    <tr v-for="denom in localMonedasList" :key="denom.id">
+                      <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
+                        {{ denom.nombre }} ({{ formatCurrency(denom.valor) }})
+                      </td>
+                      <td class="p-3">
+                        <input
+                          v-model.number="denom.cantidad_buena"
+                          type="number"
+                          min="0"
+                          class="block w-20 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-650 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white text-sm"
+                        />
+                      </td>
+                      <td class="p-3">
+                        <input
+                          v-model.number="denom.cantidad_deteriorada"
+                          type="number"
+                          min="0"
+                          class="block w-20 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-650 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white text-sm"
+                        />
+                      </td>
+                      <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-24">
+                        {{ formatCurrency(calculaSubtotal(denom)) }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- Compartment Consolidation Grid -->
+          <div class="mt-6 p-4 bg-slate-50 dark:bg-gray-850 border border-gray-150 dark:border-gray-700/60 rounded-2xl grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col">
+              <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Billetes y Monedas (Físico)</span>
+              <span class="text-base font-extrabold text-gray-800 dark:text-gray-200 mt-1 font-mono">
+                {{ formatCurrency(totalFisicoBilletesMonedas) }}
+              </span>
+            </div>
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col">
+              <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Cajillas (En Tránsito)</span>
+              <span class="text-base font-extrabold text-gray-850 dark:text-gray-200 mt-1 font-mono">
+                {{ formatCurrency(bovedas.length > 0 ? getCajillasDisponible(bovedas[0].id) : 0) }}
+              </span>
+            </div>
+            <div class="p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col">
+              <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Efectivo Deteriorado (Acumulado)</span>
+              <span class="text-base font-extrabold text-gray-850 dark:text-gray-200 mt-1 font-mono">
+                {{ formatCurrency(bovedas.length > 0 ? getDeterioradosDisponible(bovedas[0].id) : 0) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer / Resumen -->
+        <div class="p-6 border-t border-gray-150 dark:border-gray-750 bg-gray-50 dark:bg-gray-850 flex flex-col space-y-4">
+          
+          <!-- Fila de Entrada de Saldo del Core y Diferencia -->
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-gray-800 p-4 rounded-2xl border border-gray-150 dark:border-gray-700/60 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Saldo Oficial Core Bancario <span class="text-red-500">*</span></label>
+                <input
+                  v-model.number="saldoCoreManual"
+                  type="number"
+                  placeholder="0.00"
+                  min="0"
+                  class="block w-48 px-3 py-2 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-azul-cope text-sm"
+                />
+              </div>
+              
+              <!-- Indicador de Diferencia -->
+              <div v-if="saldoCoreManual !== null && saldoCoreManual !== ''">
+                <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Diferencia (Conciliación)</span>
+                <span 
+                  class="text-sm font-extrabold px-3 py-1.5 rounded-xl inline-block font-mono"
+                  :class="{
+                    'bg-green-100 dark:bg-green-950/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-900/30': diferenciaConciliacion === 0,
+                    'bg-yellow-100 dark:bg-yellow-950/20 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-900/30': diferenciaConciliacion > 0,
+                    'bg-red-100 dark:bg-red-950/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-900/30': diferenciaConciliacion < 0
+                  }"
+                >
+                  <span v-if="diferenciaConciliacion === 0">✓ Saldos Conciliados</span>
+                  <span v-else-if="diferenciaConciliacion > 0">Sobrante: + {{ formatCurrency(diferenciaConciliacion) }}</span>
+                  <span v-else>Faltante: {{ formatCurrency(diferenciaConciliacion) }}</span>
+                </span>
+              </div>
+            </div>
+
+            <div class="text-right sm:text-left">
+              <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Gran Total Declarado (Bóveda)</span>
+              <span class="text-2xl font-black text-azul-cope dark:text-blue-450 font-mono">{{ formatCurrency(granTotalCierre) }}</span>
+            </div>
+          </div>
+
+          <!-- Acciones de Cierre -->
+          <div class="flex justify-end gap-3 pt-2">
+            <button @click="cierreModalOpen = false" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-250 font-bold rounded-xl text-sm transition-all cursor-pointer">
+              Cancelar
+            </button>
+            <button
+              :disabled="loadingCierre"
+              @click="submitCierreBoveda"
+              class="px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-sm shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+            >
+              <span v-if="loadingCierre" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              Confirmar Cierre de Bóveda
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Inventario Deteriorado -->
+  <div v-if="showDeterioradoModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in select-none">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-lg w-full border border-gray-150 dark:border-gray-700 shadow-2xl flex flex-col overflow-hidden max-h-[85vh] transform transition-all duration-300 scale-100">
+      
+      <!-- Header -->
+      <div class="px-6 py-5 border-b border-gray-150 dark:border-gray-750 flex items-center justify-between bg-amber-500 text-white">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">⚠️</span>
+          <div>
+            <h2 class="text-base font-extrabold tracking-wide uppercase">Inventario de Efectivo Deteriorado</h2>
+            <p class="text-[10px] text-amber-100 font-semibold uppercase tracking-wider">Desglose físico por denominación</p>
+          </div>
+        </div>
+        <button @click="showDeterioradoModal = false" class="text-white hover:text-amber-150 text-2xl font-bold cursor-pointer focus:outline-none">&times;</button>
+      </div>
+
+      <!-- Content -->
+      <div class="p-6 overflow-y-auto space-y-4">
+        
+        <!-- Total informativo -->
+        <div class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-2xl flex justify-between items-center">
+          <span class="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider">Total Acumulado Deteriorado</span>
+          <span class="text-xl font-mono font-black text-amber-700 dark:text-amber-300">{{ formatCurrency(totalMontoDeteriorado) }}</span>
+        </div>
+
+        <div v-if="loadingDeterioradoInventario" class="flex flex-col items-center justify-center py-12 gap-3">
+          <div class="w-8 h-8 border-3 border-amber-550 border-t-transparent rounded-full animate-spin"></div>
+          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Cargando inventario...</span>
+        </div>
+
+        <div v-else-if="deterioradoInventario.length === 0" class="text-center py-12 text-gray-450 dark:text-gray-500 italic text-sm">
+          No hay piezas físicas de efectivo deteriorado registradas en el inventario.
+        </div>
+
+        <!-- Tabla de Desglose -->
+        <div v-else class="border border-gray-150 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider select-none">
+                <th class="p-3 w-1/2">Denominación</th>
+                <th class="p-3 text-center">Cantidad (Piezas)</th>
+                <th class="p-3 text-right">Subtotal</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-sm">
+              <tr v-for="item in deterioradoInventario" :key="item.id" class="hover:bg-slate-50/50 dark:hover:bg-gray-750/30 transition-colors">
+                <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
+                  {{ item.nombre }} ({{ formatCurrency(item.valor) }})
+                </td>
+                <td class="p-3 text-center font-bold font-mono text-gray-900 dark:text-white">
+                  {{ item.cantidad }}
+                </td>
+                <td class="p-3 text-right font-bold font-mono text-gray-950 dark:text-amber-300">
+                  {{ formatCurrency(item.subtotal) }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="p-6 border-t border-gray-150 dark:border-gray-750 bg-gray-55 dark:bg-gray-850 flex justify-end">
+        <button @click="showDeterioradoModal = false" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-250 font-bold rounded-xl text-sm transition-all cursor-pointer">
+          Cerrar Vista
+        </button>
+      </div>
+
+    </div>
   </div>
 </template>
 
@@ -524,6 +822,30 @@ const matriz = ref<Record<number, Record<number, FilaMatriz>>>({})
 const totalesCajillas = ref<Record<number, FlujoEspecial>>({})
 const totalesDeteriorados = ref<Record<number, FlujoEspecial>>({})
 const selectedVentanillaId = ref<number | null>(null)
+
+// Cierre Bóveda States
+const bovedaCerradaHoy = ref(false)
+const cierreModalOpen = ref(false)
+const loadingCierre = ref(false)
+const cierreError = ref('')
+const cierreSuccess = ref('')
+const localBilletesList = ref<any[]>([])
+const localMonedasList = ref<any[]>([])
+const saldoCoreManual = ref<number | ''>('')
+
+// Inventario Deteriorado States
+const showDeterioradoModal = ref(false)
+const loadingDeterioradoInventario = ref(false)
+const deterioradoInventario = ref<any[]>([])
+
+const totalMontoDeteriorado = computed(() => {
+  return deterioradoInventario.value.reduce((sum, item) => sum + (item.subtotal || 0), 0)
+})
+
+const diferenciaConciliacion = computed(() => {
+  if (saldoCoreManual.value === '' || saldoCoreManual.value === null) return 0
+  return Number(granTotalCierre.value) - Number(saldoCoreManual.value)
+})
 
 // Computeds por tipo
 const bovedas = computed(() => cajas.value.filter(c => c.tipo_caja === 'boveda'))
@@ -690,6 +1012,153 @@ const getTotalMontoCaja = (cajaId: number, tipo: 'ingresos' | 'egresos'): number
   return total
 }
 
+const calculaSubtotal = (denom: any): number => {
+  const buena = Number(denom.cantidad_buena) || 0
+  const deteriorada = Number(denom.cantidad_deteriorada) || 0
+  return (buena + deteriorada) * denom.valor
+}
+
+const totalFisicoBilletesMonedas = computed(() => {
+  let total = 0
+  localBilletesList.value.forEach(d => {
+    total += calculaSubtotal(d)
+  })
+  localMonedasList.value.forEach(d => {
+    total += calculaSubtotal(d)
+  })
+  return total
+})
+
+const granTotalCierre = computed(() => {
+  const boveda = bovedas.value[0]
+  if (!boveda) return totalFisicoBilletesMonedas.value
+  return totalFisicoBilletesMonedas.value + getCajillasDisponible(boveda.id) + getDeterioradosDisponible(boveda.id)
+})
+
+const openCierreBovedaModal = async () => {
+  const boveda = bovedas.value[0]
+  if (!boveda) return
+
+  cierreError.value = ''
+  cierreSuccess.value = ''
+  saldoCoreManual.value = '' // Reiniciar el input de saldo manual
+  
+  // Inicializar listas locales
+  localBilletesList.value = billetes.value.map(d => ({
+    ...d,
+    cantidad_buena: 0,
+    cantidad_deteriorada: 0
+  }))
+  localMonedasList.value = monedas.value.map(d => ({
+    ...d,
+    cantidad_buena: 0,
+    cantidad_deteriorada: 0
+  }))
+
+  try {
+    // Intentar obtener conteo/arqueo de hoy si existe para precargar datos
+    const conteoRes = await axios.get(`/cajas/conteos-parciales?caja_id=${boveda.id}`)
+    const conteos = conteoRes.data
+    
+    if (conteos && conteos.length > 0) {
+      const activeArqueo = conteos[0]
+      const mergeConteo = (list: any[]) => {
+        list.forEach(d => {
+          const detBueno = activeArqueo.detalles.find((det: any) => det.denominacion_id === d.id && det.estado_dinero === 'bueno')
+          const detDet = activeArqueo.detalles.find((det: any) => det.denominacion_id === d.id && det.estado_dinero === 'deteriorado')
+          d.cantidad_buena = detBueno ? detBueno.cantidad : 0
+          d.cantidad_deteriorada = detDet ? detDet.cantidad : 0
+        })
+      }
+      mergeConteo(localBilletesList.value)
+      mergeConteo(localMonedasList.value)
+    } else {
+      // Si no hay arqueo previo, precargar de los balances del Dashboard (matriz)
+      const mergeMatriz = (list: any[]) => {
+        list.forEach(d => {
+          d.cantidad_buena = getSaldoDisponibleCantidad(boveda.id, d.id)
+          const row = matriz.value[boveda.id]?.[d.id]
+          d.cantidad_deteriorada = row ? row.deteriorado_ingreso_cantidad : 0
+        })
+      }
+      mergeMatriz(localBilletesList.value)
+      mergeMatriz(localMonedasList.value)
+    }
+    
+    cierreModalOpen.value = true
+  } catch (err: any) {
+    cierreError.value = 'Error al cargar balances o saldos del sistema.'
+    cierreModalOpen.value = true
+  }
+}
+
+const submitCierreBoveda = async () => {
+  const boveda = bovedas.value[0]
+  if (!boveda) return
+
+  if (saldoCoreManual.value === '' || saldoCoreManual.value === null || isNaN(Number(saldoCoreManual.value))) {
+    cierreError.value = 'Por favor, ingrese el Saldo Oficial del Core Bancario para la conciliación antes de cerrar.'
+    return
+  }
+
+  loadingCierre.value = true
+  cierreError.value = ''
+  cierreSuccess.value = ''
+
+  // Consolidar detalles
+  const detalles: any[] = []
+  const pushDetalles = (list: any[]) => {
+    list.forEach(d => {
+      detalles.push({
+        denominacion_id: d.id,
+        estado_dinero: 'bueno',
+        cantidad: Number(d.cantidad_buena) || 0
+      })
+      detalles.push({
+        denominacion_id: d.id,
+        estado_dinero: 'deteriorado',
+        cantidad: Number(d.cantidad_deteriorada) || 0
+      })
+    })
+  }
+
+  pushDetalles(localBilletesList.value)
+  pushDetalles(localMonedasList.value)
+
+  try {
+    await axios.post('/cierres-diarios', {
+      caja_id: boveda.id,
+      detalles: detalles
+    })
+    
+    cierreSuccess.value = '¡Bóveda cerrada exitosamente para el día de hoy!'
+    bovedaCerradaHoy.value = true
+    setTimeout(() => {
+      cierreModalOpen.value = false
+      fetchData()
+    }, 1500)
+  } catch (err: any) {
+    cierreError.value = err.response?.data?.message || 'Error al ejecutar el cierre de la Bóveda.'
+  } finally {
+    loadingCierre.value = false
+  }
+}
+
+const openInventarioDeteriorado = async (cajaId: number) => {
+  showDeterioradoModal.value = true
+  loadingDeterioradoInventario.value = true
+  deterioradoInventario.value = []
+  
+  try {
+    const res = await axios.get(`/cajas/${cajaId}/inventario-deteriorado`)
+    deterioradoInventario.value = res.data
+  } catch (err) {
+    console.error('Error al cargar inventario deteriorado:', err)
+  } finally {
+    loadingDeterioradoInventario.value = false
+  }
+}
+
 const fetchData = async () => {
   loading.value = true
   error.value = ''
@@ -701,6 +1170,7 @@ const fetchData = async () => {
     matriz.value = res.data.matriz
     totalesCajillas.value = res.data.totales_cajillas || {}
     totalesDeteriorados.value = res.data.totales_deteriorados || {}
+    bovedaCerradaHoy.value = res.data.boveda_cerrada_hoy || false
 
     // Seleccionar la primera ventanilla por defecto si hay
     const vList = cajas.value.filter(c => c.tipo_caja === 'ventanilla')

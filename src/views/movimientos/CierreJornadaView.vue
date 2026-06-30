@@ -428,7 +428,7 @@ const fetchData = async () => {
       axios.get('/cajas'),
       axios.get('/denominaciones')
     ])
-    cajas.value = cajasRes.data.filter((c: any) => c.estado)
+    cajas.value = cajasRes.data.filter((c: any) => c.estado && c.tipo_caja !== 'boveda')
     denominaciones.value = denomsRes.data.filter((d: any) => d.activo)
 
     localDenominaciones.value = denominaciones.value.map(d => ({
