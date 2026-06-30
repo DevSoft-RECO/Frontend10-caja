@@ -74,10 +74,9 @@
                 class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-655 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
                 required
               >
-                <option value="billetes">Billetes</option>
-                <option value="monedas">Monedas</option>
-                <option value="cajilla">Cajilla</option>
-                <option value="deteriorados">Deteriorados</option>
+                <option v-for="cat in categoriasDisponibles" :key="cat.value" :value="cat.value">
+                  {{ cat.label }}
+                </option>
               </select>
             </div>
           </div>
@@ -127,8 +126,8 @@
                     <thead>
                       <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         <th class="p-3 w-2/5">Denominación</th>
-                        <th v-if="form.categoria_movimiento !== 'deteriorados'" class="p-3 w-1/4 text-center">Cant. Buena</th>
-                        <th v-if="form.categoria_movimiento === 'deteriorados'" class="p-3 w-1/4 text-center">Cant. Deteriorada</th>
+                        <th v-if="form.categoria_movimiento !== 'deteriorado'" class="p-3 w-1/4 text-center">Cant. Buena</th>
+                        <th v-if="form.categoria_movimiento === 'deteriorado'" class="p-3 w-1/4 text-center">Cant. Deteriorada</th>
                         <th class="p-3 text-right">Subtotal</th>
                       </tr>
                     </thead>
@@ -137,7 +136,7 @@
                         <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
                           {{ denom.nombre }} ({{ formatCurrency(denom.valor) }})
                         </td>
-                        <td v-if="form.categoria_movimiento !== 'deteriorados'" class="p-3">
+                        <td v-if="form.categoria_movimiento !== 'deteriorado'" class="p-3">
                           <input
                             v-model.number="denom.cantidad_buena"
                             type="number"
@@ -146,7 +145,7 @@
                             class="block w-full text-center py-1.5 border border-gray-300 dark:border-gray-655 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
                           />
                         </td>
-                        <td v-if="form.categoria_movimiento === 'deteriorados'" class="p-3">
+                        <td v-if="form.categoria_movimiento === 'deteriorado'" class="p-3">
                           <input
                             v-model.number="denom.cantidad_deteriorada"
                             type="number"
@@ -173,8 +172,8 @@
                     <thead>
                       <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         <th class="p-3 w-2/5">Denominación</th>
-                        <th v-if="form.categoria_movimiento !== 'deteriorados'" class="p-3 w-1/4 text-center">Cant. Buena</th>
-                        <th v-if="form.categoria_movimiento === 'deteriorados'" class="p-3 w-1/4 text-center">Cant. Deteriorada</th>
+                        <th v-if="form.categoria_movimiento !== 'deteriorado'" class="p-3 w-1/4 text-center">Cant. Buena</th>
+                        <th v-if="form.categoria_movimiento === 'deteriorado'" class="p-3 w-1/4 text-center">Cant. Deteriorada</th>
                         <th class="p-3 text-right">Subtotal</th>
                       </tr>
                     </thead>
@@ -183,7 +182,7 @@
                         <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
                           {{ denom.nombre }} ({{ formatCurrency(denom.valor) }})
                         </td>
-                        <td v-if="form.categoria_movimiento !== 'deteriorados'" class="p-3">
+                        <td v-if="form.categoria_movimiento !== 'deteriorado'" class="p-3">
                           <input
                             v-model.number="denom.cantidad_buena"
                             type="number"
@@ -192,7 +191,7 @@
                             class="block w-full text-center py-1.5 border border-gray-300 dark:border-gray-655 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
                           />
                         </td>
-                        <td v-if="form.categoria_movimiento === 'deteriorados'" class="p-3">
+                        <td v-if="form.categoria_movimiento === 'deteriorado'" class="p-3">
                           <input
                             v-model.number="denom.cantidad_deteriorada"
                             type="number"
@@ -298,11 +297,51 @@ const form = ref({
   origen_caja_id: '',
   destino_caja_id: '',
   tipo_operacion: 'egreso' as 'ingreso' | 'egreso',
-  categoria_movimiento: 'billetes',
+  categoria_movimiento: 'abastecimiento',
   descripcion: '',
 })
 
 const localDenominaciones = ref<Denominacion[]>([])
+
+const origenCajaSeleccionada = computed(() => {
+  if (!form.value.origen_caja_id) return null
+  return props.cajas.find(c => c.id === Number(form.value.origen_caja_id)) || null
+})
+
+const destinoCajaSeleccionada = computed(() => {
+  if (!form.value.destino_caja_id) return null
+  return props.cajas.find(c => c.id === Number(form.value.destino_caja_id)) || null
+})
+
+// Categorías según la regla del origen y destino
+const categoriasDisponibles = computed(() => {
+  const o = origenCajaSeleccionada.value
+  const d = destinoCajaSeleccionada.value
+
+  if (o && (o.tipo_caja === 'boveda' || o.tipo_caja === 'general') && d && d.tipo_caja === 'ventanilla') {
+    return [{ value: 'abastecimiento', label: 'Abastecimiento' }]
+  }
+
+  if (o && o.tipo_caja === 'ventanilla' && d && (d.tipo_caja === 'boveda' || d.tipo_caja === 'general')) {
+    return [
+      { value: 'devolucion', label: 'Devolución' },
+      { value: 'deteriorado', label: 'Deteriorado' }
+    ]
+  }
+
+  return [
+    { value: 'abastecimiento', label: 'Abastecimiento' },
+    { value: 'devolucion', label: 'Devolución' },
+    { value: 'deteriorado', label: 'Deteriorado' }
+  ]
+})
+
+watch(categoriasDisponibles, (newVal) => {
+  const exists = newVal.some(c => c.value === form.value.categoria_movimiento)
+  if (!exists && newVal.length > 0) {
+    form.value.categoria_movimiento = newVal[0].value
+  }
+}, { immediate: true })
 
 // Initialize or reset localDenominaciones when modal opens
 watch(() => props.isOpen, (newVal) => {
@@ -312,7 +351,7 @@ watch(() => props.isOpen, (newVal) => {
       origen_caja_id: '',
       destino_caja_id: '',
       tipo_operacion: 'egreso',
-      categoria_movimiento: 'billetes',
+      categoria_movimiento: 'abastecimiento',
       descripcion: '',
     }
     localDenominaciones.value = props.denominaciones.map(d => ({
@@ -327,16 +366,6 @@ watch(() => props.isOpen, (newVal) => {
 const billetesList = computed(() => localDenominaciones.value.filter(d => d.tipo === 'billete'))
 const monedasList = computed(() => localDenominaciones.value.filter(d => d.tipo === 'moneda'))
 
-const origenCajaSeleccionada = computed(() => {
-  if (!form.value.origen_caja_id) return null
-  return props.cajas.find(c => c.id === Number(form.value.origen_caja_id)) || null
-})
-
-const destinoCajaSeleccionada = computed(() => {
-  if (!form.value.destino_caja_id) return null
-  return props.cajas.find(c => c.id === Number(form.value.destino_caja_id)) || null
-})
-
 const deshabilitaDeterioradoPorOrigen = computed(() => {
   return origenCajaSeleccionada.value?.tipo_caja === 'boveda'
 })
@@ -346,7 +375,7 @@ const deshabilitaDeterioradoPorDestino = computed(() => {
 })
 
 const calculaSubtotalDenominacion = (d: Denominacion) => {
-  if (form.value.categoria_movimiento === 'deteriorados') {
+  if (form.value.categoria_movimiento === 'deteriorado') {
     const deteriorada = d.cantidad_deteriorada || 0
     return d.valor * ((deshabilitaDeterioradoPorOrigen.value || deshabilitaDeterioradoPorDestino.value) ? 0 : deteriorada)
   } else {
@@ -388,7 +417,7 @@ const submitForm = async () => {
   formError.value = ''
   submitting.value = true
 
-  const isDeteriorados = form.value.categoria_movimiento === 'deteriorados'
+  const isDeteriorados = form.value.categoria_movimiento === 'deteriorado'
 
   const detallesPayload = localDenominaciones.value
     .filter(d => {

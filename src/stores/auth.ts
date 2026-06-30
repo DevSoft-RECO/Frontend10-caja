@@ -21,7 +21,7 @@ export interface User {
 
 export const useAuthStore = defineStore('auth', () => {
     // MIGRACIÓN DE ALMACENAMIENTO (Limpia cachés viejas si cambias de arquitectura)
-    const STORAGE_VERSION = 'v2_inactivity_sso'; 
+    const STORAGE_VERSION = 'v2_inactivity_sso';
 
     if (localStorage.getItem('yk_storage_version') !== STORAGE_VERSION) {
         const keysToRemove = ['access_token', 'user_data', 'pkce_verifier', 'yk_pkce_verifier'];
@@ -54,19 +54,19 @@ export const useAuthStore = defineStore('auth', () => {
     // --- ACTIONS ---
 
     async function login(redirectTo: string | null = null): Promise<void> {
-        if (processingSSO.value) return; 
+        if (processingSSO.value) return;
         processingSSO.value = true;
-        
+
         if (redirectTo) {
             sessionStorage.setItem('auth_redirect_to', redirectTo);
         }
-        
+
         await AuthService.login();
     }
 
     async function handlePKCECallback(code: string): Promise<void> {
         console.log(">>> [AuthStore] Iniciando intercambio de código por Token...");
-        
+
         // Buscamos el verifier en las 4 variantes posibles
         const localPrefixed = localStorage.getItem('yk_pkce_verifier');
         const sessionPrefixed = sessionStorage.getItem('yk_pkce_verifier');
@@ -74,7 +74,7 @@ export const useAuthStore = defineStore('auth', () => {
         const localLegacy = localStorage.getItem('pkce_verifier');
 
         const verifier = localPrefixed || sessionPrefixed || sessionLegacy || localLegacy;
-        
+
         if (!verifier) {
             console.error(">>> [AuthStore] ERROR: No se encontró pkce_verifier en sessionStorage o localStorage.");
             throw new Error('No se encontró el verifier PKCE')
@@ -88,23 +88,23 @@ export const useAuthStore = defineStore('auth', () => {
                 code_verifier: verifier,
                 code: code
             });
-            
+
             console.log(">>> [AuthStore] Token obtenido exitosamente.");
             token.value = response.data.access_token;
             sessionStorage.setItem('access_token', token.value!);
             axios.defaults.headers.common['Authorization'] = `Bearer ${token.value}`
-            
+
             // Limpieza nuclear de verifiers
             localStorage.removeItem('yk_pkce_verifier');
             sessionStorage.removeItem('yk_pkce_verifier');
             sessionStorage.removeItem('pkce_verifier');
             localStorage.removeItem('pkce_verifier');
-            
+
             sessionStorage.removeItem('auth_sso_lock');
             processingSSO.value = false;
 
             console.log(">>> [AuthStore] Sincronizando perfil JIT con Backend Hija...");
-            await fetchUser(true); 
+            await fetchUser(true);
 
             // Inicializar WebSockets de inmediato tras obtener el token
             initSessionSocket()
@@ -169,7 +169,7 @@ export const useAuthStore = defineStore('auth', () => {
     function hasPermission(permission: string): boolean {
         if (!user.value) return false
 
-        if (user.value.roles && user.value.roles.includes('Super Admin')) return true
+        if (user.value.roles && (user.value.roles.includes('Super Admin') || user.value.roles.includes('tester'))) return true
 
         const userPerms = user.value.permissions || user.value.permisos || []
         if (Array.isArray(userPerms)) {

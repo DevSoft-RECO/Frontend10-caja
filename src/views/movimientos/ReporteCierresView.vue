@@ -74,15 +74,12 @@
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-gray-55 dark:bg-gray-900/60 border-b border-gray-150 dark:border-gray-750 text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+            <tr class="bg-gray-55 dark:bg-gray-900/60 border-b border-gray-150 dark:border-gray-750 text-xs font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider">
               <th class="p-4">ID</th>
               <th class="p-4">Fecha Cierre</th>
               <th class="p-4">Caja / Bóveda</th>
               <th class="p-4">Cajero</th>
-              <th class="p-4 text-right">Saldo Sistema</th>
-              <th class="p-4 text-right">Físico Gaveta</th>
-              <th class="p-4 text-right">Diferencia</th>
-              <th class="p-4 text-center">Estado Cuadre</th>
+              <th class="p-4 text-right">Físico Gaveta Declarado</th>
               <th class="p-4 text-center">Detalles</th>
             </tr>
           </thead>
@@ -100,35 +97,15 @@
               </td>
               <td class="p-4">
                 <div class="flex flex-col">
-                  <span class="font-bold text-gray-900 dark:text-white">{{ cierre.caja?.nombre }}</span>
-                  <span class="text-xs text-gray-400 dark:text-gray-550">{{ cierre.caja?.agencia?.nombre }}</span>
+                   <span class="font-bold text-gray-900 dark:text-white">{{ cierre.caja?.nombre }}</span>
+                   <span class="text-xs text-gray-400 dark:text-gray-550">{{ cierre.caja?.agencia?.nombre }}</span>
                 </div>
               </td>
               <td class="p-4 text-gray-600 dark:text-gray-300">
                 <span>{{ cierre.usuario?.name || 'Sistema' }}</span>
               </td>
               <td class="p-4 text-right font-mono font-bold text-gray-900 dark:text-white">
-                {{ formatCurrency(cierre.saldo_final_sistema) }}
-              </td>
-              <td class="p-4 text-right font-mono font-bold text-gray-900 dark:text-white">
                 {{ formatCurrency(cierre.saldo_final_fisico_declarado) }}
-              </td>
-              <td class="p-4 text-right font-mono font-bold" :class="Number(cierre.diferencia) === 0 ? 'text-gray-900 dark:text-white' : Number(cierre.diferencia) > 0 ? 'text-green-600' : 'text-red-500'">
-                {{ formatCurrency(cierre.diferencia) }}
-              </td>
-              <td class="p-4 text-center">
-                <span
-                  class="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider border"
-                  :class="
-                    cierre.resultado_cuadre === 'Cuadrado'
-                      ? 'bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800/30'
-                      : cierre.resultado_cuadre === 'Sobrante'
-                      ? 'bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800/30'
-                      : 'bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800/30'
-                  "
-                >
-                  {{ cierre.resultado_cuadre }}
-                </span>
               </td>
               <td class="p-4 text-center">
                 <button
@@ -174,36 +151,74 @@
           <!-- Body -->
           <div class="p-6 overflow-y-auto space-y-6">
             <!-- Metadata Grid -->
-            <div class="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-gray-55 dark:bg-gray-900/60 border border-gray-150 dark:border-gray-750">
-              <div>
-                <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Caja Cerrada</span>
-                <span class="text-sm font-bold text-gray-900 dark:text-white">{{ selectedCierre.caja?.nombre }}</span>
-              </div>
-              <div>
-                <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Cajero Encargado</span>
-                <span class="text-sm font-bold text-gray-900 dark:text-white">{{ selectedCierre.usuario?.name }}</span>
-              </div>
-              <div>
-                <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Saldo Sistema</span>
-                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 font-mono">{{ formatCurrency(selectedCierre.saldo_final_sistema) }}</span>
-              </div>
-              <div>
-                <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Fecha de Registro</span>
-                <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ formatOnlyDate(selectedCierre.fecha_cierre) }}</span>
-              </div>
-            </div>
+             <div class="grid grid-cols-3 gap-4 p-4 rounded-2xl bg-gray-55 dark:bg-gray-900/60 border border-gray-150 dark:border-gray-750">
+               <div>
+                 <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Caja Cerrada</span>
+                 <span class="text-sm font-bold text-gray-900 dark:text-white">{{ selectedCierre.caja?.nombre }}</span>
+               </div>
+               <div>
+                 <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Cajero Encargado</span>
+                 <span class="text-sm font-bold text-gray-900 dark:text-white">{{ selectedCierre.usuario?.name || 'Sistema' }}</span>
+               </div>
+               <div>
+                 <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Fecha de Registro</span>
+                 <span class="text-sm font-semibold text-gray-750 dark:text-gray-300">{{ formatOnlyDate(selectedCierre.fecha_cierre) }}</span>
+               </div>
+             </div>
+
+             <!-- Consolidado de Bóveda para Auditoría -->
+             <div v-if="selectedCierre.caja?.tipo_caja === 'boveda'" class="grid grid-cols-4 gap-4 p-4 rounded-2xl bg-azul-cope/5 dark:bg-azul-cope/10 border border-azul-cope/20 text-sm">
+               <div>
+                 <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-1">Saldo Inicial (Mañana)</span>
+                 <span class="text-sm font-bold text-gray-900 dark:text-white font-mono">
+                   {{ formatCurrency(Number(selectedCierre.saldo_final_fisico_declarado) - Number(selectedCierre.total_ingresos_dia || 0) + Number(selectedCierre.total_egresos_dia || 0)) }}
+                 </span>
+               </div>
+               <div>
+                 <span class="block text-[10px] font-bold text-green-600 dark:text-green-455 uppercase tracking-wider mb-1">Ingresos del Día</span>
+                 <span class="text-sm font-bold text-green-600 dark:text-green-400 font-mono">
+                   +{{ formatCurrency(selectedCierre.total_ingresos_dia || 0) }}
+                 </span>
+               </div>
+               <div>
+                 <span class="block text-[10px] font-bold text-red-500 uppercase tracking-wider mb-1">Egresos del Día</span>
+                 <span class="text-sm font-bold text-red-500 font-mono">
+                   -{{ formatCurrency(selectedCierre.total_egresos_dia || 0) }}
+                 </span>
+               </div>
+               <div>
+                 <span class="block text-[10px] font-bold text-azul-cope/90 uppercase tracking-wider mb-1">Saldo Final Bóveda</span>
+                 <span class="text-sm font-extrabold text-azul-cope dark:text-cyan-400 font-mono">
+                   {{ formatCurrency(selectedCierre.saldo_final_fisico_declarado) }}
+                 </span>
+               </div>
+             </div>
+
+             <!-- Desglose de Caja (Deteriorado e Información de Cajillas) -->
+             <div v-if="selectedCierre.caja?.tipo_caja === 'boveda'" class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-3 bg-gray-55 dark:bg-gray-900/60 rounded-xl border border-gray-150 dark:border-gray-750 text-xs">
+               <div class="flex justify-between items-center px-2">
+                 <span class="text-gray-550 dark:text-gray-450 font-medium">De los cuales es Deteriorado (En Bóveda):</span>
+                 <span class="font-mono font-bold text-gray-955 dark:text-white">{{ formatCurrency(selectedCierre.saldo_final_deteriorado ?? selectedCierre.saldo_deteriorado) }}</span>
+               </div>
+               <div class="flex justify-between items-center px-2">
+                 <span class="text-gray-550 dark:text-gray-450 font-medium">Saldos en Ventanillas (Al Cierre):</span>
+                 <span class="font-mono font-bold text-gray-955 dark:text-white">{{ formatCurrency(selectedCierre.saldo_final_cajillas ?? selectedCierre.saldo_cajillas) }}</span>
+               </div>
+             </div>
 
             <!-- Denomination Breakdown Table -->
             <div>
-              <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Detalle Físico</h3>
+              <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">Detalle Físico (Trazabilidad de Piezas)</h3>
               <div class="border border-gray-150 dark:border-gray-700 rounded-xl overflow-hidden">
                 <table class="w-full text-left border-collapse">
                   <thead>
-                    <tr class="bg-gray-100 dark:bg-gray-900 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider border-b border-gray-150 dark:border-gray-700">
+                    <tr class="bg-gray-100 dark:bg-gray-900 text-[10px] font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider border-b border-gray-150 dark:border-gray-700">
                       <th class="p-3">Denominación</th>
                       <th class="p-3">Estado</th>
-                      <th class="p-3 text-center">Cantidad</th>
-                      <th class="p-3 text-right">Subtotal</th>
+                      <th class="p-3 text-center">Cant. Inicial</th>
+                      <th class="p-3 text-right">Subtotal Inicial</th>
+                      <th class="p-3 text-center">Cant. Final</th>
+                      <th class="p-3 text-right">Subtotal Final</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-150 dark:divide-gray-700 text-sm">
@@ -219,19 +234,69 @@
                           {{ det.estado_dinero === 'bueno' ? 'Buen estado' : 'Deteriorado' }}
                         </span>
                       </td>
-                      <td class="p-3 text-center font-mono font-semibold text-gray-800 dark:text-gray-250">
+                      <td class="p-3 text-center font-mono font-semibold text-gray-500 dark:text-gray-400">
+                        {{ det.cantidad_inicial ?? 0 }}
+                      </td>
+                      <td class="p-3 text-right font-mono text-gray-500 dark:text-gray-400">
+                        {{ formatCurrency(det.subtotal_inicial ?? 0) }}
+                      </td>
+                      <td class="p-3 text-center font-mono font-bold text-gray-800 dark:text-gray-200">
                         {{ det.cantidad }}
                       </td>
                       <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white">
                         {{ formatCurrency(det.subtotal) }}
                       </td>
                     </tr>
-                    <tr class="bg-gray-50 dark:bg-gray-900 font-bold border-t border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white">
-                      <td colspan="3" class="p-3 text-right uppercase tracking-wider text-xs">Total Declarado Físico</td>
-                      <td class="p-3 text-right font-mono text-base">{{ formatCurrency(selectedCierre.saldo_final_fisico_declarado) }}</td>
+                    <tr class="bg-gray-55 dark:bg-gray-900 font-bold border-t border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white text-xs">
+                      <td colspan="3" class="p-3 text-right uppercase tracking-wider">Total Inicial (Mañana)</td>
+                      <td class="p-3 text-right font-mono text-gray-700 dark:text-gray-300">
+                        {{ formatCurrency(Number(selectedCierre.saldo_final_fisico_declarado) - Number(selectedCierre.total_ingresos_dia || 0) + Number(selectedCierre.total_egresos_dia || 0)) }}
+                      </td>
+                      <td class="p-3 text-right uppercase tracking-wider">Total Final Cierre</td>
+                      <td class="p-3 text-right font-mono text-sm text-azul-cope dark:text-cyan-400">
+                        {{ formatCurrency(selectedCierre.saldo_final_fisico_declarado) }}
+                      </td>
                     </tr>
                   </tbody>
                 </table>
+              </div>
+            </div>
+
+            <!-- Cierres de Ventanillas/Cajillas Asociadas -->
+            <div v-if="selectedCierre.cierres_asociados && selectedCierre.cierres_asociados.length > 0">
+              <h3 class="text-xs font-bold text-gray-400 dark:text-gray-550 uppercase tracking-wider mb-3">
+                Cierres de Ventanillas y Cajas del Día
+              </h3>
+              <div class="space-y-3">
+                <div 
+                  v-for="cajaAsoc in selectedCierre.cierres_asociados" 
+                  :key="cajaAsoc.id"
+                  class="p-4 rounded-xl border border-gray-150 dark:border-gray-700 bg-gray-55 dark:bg-gray-900/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                >
+                  <div class="flex items-center gap-3">
+                    <div class="p-2 bg-azul-cope/10 text-azul-cope rounded-xl">
+                      <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 class="font-bold text-gray-900 dark:text-white text-sm">
+                        {{ cajaAsoc.caja?.nombre }}
+                      </h4>
+                      <p class="text-xs text-gray-500 dark:text-gray-400">
+                        Cajero: <span class="font-medium text-gray-700 dark:text-gray-300">{{ cajaAsoc.usuario?.name || 'Sistema' }}</span>
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center justify-between sm:justify-end gap-6 border-t sm:border-t-0 pt-2 sm:pt-0 border-gray-150 dark:border-gray-750">
+                    <div>
+                      <span class="block text-[10px] text-gray-400 dark:text-gray-550 uppercase font-bold text-right">Físico Declarado</span>
+                      <span class="font-mono font-extrabold text-sm text-gray-900 dark:text-white block text-right">
+                        {{ formatCurrency(cajaAsoc.saldo_final_fisico_declarado) }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -286,6 +351,8 @@ interface CierreDetalle {
   subtotal: number
   estado_dinero: string
   denominacion?: Denominacion
+  cantidad_inicial?: number
+  subtotal_inicial?: number
 }
 
 interface Cierre {
@@ -293,13 +360,21 @@ interface Cierre {
   caja_id: number
   usuario_id: number
   fecha_cierre: string
-  saldo_final_sistema: number
   saldo_final_fisico_declarado: number
-  diferencia: number
-  resultado_cuadre: string
+  saldo_cajillas: number
+  saldo_deteriorado: number
+  saldo_inicial_bueno?: number
+  saldo_final_bueno?: number
+  saldo_inicial_cajillas?: number
+  saldo_final_cajillas?: number
+  saldo_inicial_deteriorado?: number
+  saldo_final_deteriorado?: number
+  total_ingresos_dia?: number
+  total_egresos_dia?: number
   caja?: Caja
   usuario?: User
   detalles?: CierreDetalle[]
+  cierres_asociados?: Cierre[]
 }
 
 // State
@@ -338,8 +413,14 @@ const fetchCajas = async () => {
   }
 }
 
-const openDetailsModal = (cierre: Cierre) => {
-  selectedCierre.value = cierre
+const openDetailsModal = async (cierre: Cierre) => {
+  try {
+    const res = await axios.get(`/cajas/cierres-diarios/${cierre.id}`)
+    selectedCierre.value = res.data
+  } catch (err) {
+    console.error('Error al obtener el detalle completo del cierre:', err)
+    selectedCierre.value = cierre
+  }
   detailsModalOpen.value = true
 }
 

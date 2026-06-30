@@ -60,6 +60,14 @@ const routes: RouteRecordRaw[] = [
                 }
             },
             {
+                path: 'ajustes/dia-cero',
+                name: 'dia-cero',
+                component: () => import('@/views/ajustes/DiaCeroView.vue'),
+                meta: {
+                    title: 'Inicialización Día Cero'
+                }
+            },
+            {
                 path: 'movimientos',
                 name: 'movimientos',
                 component: () => import('@/views/movimientos/MovimientosView.vue'),
@@ -84,11 +92,27 @@ const routes: RouteRecordRaw[] = [
                 }
             },
             {
+                path: 'movimientos/apertura',
+                name: 'apertura',
+                component: () => import('@/views/movimientos/AperturaCajaView.vue'),
+                meta: {
+                    title: 'Apertura de Caja'
+                }
+            },
+            {
                 path: 'movimientos/reporte-cierres',
                 name: 'reporte-cierres',
                 component: () => import('@/views/movimientos/ReporteCierresView.vue'),
                 meta: {
                     title: 'Reporte de Cierres'
+                }
+            },
+            {
+                path: 'movimientos/dashboard-general',
+                name: 'dashboard-general',
+                component: () => import('@/views/movimientos/DashboardGeneralView.vue'),
+                meta: {
+                    title: 'Dashboard Consolidado'
                 }
             }
         ]
