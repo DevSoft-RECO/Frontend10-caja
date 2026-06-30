@@ -4,21 +4,21 @@
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
         <h1 class="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-white bg-gradient-to-r from-azul-cope to-verde-cope bg-clip-text text-transparent">
-          Cierre de Jornada Diaria
+          Apertura de Caja (Inicio de Turno)
         </h1>
         <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          Registra el cierre final de turno de tu caja. El saldo operativo se trasladará automáticamente a la Bóveda principal.
+          Valida el desglose físico de gaveta heredado del cierre anterior e inyecta la dotación contable al Libro Mayor.
         </p>
       </div>
     </div>
 
-    <!-- main body -->
+    <!-- Main Content -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Declaration Form -->
+      <!-- Formulario de Conteo Inicial -->
       <div class="lg:col-span-2 space-y-6">
         <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm space-y-6">
           <h2 class="text-lg font-bold text-gray-900 dark:text-white pb-3 border-b border-gray-100 dark:border-gray-700/60">
-            Declaración de Caja Física (Remanente en Gaveta)
+            Arqueo de Entrada
           </h2>
 
           <div v-if="error" class="p-4 bg-red-50 dark:bg-red-950/10 border border-red-200 dark:border-red-900/30 rounded-xl text-xs font-semibold text-red-800 dark:text-red-300">
@@ -31,7 +31,7 @@
 
           <!-- Select Box -->
           <div>
-            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Seleccionar Caja a Cerrar <span class="text-red-500">*</span></label>
+            <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Seleccionar Caja a Abrir <span class="text-red-500">*</span></label>
             <select
               v-model="selectedCajaId"
               @change="onCajaChange"
@@ -45,7 +45,7 @@
           </div>
 
           <!-- Declaracion de efectivo físico -->
-          <div class="space-y-6" v-if="selectedCajaId">
+          <div class="space-y-6" v-if="selectedCajaId && estadoAperturaCargado">
             <!-- Billetes -->
             <div v-if="billetesList.length > 0" class="space-y-3">
               <h3 class="text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">Billetes</h3>
@@ -141,137 +141,125 @@
             <!-- Acciones -->
             <div class="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-gray-700/60">
               <button
-                @click="confirmModalOpen = true"
-                class="px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-sm shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center gap-2"
+                v-if="descuadreDetectado"
+                type="button"
+                @click="openSupervisorModal"
+                class="px-6 py-3 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
               >
-                Ejecutar Cierre y Trasladar
+                Autorizar Descuadre (Supervisor)
+              </button>
+              <button
+                v-else
+                type="button"
+                @click="submitApertura(null)"
+                :disabled="submitting"
+                class="px-6 py-3 bg-verde-cope hover:bg-verde-cope/90 text-white font-bold rounded-xl text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40"
+              >
+                Confirmar y Abrir Caja
               </button>
             </div>
           </div>
+
+          <div v-else class="text-center py-12 text-gray-450 dark:text-gray-500 italic text-sm">
+            Selecciona una caja arriba para validar el saldo de apertura.
+          </div>
         </div>
       </div>
-      <!-- Resumen de Sistema y Saldos Esperados -->
+
+      <!-- Resumen Lateral Comparador -->
       <div class="space-y-6">
         <div class="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-3xl p-6 shadow-sm space-y-6">
-          <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Monitoreo de Sistema</h3>
+          <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Validación de Saldo</h3>
 
-          <div v-if="loadingResumen" class="flex flex-col items-center py-6 space-y-2">
+          <div v-if="loadingEstado" class="flex flex-col items-center py-6 space-y-2">
             <div class="w-8 h-8 rounded-full border-2 border-azul-cope border-t-transparent animate-spin"></div>
-            <p class="text-xs text-gray-400">Obteniendo saldo en tiempo real...</p>
+            <p class="text-xs text-gray-400">Consultando cierre anterior...</p>
           </div>
 
-          <div v-else-if="resumen" class="space-y-4">
-            <!-- Input manual del saldo según el core bancario -->
-            <div class="p-4 bg-azul-cope/5 dark:bg-gray-900/50 rounded-2xl border border-azul-cope/10 space-y-2">
-              <label class="block text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">
-                Saldo Según Core Bancario (Ingreso Manual)
-              </label>
-              <div class="relative">
-                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 font-bold">Q</span>
-                <input
-                  v-model.number="saldoCoreBancario"
-                  type="number"
-                  placeholder="0.00"
-                  step="0.01"
-                  class="block w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-azul-cope text-sm"
-                />
-              </div>
+          <div v-else-if="estadoApertura" class="space-y-4">
+            <div class="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-150 dark:border-gray-750 rounded-2xl flex flex-col items-center justify-center">
+              <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Saldo de Cierre Anterior</span>
+              <span class="text-2xl font-extrabold font-mono text-gray-900 dark:text-white">
+                {{ formatCurrency(estadoApertura.saldo_final_fisico_declarado) }}
+              </span>
+              <span v-if="estadoApertura.fecha_cierre" class="text-[10px] text-gray-450 dark:text-gray-500 mt-1">
+                Registrado el {{ formatOnlyDate(estadoApertura.fecha_cierre) }}
+              </span>
             </div>
 
-            <!-- Resumen de Movimientos en Sistema -->
+            <!-- Declarado actual -->
             <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
-              <span class="text-xs text-gray-500 dark:text-gray-400 font-semibold">Saldo Inicial</span>
-              <span class="font-mono text-sm text-gray-900 dark:text-white">{{ formatCurrency(resumen.saldo_inicial) }}</span>
+              <span class="text-xs text-gray-500 dark:text-gray-400 font-semibold">Total Declarado Hoy</span>
+              <span class="font-mono text-sm text-gray-900 dark:text-white">{{ formatCurrency(totalDeclarado) }}</span>
             </div>
 
-            <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
-              <span class="text-xs text-green-600 dark:text-green-455 font-bold">Ingresos del Día (+)</span>
-              <span class="font-mono text-sm text-green-600 dark:text-green-455 font-bold">+{{ formatCurrency(resumen.ingresos_dia) }}</span>
+            <div class="flex items-center justify-between pt-2">
+              <span class="text-xs font-bold text-gray-500 dark:text-gray-400">Diferencia</span>
+              <span class="font-mono text-sm font-bold" :class="diferencia === 0 ? 'text-gray-900 dark:text-white' : diferencia > 0 ? 'text-blue-600' : 'text-red-500'">
+                {{ diferencia > 0 ? '+' : '' }}{{ formatCurrency(diferencia) }}
+              </span>
             </div>
 
-            <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
-              <span class="text-xs text-red-600 dark:text-red-400 font-bold">Egresos del Día (-)</span>
-              <span class="font-mono text-sm text-red-600 dark:text-red-400 font-bold">-{{ formatCurrency(resumen.egresos_dia) }}</span>
+            <!-- Alerta descuadre -->
+            <div v-if="descuadreDetectado" class="p-4 bg-amber-50 dark:bg-amber-950/10 border border-amber-250 dark:border-amber-900/30 rounded-xl text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed space-y-1">
+              <p class="font-bold flex items-center gap-1">⚠️ Descuadre Detectado</p>
+              El conteo actual difiere del cierre de ayer. Se requiere la firma de un supervisor para poder abrir la caja.
             </div>
 
-            <!-- Gran Total Declarado Comparador -->
-            <div class="p-4 bg-gray-55 dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-3">
-              <div>
-                <span class="block text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Total Declarado en Gaveta (Físico)</span>
-                <span class="text-xl font-extrabold font-mono text-gray-900 dark:text-white">
-                  {{ formatCurrency(totalDeclarado) }}
-                </span>
-              </div>
-
-              <!-- Diferencia Dinámica -->
-              <div v-if="Number(saldoCoreBancario) > 0" class="flex items-center justify-between pt-2 border-t border-gray-150 dark:border-gray-800">
-                <span class="text-xs text-gray-500 dark:text-gray-400 font-semibold">Diferencia</span>
-                <span
-                  class="font-mono text-sm font-bold"
-                  :class="diferenciaFisicaCore === 0 ? 'text-green-600 dark:text-green-455' : 'text-red-500'"
-                >
-                  {{ diferenciaFisicaCore > 0 ? '+' : '' }}{{ formatCurrency(diferenciaFisicaCore) }}
-                </span>
-              </div>
-
-              <!-- Warning Alert if there's a difference between Core Bancario and Physical Balance -->
-              <div
-                v-if="Number(saldoCoreBancario) > 0 && Math.abs(diferenciaFisicaCore) > 0.01"
-                class="p-2.5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-xl flex items-start gap-2 text-[11px] text-amber-800 dark:text-amber-300 font-semibold"
-              >
-                <svg class="w-4 h-4 text-amber-600 dark:text-amber-450 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                <span>
-                  Discrepancia detectada: Hace falta o sobra {{ formatCurrency(Math.abs(diferenciaFisicaCore)) }} en gaveta con respecto al Core Bancario. Verifique.
-                </span>
-              </div>
+            <!-- Alerta todo cuadrado -->
+            <div v-else-if="selectedCajaId" class="p-4 bg-green-50 dark:bg-green-950/10 border border-green-250 dark:border-green-900/30 rounded-xl text-xs text-green-800 dark:text-green-300 font-semibold leading-relaxed">
+              <p class="font-bold flex items-center gap-1">✓ Saldos Cuadrados</p>
+              El arqueo de inicio coincide al 100% con el cierre anterior. Puedes abrir tu caja con normalidad.
             </div>
-          </div>
-
-          <div class="text-center py-6 text-gray-400 text-xs italic" v-else>
-            Selecciona una caja para iniciar la declaración.
           </div>
         </div>
       </div>
     </div>
 
-    <!-- MODAL CONFIRMACION CIERRE -->
+    <!-- MODAL AUTORIZACION SUPERVISOR -->
     <Transition name="fade">
-      <div v-if="confirmModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
+      <div v-if="supervisorModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
         <div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-md border border-gray-250 dark:border-gray-700 shadow-2xl p-6 space-y-6">
           <div class="flex items-start gap-4">
-            <div class="p-3 bg-red-100 dark:bg-red-950/30 text-red-650 dark:text-red-400 rounded-2xl shrink-0">
+            <div class="p-3 bg-amber-100 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 rounded-2xl shrink-0">
               <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <div>
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white">¿Ejecutar Cierre Diario de Caja?</h3>
+            <div class="w-full">
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white">Firma de Supervisor SSO</h3>
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
-                Esta acción es <strong>invariable y definitiva</strong>:
+                Selecciona al supervisor encargado para autorizar la apertura con un descuadre de <span class="font-bold text-red-500">{{ formatCurrency(diferencia) }}</span>.
               </p>
-              <ul class="list-disc list-inside text-xs text-gray-500 dark:text-gray-400 mt-2 space-y-1">
-                <li>Se registrará el desglose físico de gaveta por <span class="font-bold text-gray-900 dark:text-white">{{ formatCurrency(totalDeclarado) }}</span>.</li>
-                <li>Se realizará el <strong>barrido virtual</strong> de saldos hacia la Bóveda.</li>
-                <li>Tu turno de cajero asignado a esta caja finalizará inmediatamente.</li>
-              </ul>
+              
+              <div class="mt-4">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Supervisor Autorizador</label>
+                <select
+                  v-model="selectedSupervisorId"
+                  class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
+                >
+                  <option value="">-- Seleccionar Supervisor --</option>
+                  <option v-for="user in supervisores" :key="user.id" :value="user.id">
+                    {{ user.name }}
+                  </option>
+                </select>
+              </div>
             </div>
           </div>
 
           <div class="flex justify-end gap-3 pt-2">
             <button
-              @click="confirmModalOpen = false"
+              @click="supervisorModalOpen = false"
               class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-800 dark:text-white font-semibold rounded-xl text-xs transition-all cursor-pointer"
             >
               Cancelar
             </button>
             <button
-              @click="submitCierre"
-              :disabled="submitting"
-              class="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
+              @click="confirmAperturaConDescuadre"
+              :disabled="!selectedSupervisorId || submitting"
+              class="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
             >
-              {{ submitting ? 'Cerrando...' : 'Confirmar Cierre' }}
+              Autorizar y Abrir
             </button>
           </div>
         </div>
@@ -282,6 +270,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from '@/api/axios'
 
 interface User {
@@ -306,27 +295,39 @@ interface Denominacion {
   cantidad_deteriorada: number
 }
 
-interface ResumenCaja {
-  saldo_inicial: number
-  ingresos_dia: number
-  egresos_dia: number
-  saldo_actual: number
+interface CierreDetalle {
+  id: number
+  denominacion_id: number
+  cantidad: number
+  estado_dinero: 'bueno' | 'deteriorado'
+}
+
+interface EstadoApertura {
+  tiene_cierre_anterior: boolean
+  saldo_final_fisico_declarado: number
+  fecha_cierre?: string
+  detalles: CierreDetalle[]
 }
 
 // State
+const router = useRouter()
 const cajas = ref<Caja[]>([])
 const denominaciones = ref<Denominacion[]>([])
 const selectedCajaId = ref('')
 const error = ref('')
 const successMsg = ref('')
 const submitting = ref(false)
-const confirmModalOpen = ref(false)
-const saldoCoreBancario = ref<number | ''>('')
 
-const loadingResumen = ref(false)
-const resumen = ref<ResumenCaja | null>(null)
+const loadingEstado = ref(false)
+const estadoApertura = ref<EstadoApertura | null>(null)
+const estadoAperturaCargado = ref(false)
 
 const localDenominaciones = ref<Denominacion[]>([])
+
+// Supervisor Override State
+const supervisorModalOpen = ref(false)
+const supervisores = ref<User[]>([])
+const selectedSupervisorId = ref('')
 
 // Computeds
 const billetesList = computed(() => localDenominaciones.value.filter(d => d.tipo === 'billete'))
@@ -337,30 +338,29 @@ const cajaSeleccionada = computed(() => {
   return cajas.value.find(c => c.id === Number(selectedCajaId.value)) || null
 })
 
-// Bóveda origen desactiva deteriorados
 const deshabilitaDeterioradoPorCaja = computed(() => {
   return cajaSeleccionada.value?.tipo_caja === 'boveda'
 })
 
-// Subtotal por denominación
 const calculaSubtotal = (d: Denominacion) => {
   const buena = d.cantidad_buena || 0
   const det = deshabilitaDeterioradoPorCaja.value ? 0 : (d.cantidad_deteriorada || 0)
   return d.valor * (buena + det)
 }
 
-// Total declarado
 const totalDeclarado = computed(() => {
   return localDenominaciones.value.reduce((acc, d) => acc + calculaSubtotal(d), 0)
 })
 
-// Diferencia física contra el Core Bancario
-const diferenciaFisicaCore = computed(() => {
-  const core = Number(saldoCoreBancario.value) || 0
-  return totalDeclarado.value - core
+const diferencia = computed(() => {
+  const esperado = estadoApertura.value ? estadoApertura.value.saldo_final_fisico_declarado : 0.00
+  return totalDeclarado.value - esperado
 })
 
-// Resetear deteriorados a 0 si la caja elegida es boveda
+const descuadreDetectado = computed(() => {
+  return Math.abs(diferencia.value) > 0.01
+})
+
 watch(deshabilitaDeterioradoPorCaja, (newVal) => {
   if (newVal) {
     localDenominaciones.value.forEach(d => {
@@ -376,60 +376,58 @@ const resetForm = () => {
     cantidad_buena: 0,
     cantidad_deteriorada: 0
   }))
-  resumen.value = null
-  selectedCajaId.value = ''
-  saldoCoreBancario.value = ''
+  estadoApertura.value = null
+  estadoAperturaCargado.value = false
   error.value = ''
   successMsg.value = ''
 }
 
 const onCajaChange = async () => {
   if (!selectedCajaId.value) {
-    resumen.value = null
+    resetForm()
     return
   }
-  loadingResumen.value = true
+  loadingEstado.value = true
   error.value = ''
+  estadoAperturaCargado.value = false
   try {
-    // 1. Obtener balance en tiempo real
-    const res = await axios.get(`/cajas/${selectedCajaId.value}/saldo-actual`)
-    resumen.value = res.data
+    const res = await axios.get(`/cajas/${selectedCajaId.value}/estado-apertura`)
+    estadoApertura.value = res.data
+    estadoAperturaCargado.value = true
 
-    // 2. Intentar obtener y precargar el Conteo Parcial / Arqueo Activo
-    const conteoRes = await axios.get(`/cajas/conteos-parciales?caja_id=${selectedCajaId.value}`)
-    const conteos = conteoRes.data
-    
-    if (conteos && conteos.length > 0) {
-      const activeArqueo = conteos[0]
+    // Llenar inputs automáticamente si tiene cierre anterior para ahorrar tiempo
+    if (res.data.tiene_cierre_anterior) {
       localDenominaciones.value.forEach(d => {
-        const detBueno = activeArqueo.detalles.find((det: any) => det.denominacion_id === d.id && det.estado_dinero === 'bueno')
-        const detDet = activeArqueo.detalles.find((det: any) => det.denominacion_id === d.id && det.estado_dinero === 'deteriorado')
-        
-        d.cantidad_buena = detBueno ? detBueno.cantidad : 0
-        d.cantidad_deteriorada = detDet ? detDet.cantidad : 0
+        const detBuena = res.data.detalles.find((x: any) => x.denominacion_id === d.id && x.estado_dinero === 'bueno')
+        const detDeteriorada = res.data.detalles.find((x: any) => x.denominacion_id === d.id && x.estado_dinero === 'deteriorado')
+
+        d.cantidad_buena = detBuena ? detBuena.cantidad : 0
+        d.cantidad_deteriorada = detDeteriorada ? detDeteriorada.cantidad : 0
       })
     } else {
-      // Si no hay arqueo previo, reiniciar a 0
+      // Inicia en ceros
       localDenominaciones.value.forEach(d => {
         d.cantidad_buena = 0
         d.cantidad_deteriorada = 0
       })
     }
   } catch (err: any) {
-    error.value = 'No se pudo cargar el balance o la información del arqueo de la caja.'
+    error.value = 'Error al recuperar estado de cierre anterior.'
   } finally {
-    loadingResumen.value = false
+    loadingEstado.value = false
   }
 }
 
 const fetchData = async () => {
   try {
-    const [cajasRes, denomsRes] = await Promise.all([
+    const [cajasRes, denomsRes, usersRes] = await Promise.all([
       axios.get('/cajas'),
-      axios.get('/denominaciones')
+      axios.get('/denominaciones'),
+      axios.get('/usuarios')
     ])
     cajas.value = cajasRes.data.filter((c: any) => c.estado)
     denominaciones.value = denomsRes.data.filter((d: any) => d.activo)
+    supervisores.value = usersRes.data // En un entorno real se filtran por rol, pero los cargamos todos.
 
     localDenominaciones.value = denominaciones.value.map(d => ({
       ...d,
@@ -441,11 +439,20 @@ const fetchData = async () => {
   }
 }
 
-const submitCierre = async () => {
+const openSupervisorModal = () => {
+  selectedSupervisorId.value = ''
+  supervisorModalOpen.value = true
+}
+
+const confirmAperturaConDescuadre = () => {
+  submitApertura(Number(selectedSupervisorId.value))
+}
+
+const submitApertura = async (supervisorId: number | null) => {
   error.value = ''
   successMsg.value = ''
   submitting.value = true
-  confirmModalOpen.value = false
+  supervisorModalOpen.value = false
 
   const detalles = localDenominaciones.value
     .filter(d => d.cantidad_buena > 0 || d.cantidad_deteriorada > 0)
@@ -468,23 +475,27 @@ const submitCierre = async () => {
       return items
     })
 
-  if (detalles.length === 0) {
-    error.value = 'Debe declarar cantidades del arqueo de gaveta antes de cerrar.'
-    submitting.value = false
-    return
+  // Permite abrir en cero para cajas nuevas
+  const payload: any = {
+    detalles: detalles.length > 0 ? detalles : denominaciones.value.slice(0, 1).map(d => ({
+      denominacion_id: d.id,
+      cantidad: 0,
+      estado_dinero: 'bueno'
+    }))
+  }
+
+  if (supervisorId) {
+    payload.supervisor_id = supervisorId
   }
 
   try {
-    await axios.post('/cajas/cierres-diarios', {
-      caja_id: Number(selectedCajaId.value),
-      detalles
-    })
-
-    successMsg.value = '¡Cierre Diario y barrido completado con éxito!'
-    resetForm()
-    await fetchData()
+    await axios.post(`/cajas/${selectedCajaId.value}/abrir`, payload)
+    successMsg.value = '¡Caja abierta exitosamente! Redirigiendo a operaciones...'
+    setTimeout(() => {
+      router.push('/admin/movimientos')
+    }, 1500)
   } catch (err: any) {
-    error.value = err.response?.data?.message || 'Error al procesar el cierre diario.'
+    error.value = err.response?.data?.message || 'Error al procesar apertura de caja.'
   } finally {
     submitting.value = false
   }
@@ -498,6 +509,17 @@ const formatTipo = (tipo: string) => {
 
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('es-GT', { style: 'currency', currency: 'GTQ' }).format(val)
+}
+
+const formatOnlyDate = (dateStr: string) => {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  const localDate = new Date(d.getTime() + d.getTimezoneOffset() * 60000)
+  return localDate.toLocaleDateString('es-GT', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  })
 }
 
 onMounted(() => {
