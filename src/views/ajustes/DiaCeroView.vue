@@ -62,72 +62,64 @@
             </div>
           </div>
 
-          <!-- Campos históricos adicionales para la Bóveda -->
-          <div v-if="isBovedaSeleccionada" class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-900 border border-gray-150 dark:border-gray-750 rounded-2xl">
-            <div>
-              <label class="block text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider mb-2">Saldo Inicial Histórico de Cajillas (Q)</label>
-              <input
-                v-model.number="saldoCajillas"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
-              />
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider mb-2">Saldo Inicial Histórico Deteriorado (Q)</label>
-              <input
-                v-model.number="saldoDeteriorado"
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
-              />
-            </div>
+          <!-- Tabs Selector si es Bóveda -->
+          <div v-if="isBovedaSeleccionada && selectedCajaId" class="flex gap-2 p-1.5 bg-gray-100 dark:bg-gray-900 rounded-2xl border border-gray-150 dark:border-gray-700/60 select-none">
+            <button
+              @click="activeTab = 'operaciones'"
+              class="flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer"
+              :class="activeTab === 'operaciones' ? 'bg-white dark:bg-gray-800 text-azul-cope shadow-sm' : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-300'"
+            >
+              💼 1. Operaciones (Bueno)
+            </button>
+            <button
+              @click="activeTab = 'cajillas'"
+              class="flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer"
+              :class="activeTab === 'cajillas' ? 'bg-white dark:bg-gray-800 text-azul-cope shadow-sm' : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-300'"
+            >
+              🏪 2. Cajillas (Tránsito)
+            </button>
+            <button
+              @click="activeTab = 'deteriorado'"
+              class="flex-1 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer"
+              :class="activeTab === 'deteriorado' ? 'bg-white dark:bg-gray-800 text-azul-cope shadow-sm' : 'text-gray-500 hover:text-gray-800 dark:hover:text-gray-300'"
+            >
+              ⚠️ 3. Deteriorado
+            </button>
           </div>
 
           <!-- Denomination Grid -->
           <div class="space-y-6" v-if="selectedCajaId">
-            <!-- Billetes -->
+            
+            <!-- LISTADO DE BILLETES -->
             <div v-if="billetesList.length > 0" class="space-y-3">
-              <h3 class="text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">Billetes</h3>
+              <h3 class="text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">
+                Billetes <span class="text-gray-400 dark:text-gray-500 font-semibold" v-if="isBovedaSeleccionada">({{ formatTabName(activeTab) }})</span>
+              </h3>
               <div class="border border-gray-150 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
                 <table class="w-full text-left border-collapse">
                   <thead>
                     <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      <th class="p-3 w-1/3">Denominación</th>
-                      <th class="p-3 w-1/4 text-center">Cant. Buena</th>
-                      <th class="p-3 w-1/4 text-center">Cant. Deteriorada</th>
+                      <th class="p-3 w-1/2">Denominación</th>
+                      <th class="p-3 w-1/4 text-center">Cantidad</th>
                       <th class="p-3 text-right">Subtotal</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-sm">
-                    <tr v-for="denom in billetesList" :key="denom.id">
+                    <tr v-for="denom in getActiveList(billetesList)" :key="denom.id">
                       <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
                         {{ denom.nombre }} ({{ formatCurrency(denom.valor) }})
                       </td>
                       <td class="p-3">
                         <input
-                          v-model.number="denom.cantidad_buena"
+                          v-model.number="denom.cantidad"
                           type="number"
                           min="0"
                           placeholder="0"
-                          class="block w-24 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-650 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
+                          class="block w-28 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-650 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm font-bold font-mono"
                         />
                       </td>
-                      <td class="p-3">
-                        <input
-                          v-model.number="denom.cantidad_deteriorada"
-                          type="number"
-                          min="0"
-                          placeholder="0"
-                          class="block w-24 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-650 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
-                        />
-                      </td>
-                      <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-28">
-                        {{ formatCurrency(calculaSubtotal(denom)) }}
+                      <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-32">
+                        {{ formatCurrency(denom.cantidad * denom.valor) }}
                       </td>
                     </tr>
                   </tbody>
@@ -135,44 +127,36 @@
               </div>
             </div>
 
-            <!-- Monedas -->
+            <!-- LISTADO DE MONEDAS -->
             <div v-if="monedasList.length > 0" class="space-y-3">
-              <h3 class="text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">Monedas</h3>
+              <h3 class="text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">
+                Monedas <span class="text-gray-400 dark:text-gray-500 font-semibold" v-if="isBovedaSeleccionada">({{ formatTabName(activeTab) }})</span>
+              </h3>
               <div class="border border-gray-150 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
                 <table class="w-full text-left border-collapse">
                   <thead>
                     <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      <th class="p-3 w-1/3">Denominación</th>
-                      <th class="p-3 w-1/4 text-center">Cant. Buena</th>
-                      <th class="p-3 w-1/4 text-center">Cant. Deteriorada</th>
+                      <th class="p-3 w-1/2">Denominación</th>
+                      <th class="p-3 w-1/4 text-center">Cantidad</th>
                       <th class="p-3 text-right">Subtotal</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-sm">
-                    <tr v-for="denom in monedasList" :key="denom.id">
+                    <tr v-for="denom in getActiveList(monedasList)" :key="denom.id">
                       <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
                         {{ denom.nombre }} ({{ formatCurrency(denom.valor) }})
                       </td>
                       <td class="p-3">
                         <input
-                          v-model.number="denom.cantidad_buena"
+                          v-model.number="denom.cantidad"
                           type="number"
                           min="0"
                           placeholder="0"
-                          class="block w-24 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-650 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
+                          class="block w-28 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-650 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm font-bold font-mono"
                         />
                       </td>
-                      <td class="p-3">
-                        <input
-                          v-model.number="denom.cantidad_deteriorada"
-                          type="number"
-                          min="0"
-                          placeholder="0"
-                          class="block w-24 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-650 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
-                        />
-                      </td>
-                      <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-28">
-                        {{ formatCurrency(calculaSubtotal(denom)) }}
+                      <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-32">
+                        {{ formatCurrency(denom.cantidad * denom.valor) }}
                       </td>
                     </tr>
                   </tbody>
@@ -274,14 +258,16 @@ const cajas = ref<Caja[]>([])
 const denominaciones = ref<Denominacion[]>([])
 const selectedAgenciaId = ref('')
 const selectedCajaId = ref('')
-const saldoCajillas = ref<number | null>(null)
-const saldoDeteriorado = ref<number | null>(null)
-const observaciones = ref('')
-const error = ref('')
 const successMsg = ref('')
 const submitting = ref(false)
+const observaciones = ref('')
 
-const localDenominaciones = ref<Denominacion[]>([])
+const activeTab = ref<'operaciones' | 'cajillas' | 'deteriorado'>('operaciones')
+
+const localOperaciones = ref<any[]>([])
+const localCajillas = ref<any[]>([])
+const localDeteriorado = ref<any[]>([])
+const error = ref('')
 
 // Computeds
 const filteredCajas = computed(() => {
@@ -295,30 +281,48 @@ const isBovedaSeleccionada = computed(() => {
   return caja ? caja.tipo_caja === 'boveda' : false
 })
 
-const billetesList = computed(() => localDenominaciones.value.filter(d => d.tipo === 'billete'))
-const monedasList = computed(() => localDenominaciones.value.filter(d => d.tipo === 'moneda'))
+const billetesList = computed(() => denominaciones.value.filter(d => d.tipo === 'billete'))
+const monedasList = computed(() => denominaciones.value.filter(d => d.tipo === 'moneda'))
 
-const calculaSubtotal = (d: Denominacion) => {
-  const buena = d.cantidad_buena || 0
-  const det = d.cantidad_deteriorada || 0
-  return d.valor * (buena + det)
+const getActiveList = (list: any[]) => {
+  if (!isBovedaSeleccionada.value) {
+    return localOperaciones.value.filter(d => list.some(item => item.id === d.id))
+  }
+  const target = activeTab.value === 'operaciones'
+    ? localOperaciones.value
+    : activeTab.value === 'cajillas'
+    ? localCajillas.value
+    : localDeteriorado.value
+  return target.filter(d => list.some(item => item.id === d.id))
 }
 
 const totalDeclarado = computed(() => {
-  return localDenominaciones.value.reduce((acc, d) => acc + calculaSubtotal(d), 0)
+  let total = 0
+  localOperaciones.value.forEach(d => total += (Number(d.cantidad) || 0) * d.valor)
+  if (isBovedaSeleccionada.value) {
+    localCajillas.value.forEach(d => total += (Number(d.cantidad) || 0) * d.valor)
+    localDeteriorado.value.forEach(d => total += (Number(d.cantidad) || 0) * d.valor)
+  }
+  return total
 })
 
 // Acciones
 const resetForm = () => {
-  localDenominaciones.value = denominaciones.value.map(d => ({
-    ...d,
-    cantidad_buena: 0,
-    cantidad_deteriorada: 0
+  const mapear = () => denominaciones.value.map(d => ({
+    id: d.id,
+    nombre: d.nombre,
+    valor: d.valor,
+    tipo: d.tipo,
+    cantidad: 0
   }))
+
+  localOperaciones.value = mapear()
+  localCajillas.value = mapear()
+  localDeteriorado.value = mapear()
+
   observaciones.value = ''
   selectedCajaId.value = ''
-  saldoCajillas.value = null
-  saldoDeteriorado.value = null
+  activeTab.value = 'operaciones'
   error.value = ''
   successMsg.value = ''
 }
@@ -334,11 +338,7 @@ const fetchData = async () => {
     cajas.value = cajasRes.data
     denominaciones.value = denomsRes.data.filter((d: any) => d.activo)
 
-    localDenominaciones.value = denominaciones.value.map(d => ({
-      ...d,
-      cantidad_buena: 0,
-      cantidad_deteriorada: 0
-    }))
+    resetForm()
   } catch (err) {
     error.value = 'Error al cargar los catálogos.'
   }
@@ -349,38 +349,30 @@ const submitCarga = async () => {
   successMsg.value = ''
   submitting.value = true
 
-  const detalles = localDenominaciones.value
-    .filter(d => d.cantidad_buena > 0 || d.cantidad_deteriorada > 0)
-    .flatMap(d => {
-      const items = []
-      if (d.cantidad_buena > 0) {
-        items.push({
-          denominacion_id: d.id,
-          estado_dinero: 'bueno',
-          cantidad: d.cantidad_buena
-        })
-      }
-      if (d.cantidad_deteriorada > 0) {
-        items.push({
-          denominacion_id: d.id,
-          estado_dinero: 'deteriorado',
-          cantidad: d.cantidad_deteriorada
-        })
-      }
-      return items
-    })
+  const mapDetalles = (list: any[]) => {
+    return list
+      .filter(d => Number(d.cantidad) > 0)
+      .map(d => ({
+        denominacion_id: d.id,
+        cantidad: Number(d.cantidad)
+      }))
+  }
 
-  if (detalles.length === 0) {
-    error.value = 'Debe declarar cantidades del arqueo antes de inicializar.'
+  const detallesBueno = mapDetalles(localOperaciones.value)
+  const detallesCajillas = isBovedaSeleccionada.value ? mapDetalles(localCajillas.value) : []
+  const detallesDeteriorado = isBovedaSeleccionada.value ? mapDetalles(localDeteriorado.value) : []
+
+  if (detallesBueno.length === 0 && detallesCajillas.length === 0 && detallesDeteriorado.length === 0) {
+    error.value = 'Debe declarar al menos una cantidad mayor a 0 antes de inicializar.'
     submitting.value = false
     return
   }
 
   try {
     await axios.post(`/cajas/${selectedCajaId.value}/dia-cero`, {
-      detalles,
-      saldo_cajillas: isBovedaSeleccionada.value ? (saldoCajillas.value || 0) : 0,
-      saldo_deteriorado: isBovedaSeleccionada.value ? (saldoDeteriorado.value || 0) : 0,
+      detalles_operaciones: detallesBueno,
+      detalles_cajillas: detallesCajillas,
+      detalles_deteriorado: detallesDeteriorado,
       observaciones: observaciones.value
     })
 
@@ -391,6 +383,12 @@ const submitCarga = async () => {
   } finally {
     submitting.value = false
   }
+}
+
+const formatTabName = (tab: string) => {
+  if (tab === 'operaciones') return 'Operaciones'
+  if (tab === 'cajillas') return 'Cajillas'
+  return 'Deteriorado'
 }
 
 const formatTipo = (tipo: string) => {
