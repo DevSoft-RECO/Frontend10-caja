@@ -105,7 +105,7 @@
             <thead>
               <!-- Top Header (Box Names) -->
               <tr class="bg-gray-100 dark:bg-gray-900 text-xs font-bold text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 select-none">
-                <th class="p-4 border-r border-gray-200 dark:border-gray-700 font-extrabold text-sm text-gray-800 dark:text-gray-200" rowspan="2">Denominación</th>
+                <th class="p-4 border-r border-gray-200 dark:border-gray-700 font-extrabold text-sm text-gray-800 dark:text-gray-200" rowspan="2">Operaciones</th>
                 
                 <!-- Bóveda Column Group -->
                 <th class="p-3 border-r-2 border-slate-300 dark:border-slate-600 text-center bg-slate-50 dark:bg-slate-900/90 text-slate-800 dark:text-slate-200 font-bold uppercase tracking-wider text-[11px]" colspan="4" v-if="bovedas.length > 0">
