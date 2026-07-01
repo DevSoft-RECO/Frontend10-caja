@@ -384,8 +384,16 @@
 
               <!-- Fila Cajillas -->
               <tr class="hover:bg-slate-50/40 dark:hover:bg-gray-750/30 transition-colors">
-                <td class="p-3.5 border-r border-gray-200 dark:border-gray-700 font-bold text-gray-900 dark:text-white pl-4">
-                  Cajillas (Aperturas / Cierres)
+                <td class="p-3.5 border-r border-gray-200 dark:border-gray-700 font-bold text-gray-900 dark:text-white pl-4 flex items-center justify-between gap-2">
+                  <span>Cajillas (Aperturas / Cierres)</span>
+                  <button
+                    v-if="bovedas.length > 0"
+                    @click="openInventarioCajillas(bovedas[0].id, bovedas[0].nombre)"
+                    class="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/20 dark:hover:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-900/40 rounded-lg text-[10px] font-black tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1"
+                    title="Ver desglose físico"
+                  >
+                    🔍 Detalle
+                  </button>
                 </td>
                 
                 <!-- Bóveda data -->
@@ -432,7 +440,7 @@
                   <span>Efectivo Deteriorado</span>
                   <button
                     v-if="bovedas.length > 0"
-                    @click="openInventarioDeteriorado(bovedas[0].id)"
+                    @click="openInventarioDeteriorado(bovedas[0].id, bovedas[0].nombre)"
                     class="px-2 py-1 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/20 dark:hover:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-900/40 rounded-lg text-[10px] font-black tracking-wider uppercase transition-all cursor-pointer flex items-center gap-1"
                     title="Ver desglose físico"
                   >
@@ -537,82 +545,36 @@
     </div>
   </div>
 
-  <!-- Modal Inventario Deteriorado -->
-  <div v-if="showDeterioradoModal" class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in select-none">
-    <div class="bg-white dark:bg-gray-800 rounded-3xl max-w-lg w-full border border-gray-150 dark:border-gray-700 shadow-2xl flex flex-col overflow-hidden max-h-[85vh] transform transition-all duration-300 scale-100">
-      
-      <!-- Header -->
-      <div class="px-6 py-5 border-b border-gray-150 dark:border-gray-750 flex items-center justify-between bg-amber-500 text-white">
-        <div class="flex items-center gap-2">
-          <span class="text-xl">⚠️</span>
-          <div>
-            <h2 class="text-base font-extrabold tracking-wide uppercase">Inventario de Efectivo Deteriorado</h2>
-            <p class="text-[10px] text-amber-100 font-semibold uppercase tracking-wider">Desglose físico por denominación</p>
-          </div>
-        </div>
-        <button @click="showDeterioradoModal = false" class="text-white hover:text-amber-150 text-2xl font-bold cursor-pointer focus:outline-none">&times;</button>
-      </div>
+  <!-- Modal de Desglose para Cajillas -->
+  <InventarioDesgloseModal
+    :is-open="showCajillasModal"
+    title="Inventario de Efectivo en Cajillas"
+    :caja-nombre="selectedModalCajaNombre"
+    :caja-id="selectedModalCajaId"
+    :denominaciones="denominaciones"
+    :matriz="matriz"
+    tipo-inventario="cajillas"
+    @close="showCajillasModal = false"
+  />
 
-      <!-- Content -->
-      <div class="p-6 overflow-y-auto space-y-4">
-        
-        <!-- Total informativo -->
-        <div class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-2xl flex justify-between items-center">
-          <span class="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-wider">Total Acumulado Deteriorado</span>
-          <span class="text-xl font-mono font-black text-amber-700 dark:text-amber-300">{{ formatCurrency(totalMontoDeteriorado) }}</span>
-        </div>
-
-        <div v-if="loadingDeterioradoInventario" class="flex flex-col items-center justify-center py-12 gap-3">
-          <div class="w-8 h-8 border-3 border-amber-550 border-t-transparent rounded-full animate-spin"></div>
-          <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Cargando inventario...</span>
-        </div>
-
-        <div v-else-if="deterioradoInventario.length === 0" class="text-center py-12 text-gray-450 dark:text-gray-500 italic text-sm">
-          No hay piezas físicas de efectivo deteriorado registradas en el inventario.
-        </div>
-
-        <!-- Tabla de Desglose -->
-        <div v-else class="border border-gray-150 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
-          <table class="w-full text-left border-collapse">
-            <thead>
-              <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider select-none">
-                <th class="p-3 w-1/2">Denominación</th>
-                <th class="p-3 text-center">Cantidad (Piezas)</th>
-                <th class="p-3 text-right">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-sm">
-              <tr v-for="item in deterioradoInventario" :key="item.id" class="hover:bg-slate-50/50 dark:hover:bg-gray-750/30 transition-colors">
-                <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
-                  {{ item.nombre }} ({{ formatCurrency(item.valor) }})
-                </td>
-                <td class="p-3 text-center font-bold font-mono text-gray-900 dark:text-white">
-                  {{ item.cantidad }}
-                </td>
-                <td class="p-3 text-right font-bold font-mono text-gray-950 dark:text-amber-300">
-                  {{ formatCurrency(item.subtotal) }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="p-6 border-t border-gray-150 dark:border-gray-750 bg-gray-55 dark:bg-gray-850 flex justify-end">
-        <button @click="showDeterioradoModal = false" class="px-6 py-2.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-250 font-bold rounded-xl text-sm transition-all cursor-pointer">
-          Cerrar Vista
-        </button>
-      </div>
-
-    </div>
-  </div>
+  <!-- Modal de Desglose para Deteriorado -->
+  <InventarioDesgloseModal
+    :is-open="showDeterioradoModal"
+    title="Inventario de Efectivo Deteriorado"
+    :caja-nombre="selectedModalCajaNombre"
+    :caja-id="selectedModalCajaId"
+    :denominaciones="denominaciones"
+    :matriz="matriz"
+    tipo-inventario="deteriorado"
+    @close="showDeterioradoModal = false"
+  />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import axios from '@/api/axios'
 import CierreBovedaModal from '@/components/movimientos/CierreBovedaModal.vue'
+import InventarioDesgloseModal from '@/components/movimientos/InventarioDesgloseModal.vue'
 
 interface Caja {
   id: number
@@ -659,14 +621,11 @@ const selectedVentanillaId = ref<number | null>(null)
 const bovedaCerradaHoy = ref(false)
 const cierreModalOpen = ref(false)
 
-// Inventario Deteriorado States
+// Modal Desglose States
+const showCajillasModal = ref(false)
 const showDeterioradoModal = ref(false)
-const loadingDeterioradoInventario = ref(false)
-const deterioradoInventario = ref<any[]>([])
-
-const totalMontoDeteriorado = computed(() => {
-  return deterioradoInventario.value.reduce((sum, item) => sum + (item.subtotal || 0), 0)
-})
+const selectedModalCajaId = ref<number | null>(null)
+const selectedModalCajaNombre = ref('')
 
 // Computeds por tipo
 const bovedas = computed(() => cajas.value.filter(c => c.tipo_caja === 'boveda'))
@@ -838,19 +797,16 @@ const onCierreSuccess = () => {
   fetchData()
 }
 
-const openInventarioDeteriorado = async (cajaId: number) => {
+const openInventarioCajillas = (cajaId: number, nombre: string) => {
+  selectedModalCajaId.value = cajaId
+  selectedModalCajaNombre.value = nombre
+  showCajillasModal.value = true
+}
+
+const openInventarioDeteriorado = (cajaId: number, nombre: string) => {
+  selectedModalCajaId.value = cajaId
+  selectedModalCajaNombre.value = nombre
   showDeterioradoModal.value = true
-  loadingDeterioradoInventario.value = true
-  deterioradoInventario.value = []
-  
-  try {
-    const res = await axios.get(`/cajas/${cajaId}/inventario-deteriorado`)
-    deterioradoInventario.value = res.data
-  } catch (err) {
-    console.error('Error al cargar inventario deteriorado:', err)
-  } finally {
-    loadingDeterioradoInventario.value = false
-  }
 }
 
 const agencias = ref<any[]>([])
