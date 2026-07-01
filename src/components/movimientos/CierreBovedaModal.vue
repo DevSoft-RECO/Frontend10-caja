@@ -361,7 +361,7 @@ const submitCierreBoveda = async () => {
   })
 
   try {
-    await axios.post('/cierres-diarios', {
+    await axios.post('/cajas/cierres-diarios', {
       caja_id: props.boveda.id,
       detalles: detalles
     })
