@@ -12,6 +12,20 @@
       </div>
 
       <div class="flex items-center gap-3">
+        <!-- Selector de Agencia -->
+        <div v-if="agencias.length > 0" class="flex items-center gap-2">
+          <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider select-none">Agencia:</label>
+          <select
+            v-model="agenciaSeleccionadaId"
+            @change="onAgenciaChange"
+            class="block w-48 px-2.5 py-1.5 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-xs font-bold transition-all"
+          >
+            <option v-for="agencia in agencias" :key="agencia.id" :value="agencia.id">
+              {{ agencia.nombre }}
+            </option>
+          </select>
+        </div>
+
         <button
           @click="fetchData"
           class="inline-flex items-center justify-center p-2.5 bg-azul-cope text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all gap-1.5 text-xs cursor-pointer"
@@ -839,11 +853,22 @@ const openInventarioDeteriorado = async (cajaId: number) => {
   }
 }
 
+const agencias = ref<any[]>([])
+const agenciaSeleccionadaId = ref<number | null>(null)
+
+const onAgenciaChange = () => {
+  fetchData()
+}
+
 const fetchData = async () => {
   loading.value = true
   error.value = ''
   try {
-    const res = await axios.get('/reportes/dashboard-general')
+    const params: any = {}
+    if (agenciaSeleccionadaId.value !== null) {
+      params.agencia_id = agenciaSeleccionadaId.value
+    }
+    const res = await axios.get('/reportes/dashboard-general', { params })
     fechaHoy.value = res.data.fecha
     cajas.value = res.data.cajas
     denominaciones.value = res.data.denominaciones
@@ -851,11 +876,21 @@ const fetchData = async () => {
     totalesCajillas.value = res.data.totales_cajillas || {}
     totalesDeteriorados.value = res.data.totales_deteriorados || {}
     bovedaCerradaHoy.value = res.data.boveda_cerrada_hoy || false
+    agencias.value = res.data.agencias || []
+    
+    if (res.data.agencia_seleccionada_id && agenciaSeleccionadaId.value === null) {
+      agenciaSeleccionadaId.value = res.data.agencia_seleccionada_id
+    }
 
-    // Seleccionar la primera ventanilla por defecto si hay
+    // Seleccionar la primera ventanilla por defecto si hay o si la anterior ya no pertenece a la agencia
     const vList = cajas.value.filter(c => c.tipo_caja === 'ventanilla')
-    if (vList.length > 0 && selectedVentanillaId.value === null) {
-      selectedVentanillaId.value = vList[0].id
+    if (vList.length > 0) {
+      const exists = vList.some(v => v.id === selectedVentanillaId.value)
+      if (!exists || selectedVentanillaId.value === null) {
+        selectedVentanillaId.value = vList[0].id
+      }
+    } else {
+      selectedVentanillaId.value = null
     }
   } catch (err: any) {
     error.value = 'No se pudo cargar el Dashboard Consolidado.'
@@ -870,8 +905,7 @@ const formatCurrency = (val: number) => {
 
 onMounted(() => {
   fetchData()
-})
-</script>
+})</script>
 
 <style scoped>
 .fade-enter-active,
