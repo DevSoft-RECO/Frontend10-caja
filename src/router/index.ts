@@ -122,6 +122,14 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                     title: 'Traslado entre Bóvedas'
                 }
+            },
+            {
+                path: 'movimientos/bancos',
+                name: 'bancos-operaciones',
+                component: () => import('@/views/movimientos/BancosOperacionesView.vue'),
+                meta: {
+                    title: 'Operación Bancos Externos'
+                }
             }
         ]
     },

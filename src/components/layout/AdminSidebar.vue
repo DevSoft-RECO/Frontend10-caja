@@ -273,6 +273,7 @@ const menuItems = computed(() => {
             children: [
                 { label: 'Dashboard General', route: '/admin/movimientos/dashboard-general' },
                 { label: 'Traslado entre Bóvedas', route: '/admin/movimientos/traslado-bovedas' },
+                { label: 'Operación Bancos Externos', route: '/admin/movimientos/bancos' },
                 { label: 'Historial de Cierres', route: '/admin/movimientos/reporte-cierres' },
                 { label: 'Historial de Movimientos', route: '/admin/movimientos' }
             ]
