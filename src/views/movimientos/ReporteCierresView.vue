@@ -228,10 +228,22 @@
                       </td>
                       <td class="p-3">
                         <span
-                          class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider"
-                          :class="det.estado_dinero === 'bueno' ? 'bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400' : 'bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400'"
+                          v-if="det.estado_dinero === 'bueno'"
+                          class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800/30"
                         >
-                          {{ det.estado_dinero === 'bueno' ? 'Buen estado' : 'Deteriorado' }}
+                          Buen estado
+                        </span>
+                        <span
+                          v-else-if="det.estado_dinero === 'cajillas'"
+                          class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-blue-50 dark:bg-blue-950/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800/30"
+                        >
+                          Cajillas (Tránsito)
+                        </span>
+                        <span
+                          v-else
+                          class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-red-50 dark:bg-red-950/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/30"
+                        >
+                          Deteriorado
                         </span>
                       </td>
                       <td class="p-3 text-center font-mono font-semibold text-gray-500 dark:text-gray-400">
