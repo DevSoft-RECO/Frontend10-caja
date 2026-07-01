@@ -114,6 +114,14 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                     title: 'Dashboard Consolidado'
                 }
+            },
+            {
+                path: 'movimientos/traslado-bovedas',
+                name: 'traslado-bovedas',
+                component: () => import('@/views/movimientos/TrasladoBovedasView.vue'),
+                meta: {
+                    title: 'Traslado entre Bóvedas'
+                }
             }
         ]
     },
