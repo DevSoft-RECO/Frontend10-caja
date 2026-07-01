@@ -44,7 +44,7 @@
                 required
               >
                 <option value="">-- Seleccionar Origen --</option>
-                <option v-for="caja in cajas" :key="caja.id" :value="caja.id" :disabled="!caja.estado">
+                <option v-for="caja in cajas" :key="caja.id" :value="caja.id" :disabled="!caja.estado && caja.tipo_caja !== 'general'">
                   {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }})
                 </option>
               </select>
@@ -60,7 +60,7 @@
                 required
               >
                 <option value="">-- Seleccionar Destino --</option>
-                <option v-for="caja in cajas" :key="caja.id" :value="caja.id" :disabled="caja.id === Number(form.origen_caja_id) || !caja.estado">
+                <option v-for="caja in cajas" :key="caja.id" :value="caja.id" :disabled="caja.id === Number(form.origen_caja_id) || (!caja.estado && caja.tipo_caja !== 'general')">
                   {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }})
                 </option>
               </select>
