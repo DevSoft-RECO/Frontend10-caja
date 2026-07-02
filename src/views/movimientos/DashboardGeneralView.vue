@@ -169,9 +169,10 @@
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-sm font-medium">
               <!-- Billetes Section Header -->
               <tr class="bg-slate-100/80 dark:bg-slate-900 text-xs font-extrabold text-slate-700 dark:text-slate-300 border-y border-gray-200 dark:border-gray-700 select-none">
-                <td :colspan="columnCount" class="p-3 uppercase tracking-widest pl-4">
-                  <span class="inline-flex items-center gap-1">
-                    💵 Billetes
+                <td :colspan="columnCount" class="p-3.5 uppercase tracking-widest pl-4 cursor-pointer hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors" @click="colapsarBilletes = !colapsarBilletes">
+                  <span class="inline-flex items-center justify-between w-full">
+                    <span>💵 Billetes</span>
+                    <span class="text-xs text-gray-400 font-bold transition-transform duration-300" :class="colapsarBilletes ? 'rotate-180' : ''">▲</span>
                   </span>
                 </td>
               </tr>
@@ -180,6 +181,7 @@
               <tr
                 v-for="denom in billetes"
                 :key="denom.id"
+                v-show="!colapsarBilletes"
                 class="hover:bg-slate-50/40 dark:hover:bg-gray-750/30 transition-colors"
               >
                 <!-- Label Column -->
@@ -272,9 +274,10 @@
 
               <!-- Monedas Section Header -->
               <tr class="bg-slate-100/80 dark:bg-slate-900 text-xs font-extrabold text-slate-700 dark:text-slate-300 border-y border-gray-200 dark:border-gray-700 select-none">
-                <td :colspan="columnCount" class="p-3 uppercase tracking-widest pl-4">
-                  <span class="inline-flex items-center gap-1">
-                    🪙 Monedas
+                <td :colspan="columnCount" class="p-3.5 uppercase tracking-widest pl-4 cursor-pointer hover:bg-slate-200/50 dark:hover:bg-slate-800 transition-colors" @click="colapsarMonedas = !colapsarMonedas">
+                  <span class="inline-flex items-center justify-between w-full">
+                    <span>🪙 Monedas</span>
+                    <span class="text-xs text-gray-400 font-bold transition-transform duration-300" :class="colapsarMonedas ? 'rotate-180' : ''">▲</span>
                   </span>
                 </td>
               </tr>
@@ -283,6 +286,7 @@
               <tr
                 v-for="denom in monedas"
                 :key="denom.id"
+                v-show="!colapsarMonedas"
                 class="hover:bg-slate-50/40 dark:hover:bg-gray-750/30 transition-colors"
               >
                 <!-- Label Column -->
@@ -626,6 +630,8 @@ const showCajillasModal = ref(false)
 const showDeterioradoModal = ref(false)
 const selectedModalCajaId = ref<number | null>(null)
 const selectedModalCajaNombre = ref('')
+const colapsarBilletes = ref(false)
+const colapsarMonedas = ref(false)
 
 // Computeds por tipo
 const bovedas = computed(() => cajas.value.filter(c => c.tipo_caja === 'boveda'))
