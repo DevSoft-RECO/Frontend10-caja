@@ -430,8 +430,17 @@ const fetchData = async () => {
       axios.get('/cajas'),
       axios.get('/denominaciones')
     ])
-    // Filtrar únicamente las cajas asignadas al usuario activo y que no sean bóveda
-    cajas.value = cajasRes.data.filter((c: any) => c.estado && c.tipo_caja !== 'boveda' && c.usuario_id === authStore.user?.id)
+    // Obtener la agencia del usuario logueado
+    const userAgenciaId = authStore.user?.agencia_id || 
+                          authStore.user?.agencia?.id || 
+                          cajasRes.data.find((c: any) => c.usuario_id === authStore.user?.id)?.agencia_id
+
+    // Filtrar las cajas activas de la misma agencia que sean ventanillas
+    cajas.value = cajasRes.data.filter((c: any) => 
+      c.estado && 
+      c.tipo_caja === 'ventanilla' && 
+      Number(c.agencia_id) === Number(userAgenciaId)
+    )
     denominaciones.value = denomsRes.data.filter((d: any) => d.activo)
 
     localDenominaciones.value = denominaciones.value.map(d => ({
@@ -440,7 +449,7 @@ const fetchData = async () => {
       cantidad_deteriorada: 0
     }))
 
-    // Auto-seleccionar si el cajero solo tiene una caja asignada
+    // Auto-seleccionar si solo hay una caja disponible
     if (cajas.value.length === 1) {
       selectedCajaId.value = String(cajas.value[0].id)
       onCajaChange()
