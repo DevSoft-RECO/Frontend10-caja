@@ -158,7 +158,10 @@
                   <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-sm">
                     <tr v-for="denom in billetesList" :key="denom.id">
                       <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
-                        {{ denom.nombre }} ({{ formatCurrency(denom.valor) }})
+                        <div>{{ denom.nombre }} ({{ formatCurrency(denom.valor) }})</div>
+                        <div v-if="form.tipo_operacion === 'egreso' && form.categoria_movimiento === 'abastecimiento' && form.origen_caja_id" class="text-[10px] text-gray-400 dark:text-gray-505 font-semibold mt-0.5">
+                          Disponible en origen: <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ stockMap[denom.id]?.stock_bueno ?? 0 }}</span>
+                        </div>
                       </td>
                       <td v-if="form.categoria_movimiento !== 'deteriorado'" class="p-3">
                         <input
@@ -204,7 +207,10 @@
                   <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-sm">
                     <tr v-for="denom in monedasList" :key="denom.id">
                       <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
-                        {{ denom.nombre }} ({{ formatCurrency(denom.valor) }})
+                        <div>{{ denom.nombre }} ({{ formatCurrency(denom.valor) }})</div>
+                        <div v-if="form.tipo_operacion === 'egreso' && form.categoria_movimiento === 'abastecimiento' && form.origen_caja_id" class="text-[10px] text-gray-400 dark:text-gray-505 font-semibold mt-0.5">
+                          Disponible en origen: <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ stockMap[denom.id]?.stock_bueno ?? 0 }}</span>
+                        </div>
                       </td>
                       <td v-if="form.categoria_movimiento !== 'deteriorado'" class="p-3">
                         <input
@@ -292,7 +298,6 @@ const submitting = ref(false)
 const cajas = ref<Caja[]>([])
 const denominaciones = ref<Denominacion[]>([])
 const localDenominaciones = ref<Denominacion[]>([])
-
 const form = ref({
   origen_caja_id: '',
   destino_caja_id: '',
@@ -300,6 +305,29 @@ const form = ref({
   categoria_movimiento: 'abastecimiento',
   descripcion: '',
 })
+
+const stockMap = ref<Record<number, { stock_bueno: number, stock_deteriorado: number }>>({})
+
+const fetchStock = async () => {
+  stockMap.value = {}
+  if (!form.value.origen_caja_id) return
+  
+  try {
+    const res = await axios.get(`/cajas/${form.value.origen_caja_id}/stock-denominaciones`)
+    const map: Record<number, { stock_bueno: number, stock_deteriorado: number }> = {}
+    res.data.forEach((item: any) => {
+      map[item.denominacion_id] = {
+        stock_bueno: item.stock_bueno,
+        stock_deteriorado: item.stock_deteriorado
+      }
+    })
+    stockMap.value = map
+  } catch (err) {
+    console.error('Error al cargar stock de la caja origen:', err)
+  }
+}
+
+watch(() => form.value.origen_caja_id, fetchStock)
 
 const origenCajaSeleccionada = computed(() => {
   if (!form.value.origen_caja_id) return null
@@ -478,6 +506,21 @@ const submitForm = async () => {
   formError.value = ''
   successMsg.value = ''
   submitting.value = true
+
+  // Validar si es un egreso y de tipo abastecimiento que no supere el stock disponible
+  if (form.value.tipo_operacion === 'egreso' && form.value.categoria_movimiento === 'abastecimiento') {
+    for (const d of localDenominaciones.value) {
+      const cantReq = d.cantidad_buena || 0
+      if (cantReq > 0) {
+        const disponible = stockMap.value[d.id]?.stock_bueno || 0
+        if (cantReq > disponible) {
+          formError.value = `Stock insuficiente en la caja origen para la denominación ${d.nombre}. Solicitado: ${cantReq}, Disponible: ${disponible}.`
+          submitting.value = false
+          return
+        }
+      }
+    }
+  }
 
   const isDeteriorados = form.value.categoria_movimiento === 'deteriorado'
 
