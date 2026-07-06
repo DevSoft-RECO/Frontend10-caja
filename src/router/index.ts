@@ -100,6 +100,14 @@ const routes: RouteRecordRaw[] = [
                 }
             },
             {
+                path: 'movimientos/caja',
+                name: 'movimientos-caja',
+                component: () => import('@/views/movimientos/MovimientosCajaView.vue'),
+                meta: {
+                    title: 'Movimientos de Caja'
+                }
+            },
+            {
                 path: 'movimientos/reporte-cierres',
                 name: 'reporte-cierres',
                 component: () => import('@/views/movimientos/ReporteCierresView.vue'),
@@ -113,6 +121,14 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('@/views/movimientos/AutorizacionesAperturaView.vue'),
                 meta: {
                     title: 'Autorizaciones de Apertura'
+                }
+            },
+            {
+                path: 'movimientos/autorizaciones-movimientos',
+                name: 'autorizaciones-movimientos',
+                component: () => import('@/views/movimientos/AutorizacionesMovimientosView.vue'),
+                meta: {
+                    title: 'Autorizaciones de Movimientos'
                 }
             },
             {
