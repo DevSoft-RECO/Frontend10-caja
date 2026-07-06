@@ -283,6 +283,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
 import axios from '@/api/axios'
+import { useAuthStore } from '@/stores/auth'
 
 interface User {
   id: number
@@ -424,11 +425,13 @@ const onCajaChange = async () => {
 
 const fetchData = async () => {
   try {
+    const authStore = useAuthStore()
     const [cajasRes, denomsRes] = await Promise.all([
       axios.get('/cajas'),
       axios.get('/denominaciones')
     ])
-    cajas.value = cajasRes.data.filter((c: any) => c.estado && c.tipo_caja !== 'boveda')
+    // Filtrar únicamente las cajas asignadas al usuario activo y que no sean bóveda
+    cajas.value = cajasRes.data.filter((c: any) => c.estado && c.tipo_caja !== 'boveda' && c.usuario_id === authStore.user?.id)
     denominaciones.value = denomsRes.data.filter((d: any) => d.activo)
 
     localDenominaciones.value = denominaciones.value.map(d => ({
@@ -436,6 +439,12 @@ const fetchData = async () => {
       cantidad_buena: 0,
       cantidad_deteriorada: 0
     }))
+
+    // Auto-seleccionar si el cajero solo tiene una caja asignada
+    if (cajas.value.length === 1) {
+      selectedCajaId.value = String(cajas.value[0].id)
+      onCajaChange()
+    }
   } catch (err: any) {
     error.value = 'Error al cargar catálogos.'
   }
