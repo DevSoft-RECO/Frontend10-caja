@@ -159,7 +159,7 @@
                     <tr v-for="denom in billetesList" :key="denom.id">
                       <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
                         <div>{{ denom.nombre }} ({{ formatCurrency(denom.valor) }})</div>
-                        <div v-if="form.tipo_operacion === 'egreso' && form.categoria_movimiento === 'abastecimiento' && form.origen_caja_id" class="text-[10px] text-gray-400 dark:text-gray-505 font-semibold mt-0.5">
+                        <div v-if="form.tipo_operacion === 'egreso' && form.origen_caja_id" class="text-[10px] text-gray-400 dark:text-gray-505 font-semibold mt-0.5">
                           Disponible en origen: <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ stockMap[denom.id]?.stock_bueno ?? 0 }}</span>
                         </div>
                       </td>
@@ -208,7 +208,7 @@
                     <tr v-for="denom in monedasList" :key="denom.id">
                       <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
                         <div>{{ denom.nombre }} ({{ formatCurrency(denom.valor) }})</div>
-                        <div v-if="form.tipo_operacion === 'egreso' && form.categoria_movimiento === 'abastecimiento' && form.origen_caja_id" class="text-[10px] text-gray-400 dark:text-gray-505 font-semibold mt-0.5">
+                        <div v-if="form.tipo_operacion === 'egreso' && form.origen_caja_id" class="text-[10px] text-gray-400 dark:text-gray-505 font-semibold mt-0.5">
                           Disponible en origen: <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ stockMap[denom.id]?.stock_bueno ?? 0 }}</span>
                         </div>
                       </td>
@@ -507,8 +507,8 @@ const submitForm = async () => {
   successMsg.value = ''
   submitting.value = true
 
-  // Validar si es un egreso y de tipo abastecimiento que no supere el stock disponible
-  if (form.value.tipo_operacion === 'egreso' && form.value.categoria_movimiento === 'abastecimiento') {
+  // Validar si es un egreso que no supere el stock disponible
+  if (form.value.tipo_operacion === 'egreso') {
     for (const d of localDenominaciones.value) {
       const cantReq = d.cantidad_buena || 0
       if (cantReq > 0) {
