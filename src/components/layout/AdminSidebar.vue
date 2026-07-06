@@ -261,6 +261,7 @@ const menuItems = computed(() => {
             show: true,
             children: [
                 { label: 'Apertura de Caja', route: '/admin/movimientos/apertura' },
+                { label: 'Movimientos', route: '/admin/movimientos/caja' },
                 { label: 'Arqueo Parcial', route: '/admin/movimientos/arqueo' },
                 { label: 'Cierre de Caja', route: '/admin/movimientos/cierre' }
             ]
@@ -273,6 +274,7 @@ const menuItems = computed(() => {
             children: [
                 { label: 'Dashboard General', route: '/admin/movimientos/dashboard-general' },
                 { label: 'Autorizaciones de Apertura', route: '/admin/movimientos/autorizaciones' },
+                { label: 'Autorizaciones de Movimientos', route: '/admin/movimientos/autorizaciones-movimientos' },
                 { label: 'Traslado entre Bóvedas', route: '/admin/movimientos/traslado-bovedas' },
                 { label: 'Operación Bancos Externos', route: '/admin/movimientos/bancos' },
                 { label: 'Historial de Cierres', route: '/admin/movimientos/reporte-cierres' },
