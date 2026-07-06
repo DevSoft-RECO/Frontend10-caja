@@ -23,21 +23,12 @@
             </h2>
             <div v-if="selectedCajaId && estadoAperturaCargado" class="flex gap-2">
               <button
-                v-if="descuadreDetectado"
-                type="button"
-                @click="openSupervisorModal"
-                class="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center gap-1 cursor-pointer animate-pulse"
-              >
-                ⚠️ Autorizar Descuadre
-              </button>
-              <button
-                v-else
                 type="button"
                 @click="submitApertura(null)"
                 :disabled="submitting"
                 class="px-5 py-2.5 bg-verde-cope hover:bg-verde-cope/90 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center gap-1 cursor-pointer disabled:opacity-40"
               >
-                Confirmar y Abrir Caja
+                Solicitar Apertura
               </button>
             </div>
           </div>
@@ -189,7 +180,7 @@
             <!-- Alerta descuadre -->
             <div v-if="descuadreDetectado" class="p-4 bg-amber-50 dark:bg-amber-950/10 border border-amber-250 dark:border-amber-900/30 rounded-xl text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed space-y-1">
               <p class="font-bold flex items-center gap-1">⚠️ Descuadre Detectado</p>
-              El conteo actual difiere del cierre de ayer. Se requiere la firma de un supervisor para poder abrir la caja.
+              El conteo actual difiere del cierre de ayer. La solicitud será enviada para auditoría y aprobación de Bóveda.
             </div>
 
             <!-- Alerta todo cuadrado -->
@@ -202,61 +193,13 @@
       </div>
     </div>
 
-    <!-- MODAL AUTORIZACION SUPERVISOR -->
-    <Transition name="fade">
-      <div v-if="supervisorModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm">
-        <div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-md border border-gray-250 dark:border-gray-700 shadow-2xl p-6 space-y-6">
-          <div class="flex items-start gap-4">
-            <div class="p-3 bg-amber-100 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 rounded-2xl shrink-0">
-              <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            <div class="w-full">
-              <h3 class="text-lg font-bold text-gray-900 dark:text-white">Firma de Supervisor SSO</h3>
-              <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">
-                Selecciona al supervisor encargado para autorizar la apertura con un descuadre de <span class="font-bold text-red-500">{{ formatCurrency(diferencia) }}</span>.
-              </p>
-              
-              <div class="mt-4">
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Supervisor Autorizador</label>
-                <select
-                  v-model="selectedSupervisorId"
-                  class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
-                >
-                  <option value="">-- Seleccionar Supervisor --</option>
-                  <option v-for="user in supervisores" :key="user.id" :value="user.id">
-                    {{ user.name }}
-                  </option>
-                </select>
-              </div>
-            </div>
-          </div>
 
-          <div class="flex justify-end gap-3 pt-2">
-            <button
-              @click="supervisorModalOpen = false"
-              class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-650 text-gray-800 dark:text-white font-semibold rounded-xl text-xs transition-all cursor-pointer"
-            >
-              Cancelar
-            </button>
-            <button
-              @click="confirmAperturaConDescuadre"
-              :disabled="!selectedSupervisorId || submitting"
-              class="px-5 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer"
-            >
-              Autorizar y Abrir
-            </button>
-          </div>
-        </div>
-      </div>
-    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
-import { useRouter } from 'vue-router'
+
 import axios from '@/api/axios'
 import { useAuthStore } from '@/stores/auth'
 
@@ -297,7 +240,7 @@ interface EstadoApertura {
 }
 
 // State
-const router = useRouter()
+
 const cajas = ref<Caja[]>([])
 const denominaciones = ref<Denominacion[]>([])
 const selectedCajaId = ref('')
@@ -311,10 +254,7 @@ const estadoAperturaCargado = ref(false)
 
 const localDenominaciones = ref<Denominacion[]>([])
 
-// Supervisor Override State
-const supervisorModalOpen = ref(false)
-const supervisores = ref<User[]>([])
-const selectedSupervisorId = ref('')
+
 
 // Computeds
 const billetesList = computed(() => localDenominaciones.value.filter(d => d.tipo === 'billete'))
@@ -407,15 +347,13 @@ const onCajaChange = async () => {
 const fetchData = async () => {
   try {
     const authStore = useAuthStore()
-    const [cajasRes, denomsRes, usersRes] = await Promise.all([
+    const [cajasRes, denomsRes] = await Promise.all([
       axios.get('/cajas'),
-      axios.get('/denominaciones'),
-      axios.get('/usuarios')
+      axios.get('/denominaciones')
     ])
     // Filtrar únicamente las cajas asignadas al usuario activo
     cajas.value = cajasRes.data.filter((c: any) => c.estado && c.usuario_id === authStore.user?.id)
     denominaciones.value = denomsRes.data.filter((d: any) => d.activo)
-    supervisores.value = usersRes.data
 
     localDenominaciones.value = denominaciones.value.map(d => ({
       ...d,
@@ -433,20 +371,12 @@ const fetchData = async () => {
   }
 }
 
-const openSupervisorModal = () => {
-  selectedSupervisorId.value = ''
-  supervisorModalOpen.value = true
-}
 
-const confirmAperturaConDescuadre = () => {
-  submitApertura(Number(selectedSupervisorId.value))
-}
 
 const submitApertura = async (supervisorId: number | null) => {
   error.value = ''
   successMsg.value = ''
   submitting.value = true
-  supervisorModalOpen.value = false
 
   const detalles = localDenominaciones.value
     .filter(d => d.cantidad_buena > 0)
@@ -470,13 +400,14 @@ const submitApertura = async (supervisorId: number | null) => {
   }
 
   try {
-    await axios.post(`/cajas/${selectedCajaId.value}/abrir`, payload)
-    successMsg.value = '¡Caja abierta exitosamente! Redirigiendo a operaciones...'
+    await axios.post(`/cajas/${selectedCajaId.value}/solicitar-apertura`, payload)
+    successMsg.value = '¡Solicitud de apertura enviada exitosamente! Por favor, espera la aprobación del encargado de Bóveda.'
     setTimeout(() => {
-      router.push('/admin/movimientos')
-    }, 1500)
+      resetForm()
+      fetchData()
+    }, 3000)
   } catch (err: any) {
-    error.value = err.response?.data?.message || 'Error al procesar apertura de caja.'
+    error.value = err.response?.data?.message || 'Error al procesar solicitud de apertura de caja.'
   } finally {
     submitting.value = false
   }

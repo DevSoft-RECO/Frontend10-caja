@@ -272,6 +272,7 @@ const menuItems = computed(() => {
             show: true,
             children: [
                 { label: 'Dashboard General', route: '/admin/movimientos/dashboard-general' },
+                { label: 'Autorizaciones de Apertura', route: '/admin/movimientos/autorizaciones' },
                 { label: 'Traslado entre Bóvedas', route: '/admin/movimientos/traslado-bovedas' },
                 { label: 'Operación Bancos Externos', route: '/admin/movimientos/bancos' },
                 { label: 'Historial de Cierres', route: '/admin/movimientos/reporte-cierres' },

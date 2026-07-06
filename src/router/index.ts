@@ -108,6 +108,14 @@ const routes: RouteRecordRaw[] = [
                 }
             },
             {
+                path: 'movimientos/autorizaciones',
+                name: 'autorizaciones-apertura',
+                component: () => import('@/views/movimientos/AutorizacionesAperturaView.vue'),
+                meta: {
+                    title: 'Autorizaciones de Apertura'
+                }
+            },
+            {
                 path: 'movimientos/dashboard-general',
                 name: 'dashboard-general',
                 component: () => import('@/views/movimientos/DashboardGeneralView.vue'),
