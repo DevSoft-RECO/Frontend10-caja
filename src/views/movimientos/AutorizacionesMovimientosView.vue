@@ -148,8 +148,8 @@
                 <thead>
                   <tr class="bg-gray-50 dark:bg-gray-900 border-b border-gray-150 dark:border-gray-700 font-bold text-gray-500 dark:text-gray-400 uppercase">
                     <th class="p-2.5">Denominación</th>
-                    <th class="p-2.5 text-center">Cant. Buena Solicitada</th>
-                    <th class="p-2.5 text-center">Cant. Deteriorada Solicitada</th>
+                    <th v-if="selectedSolicitud.categoria_movimiento !== 'devolucion'" class="p-2.5 text-center">Cant. Buena Solicitada</th>
+                    <th v-if="selectedSolicitud.categoria_movimiento === 'devolucion'" class="p-2.5 text-center">Cant. Deteriorada Solicitada</th>
                     <th class="p-2.5 text-right">Subtotal</th>
                   </tr>
                 </thead>
@@ -158,10 +158,10 @@
                     <td class="p-2.5 font-bold text-gray-900 dark:text-gray-100">
                       {{ det.denominacion?.nombre }}
                     </td>
-                    <td class="p-2.5 text-center font-mono" :class="det.cantidad_buena > 0 ? 'text-gray-900 dark:text-white font-bold' : 'text-gray-400'">
+                    <td v-if="selectedSolicitud.categoria_movimiento !== 'devolucion'" class="p-2.5 text-center font-mono" :class="det.cantidad_buena > 0 ? 'text-gray-900 dark:text-white font-bold' : 'text-gray-400'">
                       {{ det.cantidad_buena }}
                     </td>
-                    <td class="p-2.5 text-center font-mono" :class="det.cantidad_deteriorada > 0 ? 'text-amber-600 font-bold' : 'text-gray-400'">
+                    <td v-if="selectedSolicitud.categoria_movimiento === 'devolucion'" class="p-2.5 text-center font-mono" :class="det.cantidad_deteriorada > 0 ? 'text-amber-600 font-bold' : 'text-gray-400'">
                       {{ det.cantidad_deteriorada }}
                     </td>
                     <td class="p-2.5 text-right font-mono font-bold text-gray-900 dark:text-white">
