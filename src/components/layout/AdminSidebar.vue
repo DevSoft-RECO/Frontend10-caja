@@ -275,6 +275,7 @@ const menuItems = computed(() => {
                 { label: 'Autorizaciones de Apertura', route: '/admin/movimientos/autorizaciones' },
                 { label: 'Autorizaciones de Movimientos', route: '/admin/movimientos/autorizaciones-movimientos' },
                 { label: 'Traslado entre Bóvedas', route: '/admin/movimientos/traslado-bovedas' },
+                { label: 'Autorización de Traslados', route: '/admin/movimientos/autorizaciones-traslados' },
                 { label: 'Operación Bancos Externos', route: '/admin/movimientos/bancos' },
                 { label: 'Cierre de Caja', route: '/admin/movimientos/cierre' },
                 { label: 'Historial de Cierres', route: '/admin/movimientos/reporte-cierres' },
