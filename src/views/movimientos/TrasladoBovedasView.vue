@@ -1,5 +1,5 @@
 <template>
-  <div class="p-6 w-full space-y-6 max-w-5xl mx-auto">
+  <div class="p-6 w-full space-y-6">
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
@@ -74,10 +74,10 @@
           <select
             v-model="bovedaOrigenId"
             @change="onBovedaOrigenChange"
-            class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-655 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-bold transition-all"
+            class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-bold transition-all"
           >
-            <option :value="null" disabled>Seleccionar origen</option>
-            <option v-for="caja in bovedasDisponibles" :key="caja.id" :value="caja.id">
+            <option :value="null" disabled class="bg-white dark:bg-gray-800 text-gray-950 dark:text-white">Seleccionar origen</option>
+            <option v-for="caja in bovedasDisponibles" :key="caja.id" :value="caja.id" class="bg-white dark:bg-gray-800 text-gray-950 dark:text-white">
               {{ caja.nombre }} ({{ caja.agencia?.nombre }})
             </option>
           </select>
@@ -90,10 +90,10 @@
           </label>
           <select
             v-model="bovedaDestinoId"
-            class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-655 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-bold transition-all"
+            class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-bold transition-all"
           >
-            <option :value="null" disabled>Seleccionar destino</option>
-            <option v-for="caja in bovedasDestinoFiltradas" :key="caja.id" :value="caja.id">
+            <option :value="null" disabled class="bg-white dark:bg-gray-800 text-gray-950 dark:text-white">Seleccionar destino</option>
+            <option v-for="caja in bovedasDestinoFiltradas" :key="caja.id" :value="caja.id" class="bg-white dark:bg-gray-800 text-gray-950 dark:text-white">
               {{ caja.nombre }} ({{ caja.agencia?.nombre }})
             </option>
           </select>
@@ -234,10 +234,10 @@
           <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Seleccione su Bóveda Local para filtrar seguimiento</label>
           <select
             v-model="bovedaLocalFiltroId"
-            class="block w-full sm:w-80 px-3 py-2.5 border border-gray-300 dark:border-gray-655 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope text-sm font-bold transition-all"
+            class="block w-full sm:w-80 px-3 py-2.5 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope text-sm font-bold transition-all"
           >
-            <option :value="null">-- Ver Todos los Traslados Propios --</option>
-            <option v-for="caja in bovedasDisponibles" :key="caja.id" :value="caja.id">
+            <option :value="null" class="bg-white dark:bg-gray-800 text-gray-950 dark:text-white">-- Ver Todos los Traslados Propios --</option>
+            <option v-for="caja in bovedasDisponibles" :key="caja.id" :value="caja.id" class="bg-white dark:bg-gray-800 text-gray-950 dark:text-white">
               {{ caja.nombre }} ({{ caja.agencia?.nombre }})
             </option>
           </select>
@@ -647,13 +647,13 @@ const formatDate = (val: string) => {
 const getStepClass = (estadoActual: string, targetEstados: string[]) => {
   const isIncluded = targetEstados.includes(estadoActual)
   if (estadoActual === 'cancelado') {
-    return 'p-2 rounded-xl bg-red-50 text-red-500 border border-red-200 opacity-60'
+    return 'p-2 rounded-xl bg-red-50 text-red-500 border border-red-200 opacity-60 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/30'
   }
   if (isIncluded) {
     if (estadoActual === targetEstados[targetEstados.length - 1]) {
-      return 'p-2 rounded-xl bg-green-50 text-green-700 border-2 border-green-500 font-bold shadow-sm'
+      return 'p-2 rounded-xl bg-green-50 text-green-700 border-2 border-green-500 font-bold shadow-sm dark:bg-green-950/20 dark:text-green-400 dark:border-green-900/30'
     }
-    return 'p-2 rounded-xl bg-azul-cope/10 text-azul-cope border border-azul-cope font-bold shadow-xs'
+    return 'p-2 rounded-xl bg-azul-cope/10 text-azul-cope border border-azul-cope font-bold shadow-xs dark:bg-azul-cope/20 dark:text-cyan-400 dark:border-azul-cope/30'
   }
   return 'p-2 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-400 border border-gray-150 dark:border-gray-800'
 }
