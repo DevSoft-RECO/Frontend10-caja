@@ -148,6 +148,14 @@ const routes: RouteRecordRaw[] = [
                 }
             },
             {
+                path: 'movimientos/autorizaciones-traslados',
+                name: 'autorizaciones-traslados',
+                component: () => import('@/views/movimientos/AutorizacionesTrasladosView.vue'),
+                meta: {
+                    title: 'Bandeja de Traslados Entrantes'
+                }
+            },
+            {
                 path: 'movimientos/bancos',
                 name: 'bancos-operaciones',
                 component: () => import('@/views/movimientos/BancosOperacionesView.vue'),
