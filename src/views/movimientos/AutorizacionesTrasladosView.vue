@@ -246,7 +246,7 @@
 
             <!-- Acción: Cancelar Solicitud -->
             <button
-              v-if="['pendiente', 'solicitud_recibida', 'programado'].includes(traslado.estado)"
+              v-if="!['ingresado', 'cancelado'].includes(traslado.estado)"
               @click="cancelarTraslado(traslado.id)"
               class="px-3 py-1.5 border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
             >
