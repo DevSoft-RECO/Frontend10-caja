@@ -4,13 +4,13 @@
     <AdminSidebar />
 
     <div
-      class="flex flex-col flex-1 h-full transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)]"
+      class="flex flex-col flex-1 h-full transition-all duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] bg-azul-cope dark:bg-gray-900"
       :class="[layoutStore.isCollapsed ? 'md:ml-20' : 'md:ml-64']"
     >
 
       <AdminHeader />
 
-      <main class="flex-1 overflow-x-hidden overflow-y-auto p-6 relative custom-scrollbar">
+      <main class="flex-1 overflow-x-hidden overflow-y-auto p-6 relative custom-scrollbar bg-gray-50 dark:bg-gray-950 md:rounded-tl-3xl shadow-2xl">
         <RouterView v-slot="{ Component }">
             <component :is="Component" />
         </RouterView>
