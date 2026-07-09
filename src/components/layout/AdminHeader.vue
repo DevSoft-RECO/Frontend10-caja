@@ -33,7 +33,7 @@
         <div class="flex items-center gap-1.5">
           <span class="w-1.5 h-1.5 rounded-full bg-verde-cope animate-pulse"></span>
           <span class="text-[9px] font-bold text-gray-300/80 dark:text-gray-500 uppercase tracking-widest leading-none">
-            Sistema Centralizado
+            SISTEMA DE CONTROL DE EFECTIVO
           </span>
         </div>
       </div>
