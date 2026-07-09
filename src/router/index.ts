@@ -40,7 +40,7 @@ const routes: RouteRecordRaw[] = [
                 name: 'dashboard',
                 component: DashboardView,
                 meta: {
-                    title: 'Gestor de Efectivo'
+                    title: 'Dashboard'
                 }
             },
             {
