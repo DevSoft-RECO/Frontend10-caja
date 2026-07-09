@@ -137,7 +137,7 @@
           ></textarea>
         </div>
 
-        <!-- Resumen de Envío -->
+      <!-- Resumen de Envío -->
         <div class="pt-4 border-t border-gray-150 dark:border-gray-750 text-xs space-y-2">
           <div class="flex justify-between items-center text-gray-500 dark:text-gray-400 font-medium">
             <span>Total de Piezas:</span>
@@ -259,153 +259,279 @@
         No se encontraron traslados de bóveda propios para esta selección.
       </div>
 
-      <div v-else class="space-y-6">
-        <div
-          v-for="traslado in trasladosPropiosFiltrados"
-          :key="traslado.id"
-          class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl p-5 shadow-sm space-y-4"
-        >
-          <!-- Fila Superior -->
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-gray-150 dark:border-gray-750">
-            <div>
+      <div v-else class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl overflow-hidden shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 text-left text-sm">
+            <thead class="bg-gray-50 dark:bg-gray-900/50">
+              <tr>
+                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">ID / Tipo</th>
+                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Origen (Entrega)</th>
+                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Destino (Recibe)</th>
+                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Monto</th>
+                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Estado</th>
+                <th class="px-6 py-4 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-150 dark:divide-gray-750">
+              <tr v-for="traslado in trasladosPropiosFiltrados" :key="traslado.id" class="hover:bg-gray-55/50 dark:hover:bg-gray-700/20 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-mono font-bold text-gray-400">#{{ traslado.id }}</span>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider"
+                      :class="traslado.tipo_traslado === 'pedir' ? 'bg-azul-cope/10 text-azul-cope' : 'bg-verde-cope/10 text-verde-cope'">
+                      {{ traslado.tipo_traslado === 'pedir' ? '📥 Petición' : '📤 Envío' }}
+                    </span>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <p class="font-bold text-gray-800 dark:text-gray-200">{{ traslado.origen_boveda?.nombre }}</p>
+                  <p class="text-xs text-gray-500">{{ traslado.origen_boveda?.agencia?.nombre }}</p>
+                </td>
+                <td class="px-6 py-4">
+                  <p class="font-bold text-gray-800 dark:text-gray-200">{{ traslado.destino_boveda?.nombre }}</p>
+                  <p class="text-xs text-gray-500">{{ traslado.destino_boveda?.agencia?.nombre }}</p>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right font-mono font-bold text-gray-900 dark:text-white">
+                  {{ formatCurrency(traslado.monto_total) }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wide border"
+                    :class="getStatusBadgeClass(traslado.estado)">
+                    {{ getStatusLabel(traslado.estado) }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                  <button
+                    @click="selectedTraslado = traslado"
+                    class="px-4 py-2 bg-azul-cope/10 hover:bg-azul-cope hover:text-white text-azul-cope font-bold text-xs rounded-xl shadow-xs transition-all cursor-pointer"
+                  >
+                    Detalles
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DETALLES DEL TRASLADO -->
+    <Transition
+      enter-active-class="transition-opacity duration-300"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-opacity duration-300"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div v-if="selectedTraslado" class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-850 rounded-3xl max-w-3xl w-full shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-750 flex flex-col max-h-[90vh]">
+          <!-- Header -->
+          <div class="px-6 py-5 border-b border-gray-150 dark:border-gray-750 flex items-center justify-between bg-gray-50 dark:bg-gray-900/30">
+            <div class="flex items-center gap-3">
+              <span class="text-lg font-extrabold text-gray-900 dark:text-white">Traslado #{{ selectedTraslado.id }}</span>
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider"
-                :class="traslado.tipo_traslado === 'pedir' ? 'bg-azul-cope/10 text-azul-cope' : 'bg-verde-cope/10 text-verde-cope'">
-                {{ traslado.tipo_traslado === 'pedir' ? '📥 Solicitud Creada' : '📤 Envío Directo Creado' }}
+                :class="selectedTraslado.tipo_traslado === 'pedir' ? 'bg-azul-cope/10 text-azul-cope' : 'bg-verde-cope/10 text-verde-cope'">
+                {{ selectedTraslado.tipo_traslado === 'pedir' ? '📥 Petición' : '📤 Envío' }}
               </span>
-              <span class="ml-2 text-xs font-bold text-gray-400">#{{ traslado.id }}</span>
             </div>
-            <div class="text-right">
-              <span class="text-sm font-extrabold text-gray-800 dark:text-white font-mono">
-                Monto: {{ formatCurrency(traslado.monto_total) }}
-              </span>
+            <button @click="selectedTraslado = null" class="text-gray-400 hover:text-gray-600 dark:hover:text-white font-bold text-xl cursor-pointer p-1">
+              ✕
+            </button>
+          </div>
+
+          <!-- Body -->
+          <div class="p-6 overflow-y-auto space-y-6">
+            <!-- Grid Información -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 dark:bg-gray-900/20 p-5 rounded-2xl border border-gray-150 dark:border-gray-800">
+              <div class="space-y-4">
+                <div>
+                  <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Origen (Entrega)</h4>
+                  <p class="font-extrabold text-gray-800 dark:text-white text-base">
+                    {{ selectedTraslado.origen_boveda?.nombre }}
+                  </p>
+                  <p class="text-xs text-gray-500 font-semibold">{{ selectedTraslado.origen_boveda?.agencia?.nombre }}</p>
+                </div>
+                <div>
+                  <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Destino (Recibe)</h4>
+                  <p class="font-extrabold text-gray-800 dark:text-white text-base">
+                    {{ selectedTraslado.destino_boveda?.nombre }}
+                  </p>
+                  <p class="text-xs text-gray-500 font-semibold">{{ selectedTraslado.destino_boveda?.agencia?.nombre }}</p>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <div>
+                  <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Monto de Operación</h4>
+                  <p class="text-xl font-extrabold text-azul-cope dark:text-cyan-400 font-mono">
+                    {{ formatCurrency(selectedTraslado.monto_total) }}
+                  </p>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-xs">
+                  <div v-if="selectedTraslado.fecha_programada">
+                    <span class="font-bold text-gray-400 block">Programado:</span>
+                    <span class="font-extrabold text-gray-800 dark:text-gray-200">
+                      {{ formatDate(selectedTraslado.fecha_programada) }}
+                    </span>
+                  </div>
+                  <div v-if="selectedTraslado.repartidor">
+                    <span class="font-bold text-gray-400 block">Repartidor:</span>
+                    <span class="font-extrabold text-gray-800 dark:text-gray-200">
+                      {{ selectedTraslado.repartidor }}
+                    </span>
+                  </div>
+                  <div>
+                    <span class="font-bold text-gray-400 block">Creado Por:</span>
+                    <span class="font-semibold text-gray-700 dark:text-gray-300">
+                      {{ selectedTraslado.creador?.name || 'Sistema' }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Comentarios -->
+            <div v-if="selectedTraslado.comentario_peticion || selectedTraslado.comentario_envio" class="space-y-2">
+              <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Notas de Operación</h4>
+              <div class="p-4 bg-yellow-50/50 dark:bg-yellow-950/10 border-l-4 border-yellow-400 rounded-r-2xl text-sm italic text-gray-700 dark:text-gray-300">
+                <p v-if="selectedTraslado.comentario_peticion"><span class="font-bold not-italic text-gray-500">Petición:</span> "{{ selectedTraslado.comentario_peticion }}"</p>
+                <p v-if="selectedTraslado.comentario_envio" class="mt-1"><span class="font-bold not-italic text-gray-500">Envío:</span> "{{ selectedTraslado.comentario_envio }}"</p>
+              </div>
+            </div>
+
+            <!-- Nuevo Diseño de Stepper (Seguimiento del Tracking) -->
+            <div class="space-y-4">
+              <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">Línea de Tiempo del Traslado</h4>
+              
+              <div class="relative py-4">
+                <!-- Línea de Fondo -->
+                <div class="absolute top-1/2 left-4 right-4 h-1 bg-gray-250 dark:bg-gray-700 -translate-y-1/2 rounded-full hidden md:block"></div>
+
+                <!-- Stepper Horizontal (md o mayor) -->
+                <div class="relative flex justify-between gap-4 flex-col md:flex-row">
+                  <template v-if="selectedTraslado.tipo_traslado === 'pedir'">
+                    <div
+                      v-for="(step, idx) in stepsPedir"
+                      :key="step.key"
+                      class="flex md:flex-col items-center flex-1 text-center relative group"
+                    >
+                      <!-- Línea de progreso activa entre pasos -->
+                      <div
+                        v-if="idx < stepsPedir.length - 1"
+                        class="absolute top-1/2 left-[50%] right-[-50%] h-1 -translate-y-1/2 hidden md:block z-0"
+                        :class="isStepActive(selectedTraslado.estado, stepsPedir[idx + 1].states) ? 'bg-emerald-500' : 'bg-gray-250 dark:bg-gray-700'"
+                      ></div>
+
+                      <!-- Círculo de Paso -->
+                      <div
+                        class="w-10 h-10 rounded-full flex items-center justify-center text-lg z-10 transition-all duration-350 border-2 select-none"
+                        :class="[
+                          isStepCurrent(selectedTraslado.estado, step.states)
+                            ? 'bg-emerald-500 border-emerald-600 text-white scale-110 shadow-lg ring-4 ring-emerald-500/20'
+                            : isStepActive(selectedTraslado.estado, step.states)
+                            ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500 text-emerald-600'
+                            : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-400'
+                        ]"
+                      >
+                        {{ step.icon }}
+                      </div>
+
+                      <div class="ml-4 md:ml-0 md:mt-2 text-left md:text-center z-10">
+                        <p
+                          class="text-xs font-bold"
+                          :class="isStepActive(selectedTraslado.estado, step.states) ? 'text-gray-900 dark:text-white' : 'text-gray-450 dark:text-gray-500'"
+                        >
+                          {{ step.label }}
+                        </p>
+                        <p class="text-[9px] font-semibold text-gray-400 dark:text-gray-500">
+                          {{ isStepCurrent(selectedTraslado.estado, step.states) ? 'Activo' : isStepActive(selectedTraslado.estado, step.states) ? 'Completado' : 'Pendiente' }}
+                        </p>
+                      </div>
+                    </div>
+                  </template>
+
+                  <template v-else>
+                    <div
+                      v-for="(step, idx) in stepsEnviar"
+                      :key="step.key"
+                      class="flex md:flex-col items-center flex-1 text-center relative group"
+                    >
+                      <!-- Línea de progreso activa entre pasos -->
+                      <div
+                        v-if="idx < stepsEnviar.length - 1"
+                        class="absolute top-1/2 left-[50%] right-[-50%] h-1 -translate-y-1/2 hidden md:block z-0"
+                        :class="isStepActive(selectedTraslado.estado, stepsEnviar[idx + 1].states) ? 'bg-emerald-500' : 'bg-gray-250 dark:bg-gray-700'"
+                      ></div>
+
+                      <!-- Círculo de Paso -->
+                      <div
+                        class="w-10 h-10 rounded-full flex items-center justify-center text-lg z-10 transition-all duration-350 border-2 select-none"
+                        :class="[
+                          isStepCurrent(selectedTraslado.estado, step.states)
+                            ? 'bg-emerald-500 border-emerald-600 text-white scale-110 shadow-lg ring-4 ring-emerald-500/20'
+                            : isStepActive(selectedTraslado.estado, step.states)
+                            ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500 text-emerald-600'
+                            : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-700 text-gray-400'
+                        ]"
+                      >
+                        {{ step.icon }}
+                      </div>
+
+                      <div class="ml-4 md:ml-0 md:mt-2 text-left md:text-center z-10">
+                        <p
+                          class="text-xs font-bold"
+                          :class="isStepActive(selectedTraslado.estado, step.states) ? 'text-gray-900 dark:text-white' : 'text-gray-450 dark:text-gray-500'"
+                        >
+                          {{ step.label }}
+                        </p>
+                        <p class="text-[9px] font-semibold text-gray-400 dark:text-gray-500">
+                          {{ isStepCurrent(selectedTraslado.estado, step.states) ? 'Activo' : isStepActive(selectedTraslado.estado, step.states) ? 'Completado' : 'Pendiente' }}
+                        </p>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Ruta y Agencias -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            <div>
-              <p class="text-gray-400 font-bold uppercase text-[10px]">Origen (Entrega)</p>
-              <p class="font-extrabold text-gray-800 dark:text-white text-sm">
-                {{ traslado.origen_boveda?.nombre }}
-              </p>
-              <p class="text-gray-500 font-semibold">{{ traslado.origen_boveda?.agencia?.nombre }}</p>
-            </div>
-            
-            <div class="flex items-center justify-center text-gray-300 dark:text-gray-600 hidden md:flex">
-              ➡️
-            </div>
-
-            <div>
-              <p class="text-gray-400 font-bold uppercase text-[10px]">Destino (Recibe)</p>
-              <p class="font-extrabold text-gray-800 dark:text-white text-sm">
-                {{ traslado.destino_boveda?.nombre }}
-              </p>
-              <p class="text-gray-500 font-semibold">{{ traslado.destino_boveda?.agencia?.nombre }}</p>
-            </div>
-          </div>
-
-          <!-- Información General -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 bg-gray-55 dark:bg-gray-900/30 p-3 rounded-2xl text-xs">
-            <div v-if="traslado.fecha_programada">
-              <span class="font-bold text-gray-400 block">Fecha Programada:</span>
-              <span class="font-extrabold text-gray-800 dark:text-gray-200">
-                {{ formatDate(traslado.fecha_programada) }}
-              </span>
-            </div>
-            <div v-if="traslado.repartidor">
-              <span class="font-bold text-gray-400 block">Repartidor:</span>
-              <span class="font-extrabold text-gray-800 dark:text-gray-200">
-                {{ traslado.repartidor }}
-              </span>
-            </div>
-            <div>
-              <span class="font-bold text-gray-400 block">Creado Por:</span>
-              <span class="font-semibold text-gray-700 dark:text-gray-300">
-                {{ traslado.creador?.name || 'Sistema' }}
-              </span>
-            </div>
-          </div>
-
-          <!-- Comentarios -->
-          <div class="text-xs space-y-1 p-2 border-l-2 border-azul-cope/30">
-            <p v-if="traslado.comentario_peticion"><span class="font-bold text-gray-400">Petición:</span> <span class="italic text-gray-700 dark:text-gray-300">"{{ traslado.comentario_peticion }}"</span></p>
-            <p v-if="traslado.comentario_envio"><span class="font-bold text-gray-400">Envío:</span> <span class="italic text-gray-700 dark:text-gray-300">"{{ traslado.comentario_envio }}"</span></p>
-          </div>
-
-          <!-- Tracking visual del progreso -->
-          <div class="pt-2">
-            <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">Estado del Tracking</p>
-            
-            <!-- Flujo Pedir -->
-            <div v-if="traslado.tipo_traslado === 'pedir'" class="grid grid-cols-6 gap-1 text-center select-none text-[10px]">
-              <div :class="getStepClass(traslado.estado, ['pendiente', 'solicitud_recibida', 'programado', 'enviado', 'paquete_recibido', 'ingresado'])">
-                <span class="block text-sm">📝</span> Solicitado
-              </div>
-              <div :class="getStepClass(traslado.estado, ['solicitud_recibida', 'programado', 'enviado', 'paquete_recibido', 'ingresado'])">
-                <span class="block text-sm">🤝</span> Recibido
-              </div>
-              <div :class="getStepClass(traslado.estado, ['programado', 'enviado', 'paquete_recibido', 'ingresado'])">
-                <span class="block text-sm">📅</span> Programado
-              </div>
-              <div :class="getStepClass(traslado.estado, ['enviado', 'paquete_recibido', 'ingresado'])">
-                <span class="block text-sm">🚚</span> Enviado
-              </div>
-              <div :class="getStepClass(traslado.estado, ['paquete_recibido', 'ingresado'])">
-                <span class="block text-sm">📦</span> En Destino
-              </div>
-              <div :class="getStepClass(traslado.estado, ['ingresado'])">
-                <span class="block text-sm">🏦</span> Depositado
-              </div>
-            </div>
-
-            <!-- Flujo Enviar -->
-            <div v-else class="grid grid-cols-3 gap-1 text-center select-none text-[10px]">
-              <div :class="getStepClass(traslado.estado, ['enviado', 'enterado', 'ingresado'])">
-                <span class="block text-sm">🚚</span> Enviado
-              </div>
-              <div :class="getStepClass(traslado.estado, ['enterado', 'ingresado'])">
-                <span class="block text-sm">👀</span> Enterado
-              </div>
-              <div :class="getStepClass(traslado.estado, ['ingresado'])">
-                <span class="block text-sm">🏦</span> Depositado
-              </div>
-            </div>
-          </div>
-
-          <!-- Botones de Acción para el iniciador -->
-          <div class="flex flex-wrap items-center justify-end gap-2.5 pt-2 border-t border-gray-150 dark:border-gray-750">
-            
+          <!-- Footer Acciones -->
+          <div class="px-6 py-5 border-t border-gray-150 dark:border-gray-750 flex flex-wrap items-center justify-end gap-3 bg-gray-55 dark:bg-gray-900/30">
             <!-- Acción: Confirmar Recepción Paquete (Solo pedir, estado enviado) -->
             <button
-              v-if="traslado.tipo_traslado === 'pedir' && traslado.estado === 'enviado'"
-              @click="updateStatus(traslado.id, 'confirmar-recepcion-paquete')"
-              class="px-3.5 py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow transition-all cursor-pointer"
+              v-if="selectedTraslado.tipo_traslado === 'pedir' && selectedTraslado.estado === 'enviado'"
+              @click="updateStatus(selectedTraslado.id, 'confirmar-recepcion-paquete')"
+              class="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer"
             >
               Confirmar Recepción Paquete
             </button>
 
             <!-- Acción: Confirmar Ingreso Efectivo (Solo para el flujo PEDIR, cuando ya tiene el paquete recibido) -->
             <button
-              v-if="traslado.tipo_traslado === 'pedir' && traslado.estado === 'paquete_recibido'"
-              @click="updateStatus(traslado.id, 'confirmar-ingreso')"
-              class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow transition-all cursor-pointer"
+              v-if="selectedTraslado.tipo_traslado === 'pedir' && selectedTraslado.estado === 'paquete_recibido'"
+              @click="updateStatus(selectedTraslado.id, 'confirmar-ingreso')"
+              class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-lg transition-all cursor-pointer"
             >
               Confirmar Ingreso a Bóveda (Acreditar)
             </button>
 
             <!-- Acción: Cancelar Solicitud -->
             <button
-              v-if="!['ingresado', 'cancelado'].includes(traslado.estado)"
-              @click="cancelarTraslado(traslado.id)"
-              class="px-3 py-1.5 border border-red-200 text-red-600 hover:bg-red-50 text-xs font-bold rounded-xl transition-all cursor-pointer"
+              v-if="!['ingresado', 'cancelado'].includes(selectedTraslado.estado)"
+              @click="cancelarTraslado(selectedTraslado.id)"
+              class="px-4 py-2.5 border border-red-200 text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 text-xs font-bold rounded-xl transition-all cursor-pointer"
             >
-              Cancelar
+              Cancelar Traslado
+            </button>
+
+            <button @click="selectedTraslado = null" class="px-4 py-2.5 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-bold text-xs rounded-xl transition-all cursor-pointer">
+              Cerrar
             </button>
           </div>
-
         </div>
       </div>
-    </div>
+    </Transition>
   </div>
 </template>
 
@@ -472,6 +598,58 @@ const cajasList = ref<Caja[]>([])
 const denominacionesList = ref<Denominacion[]>([])
 const stockDisponible = ref<Record<number, number>>({})
 const trasladosList = ref<Traslado[]>([])
+
+const selectedTraslado = ref<Traslado | null>(null)
+
+const stepsPedir = [
+  { key: 'solicitado', states: ['pendiente', 'solicitud_recibida', 'programado', 'enviado', 'paquete_recibido', 'ingresado'], label: 'Solicitado', icon: '📝' },
+  { key: 'recibido', states: ['solicitud_recibida', 'programado', 'enviado', 'paquete_recibido', 'ingresado'], label: 'Recibido', icon: '🤝' },
+  { key: 'programado', states: ['programado', 'enviado', 'paquete_recibido', 'ingresado'], label: 'Programado', icon: '📅' },
+  { key: 'enviado', states: ['enviado', 'paquete_recibido', 'ingresado'], label: 'Enviado', icon: '🚚' },
+  { key: 'paquete_recibido', states: ['paquete_recibido', 'ingresado'], label: 'En Destino', icon: '📦' },
+  { key: 'ingresado', states: ['ingresado'], label: 'Depositado', icon: '🏦' }
+]
+
+const stepsEnviar = [
+  { key: 'enviado', states: ['enviado', 'enterado', 'ingresado'], label: 'Enviado', icon: '🚚' },
+  { key: 'enterado', states: ['enterado', 'ingresado'], label: 'Enterado', icon: '👀' },
+  { key: 'ingresado', states: ['ingresado'], label: 'Depositado', icon: '🏦' }
+]
+
+const getStatusLabel = (estado: string) => {
+  const labels: Record<string, string> = {
+    pendiente: 'Pendiente',
+    solicitud_recibida: 'Recibido',
+    programado: 'Programado',
+    enviado: 'Enviado',
+    paquete_recibido: 'En Destino',
+    ingresado: 'Depositado',
+    cancelado: 'Cancelado',
+    enterado: 'Enterado'
+  }
+  return labels[estado] || estado
+}
+
+const getStatusBadgeClass = (estado: string) => {
+  switch (estado) {
+    case 'ingresado':
+      return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950/20 dark:text-green-400 dark:border-green-900/30'
+    case 'cancelado':
+      return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/30'
+    case 'pendiente':
+      return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-950/20 dark:text-yellow-400 dark:border-yellow-900/30'
+    default:
+      return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30'
+  }
+}
+
+const isStepActive = (estadoActual: string, targetEstados: string[]) => {
+  return targetEstados.includes(estadoActual)
+}
+
+const isStepCurrent = (estadoActual: string, targetEstados: string[]) => {
+  return estadoActual === targetEstados[targetEstados.length - 1]
+}
 
 // Computeds
 const bovedasDisponibles = computed(() => {
@@ -617,7 +795,10 @@ const updateStatus = async (id: number, endpoint: string) => {
   try {
     await axios.post(`/cajas/traslado-bovedas/${id}/${endpoint}`)
     successMsg.value = 'Estado de traslado actualizado exitosamente.'
-    fetchTraslados()
+    await fetchTraslados()
+    if (selectedTraslado.value && selectedTraslado.value.id === id) {
+      selectedTraslado.value = trasladosList.value.find(t => t.id === id) || null
+    }
   } catch (err: any) {
     errorMsg.value = err.response?.data?.message || 'Error al actualizar el estado de traslado.'
   }
@@ -630,7 +811,10 @@ const cancelarTraslado = async (id: number) => {
   try {
     await axios.delete(`/cajas/traslado-bovedas/${id}`)
     successMsg.value = 'Solicitud de traslado cancelada.'
-    fetchTraslados()
+    await fetchTraslados()
+    if (selectedTraslado.value && selectedTraslado.value.id === id) {
+      selectedTraslado.value = trasladosList.value.find(t => t.id === id) || null
+    }
   } catch (err: any) {
     errorMsg.value = err.response?.data?.message || 'Error al cancelar la solicitud.'
   }
@@ -644,19 +828,6 @@ const formatDate = (val: string) => {
   return new Date(val).toLocaleString('es-GT', { dateStyle: 'short', timeStyle: 'short' })
 }
 
-const getStepClass = (estadoActual: string, targetEstados: string[]) => {
-  const isIncluded = targetEstados.includes(estadoActual)
-  if (estadoActual === 'cancelado') {
-    return 'p-2 rounded-xl bg-red-50 text-red-500 border border-red-200 opacity-60 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/30'
-  }
-  if (isIncluded) {
-    if (estadoActual === targetEstados[targetEstados.length - 1]) {
-      return 'p-2 rounded-xl bg-green-50 text-green-700 border-2 border-green-500 font-bold shadow-sm dark:bg-green-950/20 dark:text-green-400 dark:border-green-900/30'
-    }
-    return 'p-2 rounded-xl bg-azul-cope/10 text-azul-cope border border-azul-cope font-bold shadow-xs dark:bg-azul-cope/20 dark:text-cyan-400 dark:border-azul-cope/30'
-  }
-  return 'p-2 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-400 border border-gray-150 dark:border-gray-800'
-}
 
 const fetchTraslados = async () => {
   loadingList.value = true
