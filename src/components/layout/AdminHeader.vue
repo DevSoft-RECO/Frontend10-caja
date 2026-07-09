@@ -66,13 +66,13 @@
        <!-- Theme Toggle -->
        <button
         @click="layoutStore.toggleTheme"
-        class="p-2 rounded-xl text-gray-250 dark:text-gray-400 hover:bg-white/10 dark:hover:bg-gray-800 hover:text-white dark:hover:text-white active:scale-95 transition-all duration-250 focus:outline-none cursor-pointer"
+        class="p-2 rounded-xl text-white dark:text-gray-400 hover:bg-white/10 dark:hover:bg-gray-800 active:scale-95 transition-all duration-250 focus:outline-none cursor-pointer"
         title="Cambiar Tema"
       >
-        <svg v-if="layoutStore.isDark" class="w-5.5 h-5.5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg v-if="layoutStore.isDark" class="w-5.5 h-5.5 text-amber-400 animate-spin-slow" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
         </svg>
-        <svg v-else class="w-5.5 h-5.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg v-else class="w-5.5 h-5.5 text-sky-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
         </svg>
       </button>
@@ -106,7 +106,7 @@
           <!-- Botón Destructivo (A la vista, SIN dropdowns) -->
           <button
             @click="handleReturnToMother"
-            class="p-2 rounded-xl text-red-300 hover:bg-white/10 dark:text-red-400 dark:hover:bg-gray-800/60 active:scale-95 transition-all duration-200 cursor-pointer"
+            class="p-2 rounded-xl text-rose-400 hover:text-rose-250 hover:bg-white/10 dark:text-red-400 dark:hover:bg-gray-800/60 active:scale-95 transition-all duration-200 cursor-pointer"
             title="Regresar al portal"
           >
             <!-- Icono de Salir/Logout Seguido -->
