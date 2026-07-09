@@ -274,12 +274,20 @@ const menuItems = computed(() => {
                 { label: 'Dashboard General', route: '/admin/movimientos/dashboard-general' },
                 { label: 'Autorizaciones de Apertura', route: '/admin/movimientos/autorizaciones' },
                 { label: 'Autorizaciones de Movimientos', route: '/admin/movimientos/autorizaciones-movimientos' },
-                { label: 'Traslado entre Bóvedas', route: '/admin/movimientos/traslado-bovedas' },
-                { label: 'Autorización de Traslados', route: '/admin/movimientos/autorizaciones-traslados' },
-                { label: 'Operación Bancos Externos', route: '/admin/movimientos/bancos' },
                 { label: 'Cierre de Caja', route: '/admin/movimientos/cierre' },
                 { label: 'Historial de Cierres', route: '/admin/movimientos/reporte-cierres' },
                 { label: 'Historial de Movimientos', route: '/admin/movimientos' }
+            ]
+        },
+        {
+            id: 'operaciones-adicionales',
+            label: 'Operaciones Adicionales',
+            iconSvg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />',
+            show: true,
+            children: [
+                { label: 'Traslado entre Bóvedas', route: '/admin/movimientos/traslado-bovedas' },
+                { label: 'Autorización de Traslados', route: '/admin/movimientos/autorizaciones-traslados' },
+                { label: 'Operación Bancos Externos', route: '/admin/movimientos/bancos' }
             ]
         },
         {
