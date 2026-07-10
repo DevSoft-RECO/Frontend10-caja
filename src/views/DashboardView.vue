@@ -71,6 +71,23 @@
           </div>
         </div>
 
+        <!-- Tránsito Card -->
+        <div class="relative overflow-hidden bg-gradient-to-br from-amber-600 via-amber-700 to-amber-900 text-white rounded-3xl p-6 shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] group">
+          <div class="absolute -right-16 -top-16 w-48 h-48 bg-white/15 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-500"></div>
+          <div class="relative z-10 space-y-4">
+            <span class="inline-flex items-center gap-1.5 text-[9px] font-bold tracking-widest uppercase bg-white/25 px-3 py-1 rounded-full text-white/95">
+              🚚 Efectivo en Tránsito
+            </span>
+            <div>
+              <h2 class="text-xs font-semibold text-white/70 uppercase tracking-wider">Total en Movimiento Nacional</h2>
+              <div class="text-3xl sm:text-4xl font-extrabold tracking-tight font-mono mt-1">
+                {{ formatCurrency(totalEnTransito) }}
+              </div>
+            </div>
+            <p class="text-[10px] text-white/85 leading-relaxed">Efectivo saliente de origen que está pendiente de ingresarse en bóveda destino.</p>
+          </div>
+        </div>
+
         <!-- Chart Card -->
         <div class="bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-3xl p-6 shadow-sm flex flex-col items-center">
           <div class="w-full pb-4 border-b border-gray-100 dark:border-gray-700/60 mb-4 flex items-center justify-between">
@@ -88,7 +105,7 @@
         <div class="bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-3xl p-6 shadow-sm space-y-4">
           <div class="pb-4 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
             <h3 class="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Participación de Agencias</h3>
-            <span class="text-xs text-gray-400 dark:text-gray-500 font-bold">Porcentaje del Total Nacional</span>
+            <span class="text-xs text-gray-400 dark:text-gray-550 font-bold">Porcentaje del Total Nacional</span>
           </div>
 
           <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
@@ -106,7 +123,21 @@
                     <h4 class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-azul-cope transition-colors">
                       {{ agencia.nombre }}
                     </h4>
-                    <p class="text-[11px] text-gray-400 dark:text-gray-500">Saldo Disponible</p>
+                    <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
+                      <span class="text-[10px] text-gray-400 dark:text-gray-500">Saldo Disponible</span>
+                      <!-- Incoming transit badge -->
+                      <template v-if="agencia.en_transito_entrante_detalles && agencia.en_transito_entrante_detalles.length > 0">
+                        <span v-for="(det, i) in agencia.en_transito_entrante_detalles" :key="'in-' + i" class="inline-flex items-center gap-0.5 text-[9px] font-extrabold text-amber-600 bg-amber-50 dark:bg-amber-955/20 dark:text-amber-400 px-1.5 py-0.5 rounded border border-amber-200/10" :title="`Viene de ${det.agencia}`">
+                          🚚 +{{ formatCurrency(det.monto) }} de {{ det.agencia }}
+                        </span>
+                      </template>
+                      <!-- Outgoing transit badge -->
+                      <template v-if="agencia.en_transito_saliente_detalles && agencia.en_transito_saliente_detalles.length > 0">
+                        <span v-for="(det, i) in agencia.en_transito_saliente_detalles" :key="'out-' + i" class="inline-flex items-center gap-0.5 text-[9px] font-extrabold text-red-550 bg-red-50 dark:bg-red-955/20 dark:text-red-400 px-1.5 py-0.5 rounded border border-red-200/10" :title="`Va hacia ${det.agencia}`">
+                          📤 -{{ formatCurrency(det.monto) }} a {{ det.agencia }}
+                        </span>
+                      </template>
+                    </div>
                   </div>
                 </div>
 
@@ -142,9 +173,7 @@
           </div>
         </div>
       </div>
-
-    </div>
-  </div>
+    </div>  </div>
 </template>
 
 <script setup lang="ts">
@@ -156,16 +185,24 @@ interface AgenciaSaldo {
   id: number
   nombre: string
   saldo_disponible: number
+  en_transito_entrante: number
+  en_transito_saliente: number
 }
 
 const loading = ref(true)
 const error = ref('')
 const agenciasSaldos = ref<AgenciaSaldo[]>([])
+const trasladosEnTransito = ref<any[]>([])
 let chartInstance: Chart | null = null
 
 // Computar total general
 const totalGeneral = computed(() => {
   return agenciasSaldos.value.reduce((acc, curr) => acc + curr.saldo_disponible, 0)
+})
+
+// Computar total en tránsito consolidado a nivel nacional
+const totalEnTransito = computed(() => {
+  return agenciasSaldos.value.reduce((acc, curr) => acc + (curr.en_transito_entrante || 0), 0)
 })
 
 // Ordenar agencias de mayor a menor efectivo disponible
@@ -183,12 +220,60 @@ const getPercentage = (saldo: number) => {
   return (saldo / totalGeneral.value) * 100
 }
 
+const formatEntranteTitle = (agencia: any) => {
+  if (!agencia.en_transito_entrante_detalles || agencia.en_transito_entrante_detalles.length === 0) {
+    return 'En tránsito: Sin detalles'
+  }
+  const details = agencia.en_transito_entrante_detalles.map((d: any) => {
+    return `${formatCurrency(d.monto)} desde ${d.agencia}`
+  }).join(', ')
+  return `En tránsito: Viene de ${details}`
+}
+
+const formatSalienteTitle = (agencia: any) => {
+  if (!agencia.en_transito_saliente_detalles || agencia.en_transito_saliente_detalles.length === 0) {
+    return 'En tránsito: Sin detalles'
+  }
+  const details = agencia.en_transito_saliente_detalles.map((d: any) => {
+    return `${formatCurrency(d.monto)} hacia ${d.agencia}`
+  }).join(', ')
+  return `En tránsito: Va hacia ${details}`
+}
+
+const getStatusLabel = (estado: string) => {
+  const labels: Record<string, string> = {
+    pendiente: 'Pendiente',
+    solicitud_recibida: 'Recibido',
+    programado: 'Programado',
+    enviado: 'Enviado',
+    paquete_recibido: 'En Destino',
+    ingresado: 'Depositado',
+    cancelado: 'Cancelado',
+    enterado: 'Enterado'
+  }
+  return labels[estado] || estado
+}
+
+const getStatusBadgeClass = (estado: string) => {
+  switch (estado) {
+    case 'ingresado':
+      return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950/20 dark:text-green-400 dark:border-green-900/30'
+    case 'cancelado':
+      return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/30'
+    case 'pendiente':
+      return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-950/20 dark:text-yellow-400 dark:border-yellow-900/30'
+    default:
+      return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30'
+  }
+}
+
 const fetchSaldos = async () => {
   loading.value = true
   error.value = ''
   try {
     const res = await axios.get('/reportes/saldos-agencias')
-    agenciasSaldos.value = res.data
+    agenciasSaldos.value = res.data.agencias
+    trasladosEnTransito.value = res.data.traslados_en_transito
   } catch (err: any) {
     error.value = 'No se pudieron obtener los saldos de las agencias.'
   } finally {

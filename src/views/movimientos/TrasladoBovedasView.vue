@@ -250,6 +250,37 @@
         </button>
       </div>
 
+      <!-- Resumen de Efectivo en Tránsito Local -->
+      <div v-if="!loadingList && bovedaLocalFiltroId !== null" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Entrante Card -->
+        <div class="p-5 bg-amber-50 dark:bg-amber-955/10 border border-amber-200/50 dark:border-amber-900/30 rounded-2xl flex items-center justify-between shadow-sm">
+          <div>
+            <span class="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider block mb-1">📥 Tránsito Entrante</span>
+            <span class="text-2xl font-black text-amber-700 dark:text-amber-400 font-mono">
+              {{ formatCurrency(enTransitoEntrante) }}
+            </span>
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1">Efectivo enviado por otra bóveda hacia esta sucursal.</p>
+          </div>
+          <div class="p-3 bg-amber-100 dark:bg-amber-900/25 text-amber-750 dark:text-amber-400 rounded-xl text-2xl select-none">
+            🚚
+          </div>
+        </div>
+
+        <!-- Saliente Card -->
+        <div class="p-5 bg-red-50/60 dark:bg-red-955/10 border border-red-200/40 dark:border-red-900/20 rounded-2xl flex items-center justify-between shadow-sm">
+          <div>
+            <span class="text-[10px] font-bold text-red-500 dark:text-red-400 uppercase tracking-wider block mb-1">📤 Tránsito Saliente</span>
+            <span class="text-2xl font-black text-red-650 dark:text-red-400 font-mono">
+              {{ formatCurrency(enTransitoSaliente) }}
+            </span>
+            <p class="text-[10px] text-gray-400 dark:text-gray-500 mt-1">Efectivo despachado por esta sucursal hacia otra bóveda.</p>
+          </div>
+          <div class="p-3 bg-red-100/70 dark:bg-red-900/25 text-red-500 dark:text-red-400 rounded-xl text-2xl select-none">
+            📤
+          </div>
+        </div>
+      </div>
+
       <div v-if="loadingList" class="flex flex-col items-center justify-center py-20 space-y-3">
         <div class="w-8 h-8 border-3 border-azul-cope border-t-transparent rounded-full animate-spin"></div>
         <p class="text-sm text-gray-500">Cargando traslados propios...</p>
@@ -686,6 +717,24 @@ const trasladosPropiosFiltrados = computed(() => {
       return t.origen_boveda_id === bovedaLocalFiltroId.value
     }
   })
+})
+
+const enTransitoEntrante = computed(() => {
+  if (bovedaLocalFiltroId.value === null) return 0
+  return trasladosList.value.reduce((sum, t) => {
+    const esDestino = t.destino_boveda_id === bovedaLocalFiltroId.value
+    const enTransito = ['enviado', 'enterado', 'paquete_recibido'].includes(t.estado)
+    return sum + (esDestino && enTransito ? t.monto_total : 0)
+  }, 0)
+})
+
+const enTransitoSaliente = computed(() => {
+  if (bovedaLocalFiltroId.value === null) return 0
+  return trasladosList.value.reduce((sum, t) => {
+    const esOrigen = t.origen_boveda_id === bovedaLocalFiltroId.value
+    const enTransito = ['enviado', 'enterado', 'paquete_recibido'].includes(t.estado)
+    return sum + (esOrigen && enTransito ? t.monto_total : 0)
+  }, 0)
 })
 
 const clearFormValues = () => {
