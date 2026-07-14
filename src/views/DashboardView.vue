@@ -173,7 +173,73 @@
           </div>
         </div>
       </div>
-    </div>  </div>
+    </div>
+
+    <!-- New Section: Descuadres Overview -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- Card for Bar Chart (3/4 = col-span-9) -->
+      <div class="lg:col-span-9 bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+        <div>
+          <div class="pb-4 border-b border-gray-100 dark:border-gray-700/60 mb-4 flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Descuadres por Agencia</h3>
+              <p class="text-xs text-gray-400 dark:text-gray-550 mt-1">
+                Total: <span class="font-extrabold text-gray-900 dark:text-white">{{ totalDescuadresCount }} incidentes</span>
+                <span class="mx-2">|</span>
+                Agencia con más reportes: <span class="font-extrabold text-red-655 dark:text-red-400">{{ agencyMostDescuadres }}</span>
+              </p>
+            </div>
+            <router-link
+              to="/admin/movimientos/descuadres"
+              class="text-xs font-bold text-azul-cope hover:text-azul-cope/80 flex items-center gap-1.5"
+            >
+              Ver Módulo ➜
+            </router-link>
+          </div>
+          
+          <div class="relative w-full h-64 flex items-center justify-center">
+            <div v-if="totalDescuadresCount === 0" class="text-xs text-gray-400 text-center font-medium">
+              No hay descuadres registrados en el sistema
+            </div>
+            <canvas v-else id="agenciasDescuadresBarChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card for Pie Chart (1/4 = col-span-3) -->
+      <div class="lg:col-span-3 bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-3xl p-6 shadow-sm flex flex-col items-center justify-between">
+        <div class="w-full pb-4 border-b border-gray-100 dark:border-gray-700/60 mb-4">
+          <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider text-center">Tipo de Descuadre</h3>
+        </div>
+        
+        <div class="w-full flex flex-col items-center justify-center gap-4 flex-1">
+          <div class="relative w-36 h-36 flex items-center justify-center">
+            <div v-if="totalDescuadresCount === 0" class="text-xs text-gray-400 text-center font-medium">
+              Sin registros
+            </div>
+            <canvas v-else id="descuadresChart"></canvas>
+          </div>
+          
+          <div v-if="totalDescuadresCount > 0" class="space-y-2 text-xs w-full">
+            <div class="flex items-center justify-between px-2">
+              <div class="flex items-center gap-2">
+                <span class="inline-block w-3 h-3 bg-red-500 rounded-md"></span>
+                <span class="text-gray-750 dark:text-gray-300">Faltantes</span>
+              </div>
+              <span class="font-mono font-black text-red-650 dark:text-red-400 bg-red-50 dark:bg-red-955/20 px-2.5 py-0.5 rounded-full">{{ faltantesCount }}</span>
+            </div>
+            <div class="flex items-center justify-between px-2">
+              <div class="flex items-center gap-2">
+                <span class="inline-block w-3.5 h-3 bg-emerald-500 rounded-md"></span>
+                <span class="text-gray-750 dark:text-gray-300">Sobrantes</span>
+              </div>
+              <span class="font-mono font-black text-emerald-650 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-955/20 px-2.5 py-0.5 rounded-full">{{ sobrantesCount }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -187,13 +253,18 @@ interface AgenciaSaldo {
   saldo_disponible: number
   en_transito_entrante: number
   en_transito_saliente: number
+  en_transito_entrante_detalles?: { agencia: string; monto: number }[]
+  en_transito_saliente_detalles?: { agencia: string; monto: number }[]
 }
 
 const loading = ref(true)
 const error = ref('')
 const agenciasSaldos = ref<AgenciaSaldo[]>([])
 const trasladosEnTransito = ref<any[]>([])
+const descuadres = ref<any[]>([])
 let chartInstance: Chart | null = null
+let descuadresChartInstance: Chart | null = null
+let agenciasBarChartInstance: Chart | null = null
 
 // Computar total general
 const totalGeneral = computed(() => {
@@ -203,6 +274,46 @@ const totalGeneral = computed(() => {
 // Computar total en tránsito consolidado a nivel nacional
 const totalEnTransito = computed(() => {
   return agenciasSaldos.value.reduce((acc, curr) => acc + (curr.en_transito_entrante || 0), 0)
+})
+
+// Computar estadísticas de descuadres
+const totalDescuadresCount = computed(() => descuadres.value.length)
+
+const faltantesCount = computed(() => {
+  return descuadres.value.filter(d => d.tipo_descuadre === 'FALTANTE').length
+})
+
+const sobrantesCount = computed(() => {
+  return descuadres.value.filter(d => d.tipo_descuadre === 'SOBRANTE').length
+})
+
+const agencyMostDescuadres = computed(() => {
+  if (descuadres.value.length === 0) return 'Ninguna'
+  const counts: Record<string, number> = {}
+  descuadres.value.forEach(d => {
+    const name = d.agencia?.nombre || `Agencia ID: ${d.agencia_id}`
+    counts[name] = (counts[name] || 0) + 1
+  })
+  let maxName = 'Ninguna'
+  let maxVal = 0
+  for (const name in counts) {
+    if (counts[name] > maxVal) {
+      maxVal = counts[name]
+      maxName = name
+    }
+  }
+  return `${maxName} (${maxVal} reportes)`
+})
+
+const agenciasDescuadresData = computed(() => {
+  const counts: Record<string, number> = {}
+  descuadres.value.forEach(d => {
+    const name = d.agencia?.nombre || `Agencia ID: ${d.agencia_id}`
+    counts[name] = (counts[name] || 0) + 1
+  })
+  const labels = Object.keys(counts)
+  const data = labels.map(label => counts[label])
+  return { labels, data }
 })
 
 // Ordenar agencias de mayor a menor efectivo disponible
@@ -220,53 +331,6 @@ const getPercentage = (saldo: number) => {
   return (saldo / totalGeneral.value) * 100
 }
 
-const formatEntranteTitle = (agencia: any) => {
-  if (!agencia.en_transito_entrante_detalles || agencia.en_transito_entrante_detalles.length === 0) {
-    return 'En tránsito: Sin detalles'
-  }
-  const details = agencia.en_transito_entrante_detalles.map((d: any) => {
-    return `${formatCurrency(d.monto)} desde ${d.agencia}`
-  }).join(', ')
-  return `En tránsito: Viene de ${details}`
-}
-
-const formatSalienteTitle = (agencia: any) => {
-  if (!agencia.en_transito_saliente_detalles || agencia.en_transito_saliente_detalles.length === 0) {
-    return 'En tránsito: Sin detalles'
-  }
-  const details = agencia.en_transito_saliente_detalles.map((d: any) => {
-    return `${formatCurrency(d.monto)} hacia ${d.agencia}`
-  }).join(', ')
-  return `En tránsito: Va hacia ${details}`
-}
-
-const getStatusLabel = (estado: string) => {
-  const labels: Record<string, string> = {
-    pendiente: 'Pendiente',
-    solicitud_recibida: 'Recibido',
-    programado: 'Programado',
-    enviado: 'Enviado',
-    paquete_recibido: 'En Destino',
-    ingresado: 'Depositado',
-    cancelado: 'Cancelado',
-    enterado: 'Enterado'
-  }
-  return labels[estado] || estado
-}
-
-const getStatusBadgeClass = (estado: string) => {
-  switch (estado) {
-    case 'ingresado':
-      return 'bg-green-50 text-green-700 border-green-200 dark:bg-green-950/20 dark:text-green-400 dark:border-green-900/30'
-    case 'cancelado':
-      return 'bg-red-50 text-red-700 border-red-200 dark:bg-red-950/20 dark:text-red-400 dark:border-red-900/30'
-    case 'pendiente':
-      return 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-950/20 dark:text-yellow-400 dark:border-yellow-900/30'
-    default:
-      return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/20 dark:text-blue-400 dark:border-blue-900/30'
-  }
-}
-
 const fetchSaldos = async () => {
   loading.value = true
   error.value = ''
@@ -274,14 +338,20 @@ const fetchSaldos = async () => {
     const res = await axios.get('/reportes/saldos-agencias')
     agenciasSaldos.value = res.data.agencias
     trasladosEnTransito.value = res.data.traslados_en_transito
+    
+    // Obtener los descuadres para la gráfica
+    const descuadresRes = await axios.get('/descuadres')
+    descuadres.value = descuadresRes.data
   } catch (err: any) {
-    error.value = 'No se pudieron obtener los saldos de las agencias.'
+    error.value = 'No se pudieron obtener los saldos o los reportes de descuadres.'
   } finally {
     loading.value = false
   }
 
   nextTick(() => {
     renderChart()
+    renderDescuadresChart()
+    renderAgenciasDescuadresBarChart()
   })
 }
 
@@ -297,7 +367,6 @@ const renderChart = () => {
   const labels = sortedAgencias.value.map(a => a.nombre)
   const data = sortedAgencias.value.map(a => a.saldo_disponible)
 
-  // Colores dinámicos
   const backgroundColors = [
     '#005691', // azul-cope
     '#00c07f', // verde-cope
@@ -343,6 +412,113 @@ const renderChart = () => {
   })
 }
 
+// Renderizar gráfico de pastel de descuadres
+const renderDescuadresChart = () => {
+  const canvas = document.getElementById('descuadresChart') as HTMLCanvasElement
+  if (!canvas) return
+
+  if (descuadresChartInstance) {
+    descuadresChartInstance.destroy()
+  }
+
+  const faltantes = faltantesCount.value
+  const sobrantes = sobrantesCount.value
+
+  if (faltantes === 0 && sobrantes === 0) return
+
+  descuadresChartInstance = new Chart(canvas, {
+    type: 'pie',
+    data: {
+      labels: ['Faltantes', 'Sobrantes'],
+      datasets: [
+        {
+          data: [faltantes, sobrantes],
+          backgroundColor: ['#ef4444', '#10b981'],
+          borderWidth: 0,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: false,
+        },
+        tooltip: {
+          callbacks: {
+            label: function (context) {
+              const val = context.raw as number
+              const total = totalDescuadresCount.value
+              const percent = ((val / total) * 100).toFixed(1)
+              return ` ${context.label}: ${val} (${percent}%)`
+            },
+          },
+        },
+      },
+    },
+  })
+}
+
+// Renderizar gráfico de barras de agencias
+const renderAgenciasDescuadresBarChart = () => {
+  const canvas = document.getElementById('agenciasDescuadresBarChart') as HTMLCanvasElement
+  if (!canvas) return
+
+  if (agenciasBarChartInstance) {
+    agenciasBarChartInstance.destroy()
+  }
+
+  const { labels, data } = agenciasDescuadresData.value
+
+  if (labels.length === 0) return
+
+  agenciasBarChartInstance = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Descuadres',
+          data: data,
+          backgroundColor: '#005691',
+          borderRadius: 8,
+          borderWidth: 0,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            precision: 0,
+            color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#4b5563',
+          },
+          grid: {
+            color: document.documentElement.classList.contains('dark') ? '#374151' : '#e5e7eb',
+          }
+        },
+        x: {
+          ticks: {
+            color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#4b5563',
+          },
+          grid: {
+            display: false
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        }
+      }
+    }
+  })
+}
+
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('es-GT', { style: 'currency', currency: 'GTQ' }).format(val)
 }
@@ -354,6 +530,12 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (chartInstance) {
     chartInstance.destroy()
+  }
+  if (descuadresChartInstance) {
+    descuadresChartInstance.destroy()
+  }
+  if (agenciasBarChartInstance) {
+    agenciasBarChartInstance.destroy()
   }
 })
 </script>
