@@ -262,7 +262,8 @@ const menuItems = computed(() => {
             children: [
                 { label: 'Apertura de Caja', route: '/admin/movimientos/apertura' },
                 { label: 'Movimientos', route: '/admin/movimientos/caja' },
-                { label: 'Arqueo Parcial', route: '/admin/movimientos/arqueo' }
+                { label: 'Arqueo Parcial', route: '/admin/movimientos/arqueo' },
+                { label: 'Reversiones de Caja', route: '/admin/movimientos/reversiones' }
             ]
         },
         {
@@ -274,6 +275,7 @@ const menuItems = computed(() => {
                 { label: 'Dashboard General', route: '/admin/movimientos/dashboard-general' },
                 { label: 'Autorizaciones de Apertura', route: '/admin/movimientos/autorizaciones' },
                 { label: 'Autorizaciones de Movimientos', route: '/admin/movimientos/autorizaciones-movimientos' },
+                { label: 'Autorizaciones de Reversiones', route: '/admin/movimientos/autorizaciones-reversiones' },
                 { label: 'Cierre de Caja', route: '/admin/movimientos/cierre' },
                 { label: 'Historial de Cierres', route: '/admin/movimientos/reporte-cierres' },
                 { label: 'Historial de Movimientos', route: '/admin/movimientos' }
