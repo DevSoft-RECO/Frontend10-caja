@@ -224,6 +224,29 @@
       </div>
     </div>
 
+    <!-- Pagination controls -->
+    <div v-if="movimientos.length > 0" class="flex items-center justify-between p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm">
+      <div class="text-xs text-gray-500 dark:text-gray-400">
+        Mostrando página <span class="font-extrabold">{{ currentPage }}</span> de <span class="font-extrabold">{{ lastPage }}</span> ({{ totalRecords }} registros totales)
+      </div>
+      <div class="flex items-center gap-2">
+        <button
+          @click="changePage(currentPage - 1)"
+          :disabled="currentPage === 1"
+          class="px-3.5 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-xs font-bold text-gray-750 dark:text-gray-300 hover:bg-gray-55 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all"
+        >
+          Anterior
+        </button>
+        <button
+          @click="changePage(currentPage + 1)"
+          :disabled="currentPage === lastPage"
+          class="px-3.5 py-2 border border-gray-300 dark:border-gray-600 rounded-xl text-xs font-bold text-gray-750 dark:text-gray-300 hover:bg-gray-55 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-all"
+        >
+          Siguiente
+        </button>
+      </div>
+    </div>
+
     <!-- MODAL DETALLE DE MOVIMIENTO (Modularizado) -->
     <DetalleMovimientoModal
       :is-open="detailsModalOpen"
@@ -306,6 +329,11 @@ const denominaciones = ref<Denominacion[]>([])
 const loading = ref(true)
 const error = ref('')
 
+// Pagination
+const currentPage = ref(1)
+const lastPage = ref(1)
+const totalRecords = ref(0)
+
 // Filtros
 const filters = ref({
   origen_caja_id: '',
@@ -340,18 +368,31 @@ const fetchData = async () => {
 const fetchMovimientos = async () => {
   loading.value = true
   try {
-    const params: any = {}
+    const params: any = {
+      page: currentPage.value,
+      per_page: 10
+    }
     if (filters.value.origen_caja_id) params.origen_caja_id = filters.value.origen_caja_id
     if (filters.value.destino_caja_id) params.destino_caja_id = filters.value.destino_caja_id
     if (filters.value.fecha_desde) params.fecha_desde = filters.value.fecha_desde
     if (filters.value.fecha_hasta) params.fecha_hasta = filters.value.fecha_hasta
 
     const res = await axios.get('/movimientos', { params })
-    movimientos.value = res.data
+    movimientos.value = res.data.data
+    currentPage.value = res.data.current_page
+    lastPage.value = res.data.last_page
+    totalRecords.value = res.data.total
   } catch (err: any) {
     error.value = err.response?.data?.message || 'Error al cargar el Libro Mayor.'
   } finally {
     loading.value = false
+  }
+}
+
+const changePage = (page: number) => {
+  if (page >= 1 && page <= lastPage.value) {
+    currentPage.value = page
+    fetchMovimientos()
   }
 }
 
@@ -366,6 +407,7 @@ const openDetailsModal = (mov: Movimiento) => {
 
 const handleRegistrationSuccess = async () => {
   createModalOpen.value = false
+  currentPage.value = 1
   await fetchMovimientos()
 }
 
@@ -376,6 +418,7 @@ const resetFilters = () => {
     fecha_desde: '',
     fecha_hasta: ''
   }
+  currentPage.value = 1
   fetchMovimientos()
 }
 
