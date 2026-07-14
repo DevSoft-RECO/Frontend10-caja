@@ -71,6 +71,7 @@
           </div>
         </div>
 
+
         <!-- Tránsito Card -->
         <div class="relative overflow-hidden bg-gradient-to-br from-amber-600 via-amber-700 to-amber-900 text-white rounded-3xl p-6 shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] group">
           <div class="absolute -right-16 -top-16 w-48 h-48 bg-white/15 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-500"></div>
@@ -102,58 +103,45 @@
 
       <!-- Right Panel: List & Progress Bars (col-span-7) -->
       <div class="lg:col-span-7 space-y-6">
-        <div class="bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-3xl p-6 shadow-sm space-y-4">
-          <div class="pb-4 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
-            <h3 class="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Participación de Agencias</h3>
-            <span class="text-xs text-gray-400 dark:text-gray-550 font-bold">Porcentaje del Total Nacional</span>
+        <!-- Top 5 Agencias Card (Compacto) -->
+        <div class="bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-3xl p-4.5 shadow-sm space-y-3">
+          <div class="pb-2.5 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+            <h3 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">Top 5 Participación de Agencias</h3>
+            <span class="text-[10px] text-gray-400 dark:text-gray-550 font-bold font-mono">Porcentaje Nacional</span>
           </div>
 
           <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
             <div
-              v-for="agencia in sortedAgencias"
+              v-for="agencia in top5Agencias"
               :key="agencia.id"
-              class="py-4 first:pt-0 last:pb-0 group"
+              class="py-2.5 first:pt-0 last:pb-0 group"
             >
-              <div class="flex items-start justify-between gap-4 mb-2">
-                <div class="flex items-center gap-3">
-                  <span class="w-8 h-8 rounded-xl bg-azul-cope/5 dark:bg-azul-cope/10 text-azul-cope dark:text-blue-300 flex items-center justify-center text-xs font-bold font-mono">
+              <div class="flex items-start justify-between gap-4 mb-1">
+                <div class="flex items-center gap-2.5">
+                  <span class="w-7 h-7 rounded-lg bg-azul-cope/5 dark:bg-azul-cope/10 text-azul-cope dark:text-blue-300 flex items-center justify-center text-[10px] font-bold font-mono">
                     {{ getRank(agencia.id) }}
                   </span>
                   <div>
-                    <h4 class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-azul-cope transition-colors">
+                    <h4 class="text-xs font-bold text-gray-900 dark:text-white group-hover:text-azul-cope transition-colors">
                       {{ agencia.nombre }}
                     </h4>
-                    <div class="flex flex-wrap items-center gap-1.5 mt-0.5">
-                      <span class="text-[10px] text-gray-400 dark:text-gray-500">Saldo Disponible</span>
-                      <!-- Incoming transit badge -->
-                      <template v-if="agencia.en_transito_entrante_detalles && agencia.en_transito_entrante_detalles.length > 0">
-                        <span v-for="(det, i) in agencia.en_transito_entrante_detalles" :key="'in-' + i" class="inline-flex items-center gap-0.5 text-[9px] font-extrabold text-amber-600 bg-amber-50 dark:bg-amber-955/20 dark:text-amber-400 px-1.5 py-0.5 rounded border border-amber-200/10" :title="`Viene de ${det.agencia}`">
-                          🚚 +{{ formatCurrency(det.monto) }} de {{ det.agencia }}
-                        </span>
-                      </template>
-                      <!-- Outgoing transit badge -->
-                      <template v-if="agencia.en_transito_saliente_detalles && agencia.en_transito_saliente_detalles.length > 0">
-                        <span v-for="(det, i) in agencia.en_transito_saliente_detalles" :key="'out-' + i" class="inline-flex items-center gap-0.5 text-[9px] font-extrabold text-red-550 bg-red-50 dark:bg-red-955/20 dark:text-red-400 px-1.5 py-0.5 rounded border border-red-200/10" :title="`Va hacia ${det.agencia}`">
-                          📤 -{{ formatCurrency(det.monto) }} a {{ det.agencia }}
-                        </span>
-                      </template>
-                    </div>
+                    <span class="text-[9px] text-gray-400 dark:text-gray-555">Saldo Disponible</span>
                   </div>
                 </div>
 
                 <div class="text-right">
-                  <div class="text-sm font-extrabold text-gray-900 dark:text-white font-mono">
+                  <div class="text-xs font-extrabold text-gray-900 dark:text-white font-mono">
                     {{ formatCurrency(agencia.saldo_disponible) }}
                   </div>
-                  <div class="text-[10px] font-bold text-verde-cope bg-verde-cope/10 px-2 py-0.5 rounded-full inline-block mt-0.5">
+                  <div class="text-[9px] font-bold text-verde-cope bg-verde-cope/10 px-1.5 py-0.2 rounded-full inline-block mt-0.5">
                     {{ getPercentage(agencia.saldo_disponible).toFixed(1) }}%
                   </div>
                 </div>
               </div>
 
-              <!-- Beautiful Animated Progress Bar -->
-              <div class="w-full flex items-center gap-3">
-                <div class="flex-1 h-3 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden relative">
+              <!-- Progress Bar (Compacta) -->
+              <div class="w-full flex items-center gap-2.5">
+                <div class="flex-1 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden relative">
                   <div
                     class="h-full bg-gradient-to-r from-azul-cope to-verde-cope rounded-full transition-all duration-1000 ease-out"
                     :style="{ width: `${getPercentage(agencia.saldo_disponible)}%` }"
@@ -161,15 +149,60 @@
                 </div>
                 <router-link
                   :to="{ path: '/admin/movimientos/dashboard-general', query: { agencia_id: agencia.id } }"
-                  class="p-1 bg-gray-50 hover:bg-azul-cope hover:text-white dark:bg-gray-700 dark:hover:bg-azul-cope text-gray-400 rounded-lg transition-all cursor-pointer"
+                  class="p-0.5 bg-gray-50 hover:bg-azul-cope hover:text-white dark:bg-gray-700 dark:hover:bg-azul-cope text-gray-400 rounded-md transition-all cursor-pointer"
                   title="Ver detalle de operaciones"
                 >
-                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
                   </svg>
                 </router-link>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- Efectivo en Tránsito Card -->
+        <div class="bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-3xl p-6 shadow-sm space-y-4">
+          <div class="pb-4 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
+            <h3 class="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Tránsitos Activos Inter-Agencia</h3>
+            <span class="px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-955/25 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider rounded-full font-mono">En Ruta</span>
+          </div>
+
+          <div v-if="trasladosEnTransito.length === 0" class="py-12 text-center text-xs text-gray-400 font-medium">
+            No hay traslados de efectivo circulando en tránsito actualmente.
+          </div>
+          <div v-else class="overflow-hidden border border-gray-150 dark:border-gray-750 rounded-2xl">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-gray-50 dark:bg-gray-900/60 border-b border-gray-150 dark:border-gray-750 text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <th class="p-3">Ruta de Envío</th>
+                  <th class="p-3 text-right">Monto en Ruta</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-gray-750 dark:text-gray-300">
+                <tr v-for="t in trasladosEnTransito" :key="t.id" class="hover:bg-gray-55/50 dark:hover:bg-gray-750/30 transition-colors">
+                  <td class="p-3">
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-gray-900 dark:text-white">{{ t.origen_agencia }}</span>
+                      <span class="text-gray-400">➜</span>
+                      <span class="font-bold text-gray-900 dark:text-white">{{ t.destino_agencia }}</span>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                      <span class="inline-flex items-center gap-0.5 text-[9px] font-extrabold text-red-550 bg-red-50 dark:bg-red-955/20 dark:text-red-400 px-1.5 py-0.5 rounded border border-red-200/10">
+                        📤 Resta de origen: -{{ formatCurrency(t.monto) }}
+                      </span>
+                      <span class="inline-flex items-center gap-0.5 text-[9px] font-extrabold text-amber-600 bg-amber-50 dark:bg-amber-955/20 dark:text-amber-400 px-1.5 py-0.5 rounded border border-amber-200/10">
+                        🚚 Suma a destino: +{{ formatCurrency(t.monto) }}
+                      </span>
+                    </div>
+                    <span v-if="t.repartidor" class="block text-[10px] text-gray-450 mt-1">Custodio: {{ t.repartidor }}</span>
+                  </td>
+                  <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white">
+                    {{ formatCurrency(t.monto) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -276,6 +309,8 @@ const totalEnTransito = computed(() => {
   return agenciasSaldos.value.reduce((acc, curr) => acc + (curr.en_transito_entrante || 0), 0)
 })
 
+
+
 // Computar estadísticas de descuadres
 const totalDescuadresCount = computed(() => descuadres.value.length)
 
@@ -319,6 +354,10 @@ const agenciasDescuadresData = computed(() => {
 // Ordenar agencias de mayor a menor efectivo disponible
 const sortedAgencias = computed(() => {
   return [...agenciasSaldos.value].sort((a, b) => b.saldo_disponible - a.saldo_disponible)
+})
+
+const top5Agencias = computed(() => {
+  return sortedAgencias.value.slice(0, 5)
 })
 
 const getRank = (id: number) => {
