@@ -162,6 +162,22 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                     title: 'Operación Bancos Externos'
                 }
+            },
+            {
+                path: 'movimientos/reversiones',
+                name: 'reversiones-caja',
+                component: () => import('@/views/movimientos/ReversionesCreadorView.vue'),
+                meta: {
+                    title: 'Reversiones de Caja'
+                }
+            },
+            {
+                path: 'movimientos/autorizaciones-reversiones',
+                name: 'autorizaciones-reversiones',
+                component: () => import('@/views/movimientos/ReversionesAutorizacionView.vue'),
+                meta: {
+                    title: 'Autorizaciones de Reversiones'
+                }
             }
         ]
     },
