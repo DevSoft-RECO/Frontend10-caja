@@ -103,11 +103,11 @@
 
       <!-- Right Panel: List & Progress Bars (col-span-7) -->
       <div class="lg:col-span-7 space-y-6">
-        <!-- Top 5 Agencias Card (Compacto) -->
+        <!-- Top 5 Agencias por Límite de Póliza (Compacto) -->
         <div class="bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-3xl p-4.5 shadow-sm space-y-3">
           <div class="pb-2.5 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
-            <h3 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">Top 5 Participación de Agencias</h3>
-            <span class="text-[10px] text-gray-400 dark:text-gray-550 font-bold font-mono">Porcentaje Nacional</span>
+            <h3 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">Top 5 Riesgo Límite de Póliza (Bóvedas)</h3>
+            <span class="text-[10px] text-gray-400 dark:text-gray-550 font-bold font-mono">Consumo de Póliza</span>
           </div>
 
           <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
@@ -125,26 +125,45 @@
                     <h4 class="text-xs font-bold text-gray-900 dark:text-white group-hover:text-azul-cope transition-colors">
                       {{ agencia.nombre }}
                     </h4>
-                    <span class="text-[9px] text-gray-400 dark:text-gray-555">Saldo Disponible</span>
+                    <div class="text-[9px] text-gray-450 dark:text-gray-500 mt-0.5">
+                      Saldo: <span class="font-bold text-gray-700 dark:text-gray-300">{{ formatCurrency(agencia.saldo_disponible) }}</span>
+                      / Póliza: <span class="font-bold text-gray-700 dark:text-gray-300">{{ formatCurrency(agencia.poliza_limite) }}</span>
+                    </div>
                   </div>
                 </div>
 
                 <div class="text-right">
-                  <div class="text-xs font-extrabold text-gray-900 dark:text-white font-mono">
-                    {{ formatCurrency(agencia.saldo_disponible) }}
+                  <div
+                    class="text-xs font-black px-2 py-0.5 rounded-lg inline-block"
+                    :class="
+                      agencia.porcentaje_poliza >= 90
+                        ? 'bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400 animate-pulse'
+                        : agencia.porcentaje_poliza >= 75
+                        ? 'bg-amber-50 text-amber-600 dark:bg-amber-950/20 dark:text-amber-400'
+                        : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-955/20 dark:text-emerald-450'
+                    "
+                  >
+                    {{ agencia.porcentaje_poliza.toFixed(1) }}%
                   </div>
-                  <div class="text-[9px] font-bold text-verde-cope bg-verde-cope/10 px-1.5 py-0.2 rounded-full inline-block mt-0.5">
-                    {{ getPercentage(agencia.saldo_disponible).toFixed(1) }}%
+                  <div class="text-[8px] font-bold text-gray-400 dark:text-gray-500 mt-0.5 uppercase tracking-wider">
+                    {{ agencia.porcentaje_poliza >= 90 ? 'Límite Crítico' : agencia.porcentaje_poliza >= 75 ? 'Advertencia' : 'Seguro' }}
                   </div>
                 </div>
               </div>
 
-              <!-- Progress Bar (Compacta) -->
+              <!-- Progress Bar (Compacta y Dinámica) -->
               <div class="w-full flex items-center gap-2.5">
                 <div class="flex-1 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden relative">
                   <div
-                    class="h-full bg-gradient-to-r from-azul-cope to-verde-cope rounded-full transition-all duration-1000 ease-out"
-                    :style="{ width: `${getPercentage(agencia.saldo_disponible)}%` }"
+                    class="h-full rounded-full transition-all duration-1000 ease-out"
+                    :class="
+                      agencia.porcentaje_poliza >= 90
+                        ? 'bg-gradient-to-r from-red-500 to-rose-600'
+                        : agencia.porcentaje_poliza >= 75
+                        ? 'bg-gradient-to-r from-amber-500 to-amber-600'
+                        : 'bg-gradient-to-r from-azul-cope to-verde-cope'
+                    "
+                    :style="{ width: `${Math.min(agencia.porcentaje_poliza, 100)}%` }"
                   ></div>
                 </div>
                 <router-link
@@ -286,6 +305,8 @@ interface AgenciaSaldo {
   saldo_disponible: number
   en_transito_entrante: number
   en_transito_saliente: number
+  poliza_limite: number
+  porcentaje_poliza?: number
   en_transito_entrante_detalles?: { agencia: string; monto: number }[]
   en_transito_saliente_detalles?: { agencia: string; monto: number }[]
 }
@@ -351,17 +372,31 @@ const agenciasDescuadresData = computed(() => {
   return { labels, data }
 })
 
-// Ordenar agencias de mayor a menor efectivo disponible
+// Ordenar agencias de mayor a menor efectivo disponible (para otras utilidades o gráficos de barra si es necesario)
 const sortedAgencias = computed(() => {
   return [...agenciasSaldos.value].sort((a, b) => b.saldo_disponible - a.saldo_disponible)
 })
 
+// Ordenar agencias por porcentaje alcanzado de la póliza de su bóveda
+const sortedByPolizaReach = computed(() => {
+  return [...agenciasSaldos.value]
+    .filter(a => a.poliza_limite > 0)
+    .map(a => {
+      const percentage = (a.saldo_disponible / a.poliza_limite) * 100
+      return {
+        ...a,
+        porcentaje_poliza: percentage
+      }
+    })
+    .sort((a, b) => b.porcentaje_poliza - a.porcentaje_poliza)
+})
+
 const top5Agencias = computed(() => {
-  return sortedAgencias.value.slice(0, 5)
+  return sortedByPolizaReach.value.slice(0, 5)
 })
 
 const getRank = (id: number) => {
-  const index = sortedAgencias.value.findIndex(a => a.id === id)
+  const index = sortedByPolizaReach.value.findIndex(a => a.id === id)
   return index !== -1 ? `#${index + 1}` : '-'
 }
 
