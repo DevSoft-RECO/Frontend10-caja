@@ -197,6 +197,12 @@
                 Cód: {{ caja.agencia.codigo }}
               </span>
             </div>
+            <div v-if="caja.poliza" class="mt-2 flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400 font-semibold">
+              <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              <span>Póliza: {{ formatCurrency(caja.poliza) }}</span>
+            </div>
           </div>
 
           <!-- Cajero en Turno Section -->
@@ -264,6 +270,7 @@
               <th class="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tipo</th>
               <th class="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cajero en Turno</th>
               <th class="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
+              <th class="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Póliza</th>
               <th class="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Acciones</th>
             </tr>
           </thead>
@@ -334,6 +341,16 @@
                   "
                 >
                   {{ caja.estado ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+
+              <!-- Póliza -->
+              <td class="px-6 py-4">
+                <span v-if="caja.poliza" class="font-mono text-sm font-semibold text-gray-750 dark:text-gray-300">
+                  {{ formatCurrency(caja.poliza) }}
+                </span>
+                <span v-else class="text-xs text-gray-450 italic">
+                  Sin póliza
                 </span>
               </td>
 
@@ -437,6 +454,19 @@
                 <option value="general">Caja General</option>
                 <option value="ventanilla">Ventanilla</option>
               </select>
+            </div>
+
+            <!-- Póliza -->
+            <div>
+              <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5">Límite de Póliza (Q)</label>
+              <input
+                v-model.number="form.poliza"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="Ej: 50000.00"
+                class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
+              />
             </div>
 
             <!-- Estado (Abierta/Cerrada) -->
@@ -570,6 +600,7 @@ interface Caja {
   tipo_caja: 'boveda' | 'general' | 'ventanilla'
   usuario_id: number | null
   estado: boolean
+  poliza: number | null
   agencia?: Agencia
   usuario_en_turno?: User
 }
@@ -593,7 +624,8 @@ const form = ref({
   nombre: '',
   agencia_id: '' as number | string,
   tipo_caja: 'ventanilla' as 'boveda' | 'general' | 'ventanilla',
-  estado: true
+  estado: true,
+  poliza: '' as number | string | null
 })
 
 // Assign modal states
@@ -637,6 +669,11 @@ const fetchData = async () => {
   }
 }
 
+const formatCurrency = (val: number | null | undefined) => {
+  if (val === null || val === undefined) return 'Q0.00'
+  return new Intl.NumberFormat('es-GT', { style: 'currency', currency: 'GTQ' }).format(val)
+}
+
 const openCreateModal = () => {
   editingId.value = null
   submitError.value = ''
@@ -644,7 +681,8 @@ const openCreateModal = () => {
     nombre: '',
     agencia_id: '',
     tipo_caja: 'ventanilla',
-    estado: true
+    estado: true,
+    poliza: ''
   }
   isModalOpen.value = true
 }
@@ -656,7 +694,8 @@ const openEditModal = (caja: Caja) => {
     nombre: caja.nombre,
     agencia_id: caja.agencia_id,
     tipo_caja: caja.tipo_caja,
-    estado: caja.estado
+    estado: caja.estado,
+    poliza: caja.poliza !== null ? caja.poliza : ''
   }
   isModalOpen.value = true
 }
