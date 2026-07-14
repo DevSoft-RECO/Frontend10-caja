@@ -178,6 +178,14 @@ const routes: RouteRecordRaw[] = [
                 meta: {
                     title: 'Autorizaciones de Reversiones'
                 }
+            },
+            {
+                path: 'movimientos/descuadres',
+                name: 'descuadres-agencia',
+                component: () => import('@/views/movimientos/DescuadresAgenciaView.vue'),
+                meta: {
+                    title: 'Reporte de Descuadres de Agencia'
+                }
             }
         ]
     },

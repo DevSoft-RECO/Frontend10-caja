@@ -263,7 +263,8 @@ const menuItems = computed(() => {
                 { label: 'Apertura de Caja', route: '/admin/movimientos/apertura' },
                 { label: 'Movimientos', route: '/admin/movimientos/caja' },
                 { label: 'Arqueo Parcial', route: '/admin/movimientos/arqueo' },
-                { label: 'Reversiones de Caja', route: '/admin/movimientos/reversiones' }
+                { label: 'Reversiones de Caja', route: '/admin/movimientos/reversiones' },
+                { label: 'Reporte de Descuadres', route: '/admin/movimientos/descuadres' }
             ]
         },
         {
