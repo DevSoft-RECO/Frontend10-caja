@@ -107,7 +107,15 @@
         <div class="bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-3xl p-4.5 shadow-sm space-y-3">
           <div class="pb-2.5 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
             <h3 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">Top 5 Riesgo Límite de Póliza (Bóvedas)</h3>
-            <span class="text-[10px] text-gray-400 dark:text-gray-550 font-bold font-mono">Consumo de Póliza</span>
+            <div class="flex items-center gap-2">
+              <button
+                @click="isRiesgoPolizasModalOpen = true"
+                class="px-2 py-0.5 bg-azul-cope/10 hover:bg-azul-cope hover:text-white dark:bg-blue-900/20 text-azul-cope dark:text-blue-300 rounded-md text-[9px] font-bold transition-all cursor-pointer select-none active:scale-95"
+              >
+                Ver Todas
+              </button>
+              <span class="text-[10px] text-gray-400 dark:text-gray-550 font-bold font-mono">Consumo de Póliza</span>
+            </div>
           </div>
 
           <div class="divide-y divide-gray-100 dark:divide-gray-700/50">
@@ -291,6 +299,12 @@
         </div>
       </div>
     </div>
+    <!-- Modal de Riesgo de Pólizas -->
+    <RiesgoPolizasModal
+      :is-open="isRiesgoPolizasModalOpen"
+      :agencias="sortedByPolizaReach"
+      @close="isRiesgoPolizasModalOpen = false"
+    />
   </div>
 </template>
 
@@ -298,6 +312,7 @@
 import { ref, onMounted, computed, nextTick, onBeforeUnmount } from 'vue'
 import axios from '@/api/axios'
 import Chart from 'chart.js/auto'
+import RiesgoPolizasModal from '@/components/movimientos/RiesgoPolizasModal.vue'
 
 interface AgenciaSaldo {
   id: number
@@ -313,6 +328,7 @@ interface AgenciaSaldo {
 
 const loading = ref(true)
 const error = ref('')
+const isRiesgoPolizasModalOpen = ref(false)
 const agenciasSaldos = ref<AgenciaSaldo[]>([])
 const trasladosEnTransito = ref<any[]>([])
 const descuadres = ref<any[]>([])
