@@ -40,7 +40,7 @@
                 class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
               >
                 <option value="">-- Seleccionar Agencia --</option>
-                <option v-for="ag in agencias" :key="ag.id" :value="ag.id">
+                <option v-for="ag in filteredAgencias" :key="ag.id" :value="ag.id">
                   {{ ag.nombre }}
                 </option>
               </select>
@@ -229,6 +229,9 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import axios from '@/api/axios'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 interface Agencia {
   id: number
@@ -270,9 +273,26 @@ const localDeteriorado = ref<any[]>([])
 const error = ref('')
 
 // Computeds
+const filteredAgencias = computed(() => {
+  const isSuperAdmin = authStore.hasRole('Super Admin')
+  if (isSuperAdmin) {
+    return agencias.value
+  }
+  const userAgenciaId = authStore.user?.agencia_id || 
+                        authStore.user?.agencia?.id || 
+                        cajas.value.find((c: any) => c.usuario_id === authStore.user?.id)?.agencia_id
+
+  if (!userAgenciaId) return []
+  return agencias.value.filter(ag => Number(ag.id) === Number(userAgenciaId))
+})
+
 const filteredCajas = computed(() => {
   if (!selectedAgenciaId.value) return []
-  return cajas.value.filter(c => c.agencia_id === Number(selectedAgenciaId.value) && c.estado)
+  return cajas.value.filter(c => 
+    c.agencia_id === Number(selectedAgenciaId.value) && 
+    c.estado && 
+    c.tipo_caja === 'boveda'
+  )
 })
 
 const isBovedaSeleccionada = computed(() => {
@@ -339,6 +359,16 @@ const fetchData = async () => {
     denominaciones.value = denomsRes.data.filter((d: any) => d.activo)
 
     resetForm()
+
+    // Auto-seleccionar la agencia si no es Super Admin
+    if (!authStore.hasRole('Super Admin')) {
+      const userAgenciaId = authStore.user?.agencia_id || 
+                            authStore.user?.agencia?.id || 
+                            cajas.value.find((c: any) => c.usuario_id === authStore.user?.id)?.agencia_id
+      if (userAgenciaId) {
+        selectedAgenciaId.value = String(userAgenciaId)
+      }
+    }
   } catch (err) {
     error.value = 'Error al cargar los catálogos.'
   }
