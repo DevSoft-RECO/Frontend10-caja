@@ -274,6 +274,7 @@ const menuItems = computed(() => {
             show: true,
             children: [
                 { label: 'Dashboard General', route: '/admin/movimientos/dashboard-general' },
+                { label: 'Dashboard General (Alt)', route: '/admin/movimientos/dashboard-general-alt' },
                 { label: 'Autorizaciones de Apertura', route: '/admin/movimientos/autorizaciones' },
                 { label: 'Autorizaciones de Movimientos', route: '/admin/movimientos/autorizaciones-movimientos' },
                 { label: 'Autorizaciones de Reversiones', route: '/admin/movimientos/autorizaciones-reversiones' },

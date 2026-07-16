@@ -140,6 +140,14 @@ const routes: RouteRecordRaw[] = [
                 }
             },
             {
+                path: 'movimientos/dashboard-general-alt',
+                name: 'dashboard-general-alt',
+                component: () => import('@/views/movimientos/DashboardGeneralAlternateView.vue'),
+                meta: {
+                    title: 'Dashboard Consolidado (Alternativo)'
+                }
+            },
+            {
                 path: 'movimientos/traslado-bovedas',
                 name: 'traslado-bovedas',
                 component: () => import('@/views/movimientos/TrasladoBovedasView.vue'),
