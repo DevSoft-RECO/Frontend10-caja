@@ -48,7 +48,8 @@ const routes: RouteRecordRaw[] = [
                 name: 'denominaciones',
                 component: () => import('@/views/ajustes/DenominacionesView.vue'),
                 meta: {
-                    title: 'Denominaciones'
+                    title: 'Denominaciones',
+                    role: 'Super Admin'
                 }
             },
             {
@@ -162,7 +163,7 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('@/views/ajustes/DenominacionesView.vue'),
                 meta: {
                     title: 'Denominaciones',
-                    permission: 'configuracion_caja'
+                    role: 'Super Admin'
                 }
             },
             {
@@ -351,14 +352,17 @@ const orderedRoutes = [
     { path: '/admin/movimientos/autorizaciones-traslados', permission: 'autorizaciones' },
     { path: '/admin/movimientos/traslado-bovedas', permission: 'operaciones_adicionales' },
     { path: '/admin/movimientos/bancos', permission: 'operaciones_adicionales' },
-    { path: '/admin/ajustes/denominaciones', permission: 'configuracion_caja' },
+    { path: '/admin/ajustes/denominaciones', role: 'Super Admin' },
     { path: '/admin/ajustes/cajas', permission: 'configuracion_caja' },
     { path: '/admin/ajustes/dia-cero', permission: 'configuracion_caja' }
 ]
 
 function findFirstAllowedRoute(authStore: any): string | null {
     for (const item of orderedRoutes) {
-        if (authStore.hasPermission(item.permission)) {
+        if (item.role && authStore.hasRole(item.role)) {
+            return item.path
+        }
+        if (item.permission && authStore.hasPermission(item.permission)) {
             return item.path
         }
     }
@@ -419,6 +423,14 @@ router.beforeEach(async (to, _from, next) => {
                     return next(false)
                 }
             }
+        }
+
+        // Verificar rol
+        if (to.meta.role && !authStore.hasRole(to.meta.role as string)) {
+            const motherAppUrl = import.meta.env.VITE_MOTHER_APP_URL || 'http://localhost:5173'
+            console.warn(`⛔ Acceso denegado: Falta rol '${to.meta.role}'.`)
+            window.location.href = `${motherAppUrl}/apps`
+            return next(false)
         }
 
         // Verificar permiso
