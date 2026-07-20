@@ -90,10 +90,10 @@
         </div>
 
         <!-- Chart Card -->
-        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm flex flex-col items-center">
-          <div class="w-full pb-4 border-b border-gray-100 dark:border-gray-700/60 mb-4 flex items-center justify-between">
-            <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Distribución de Fondos</h3>
-            <span class="w-2.5 h-2.5 rounded-full bg-verde-cope animate-pulse"></span>
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm flex flex-col">
+          <div class="px-6 py-4 bg-azul-cope text-white rounded-t-3xl -mx-6 -mt-6 mb-4 flex items-center justify-between">
+            <h3 class="text-xs font-black uppercase tracking-wider text-white">Distribución de Fondos</h3>
+            <span class="w-2 h-2 rounded-full bg-verde-cope animate-pulse"></span>
           </div>
           <div class="relative w-64 h-64 flex items-center justify-center">
             <canvas id="corporateChart"></canvas>
@@ -105,16 +105,16 @@
       <div class="lg:col-span-7 space-y-6">
         <!-- Top 5 Agencias por Límite de Póliza (Compacto) -->
         <div class="bg-white dark:bg-gray-800 rounded-3xl p-4.5 shadow-sm space-y-3">
-          <div class="pb-2.5 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
-            <h3 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">Top 5 Riesgo Límite de Póliza (Bóvedas)</h3>
+          <div class="px-4.5 py-3.5 bg-azul-cope text-white rounded-t-3xl -mx-4.5 -mt-4.5 mb-3 flex items-center justify-between">
+            <h3 class="text-xs font-black uppercase tracking-wider text-white">Top 5 Riesgo Límite de Póliza (Bóvedas)</h3>
             <div class="flex items-center gap-2">
               <button
                 @click="isRiesgoPolizasModalOpen = true"
-                class="px-2 py-0.5 bg-azul-cope/10 hover:bg-azul-cope hover:text-white dark:bg-blue-900/20 text-azul-cope dark:text-blue-300 rounded-md text-[9px] font-bold transition-all cursor-pointer select-none active:scale-95"
+                class="px-2 py-0.5 bg-white/20 hover:bg-white hover:text-azul-cope text-white rounded-md text-[9px] font-bold transition-all cursor-pointer select-none active:scale-95"
               >
                 Ver Todas
               </button>
-              <span class="text-[10px] text-gray-400 dark:text-gray-550 font-bold font-mono">Consumo de Póliza</span>
+              <span class="text-[9px] text-white/80 font-bold font-mono">Consumo</span>
             </div>
           </div>
 
@@ -190,9 +190,9 @@
 
         <!-- Efectivo en Tránsito Card -->
         <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm space-y-4">
-          <div class="pb-4 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
-            <h3 class="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Tránsitos Activos Inter-Agencia</h3>
-            <span class="px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-955/25 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider rounded-full font-mono">En Ruta</span>
+          <div class="px-6 py-4 bg-azul-cope text-white rounded-t-3xl -mx-6 -mt-6 mb-4 flex items-center justify-between">
+            <h3 class="text-xs font-black uppercase tracking-wider text-white">Tránsitos Activos Inter-Agencia</h3>
+            <span class="px-2 py-0.5 bg-white/20 text-white text-[9px] font-black uppercase tracking-wider rounded-full font-mono">En Ruta</span>
           </div>
 
           <div v-if="trasladosEnTransito.length === 0" class="py-12 text-center text-xs text-gray-400 font-medium">
@@ -240,18 +240,18 @@
       <!-- Card for Bar Chart (3/4 = col-span-9) -->
       <div class="lg:col-span-9 bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
         <div>
-          <div class="pb-4 border-b border-gray-100 dark:border-gray-700/60 mb-4 flex items-center justify-between">
+          <div class="px-6 py-4 bg-azul-cope text-white rounded-t-3xl -mx-6 -mt-6 mb-4 flex items-center justify-between">
             <div>
-              <h3 class="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Descuadres por Agencia</h3>
-              <p class="text-xs text-gray-400 dark:text-gray-550 mt-1">
-                Total: <span class="font-extrabold text-gray-900 dark:text-white">{{ totalDescuadresCount }} incidentes</span>
+              <h3 class="text-xs font-black uppercase tracking-wider text-white">Descuadres por Agencia</h3>
+              <p class="text-[10px] text-white/80 mt-0.5">
+                Total: <span class="font-extrabold text-white">{{ totalDescuadresCount }} incidentes</span>
                 <span class="mx-2">|</span>
-                Agencia con más reportes: <span class="font-extrabold text-red-655 dark:text-red-400">{{ agencyMostDescuadres }}</span>
+                Agencia con más reportes: <span class="font-extrabold text-red-300">{{ agencyMostDescuadres }}</span>
               </p>
             </div>
             <router-link
               to="/admin/movimientos/descuadres"
-              class="text-xs font-bold text-azul-cope hover:text-azul-cope/80 flex items-center gap-1.5"
+              class="text-xs font-bold text-white hover:text-white/80 flex items-center gap-1.5"
             >
               Ver Módulo ➜
             </router-link>
@@ -267,9 +267,9 @@
       </div>
 
       <!-- Card for Pie Chart (1/4 = col-span-3) -->
-      <div class="lg:col-span-3 bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm flex flex-col items-center justify-between">
-        <div class="w-full pb-4 border-b border-gray-100 dark:border-gray-700/60 mb-4">
-          <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider text-center">Tipo de Descuadre</h3>
+      <div class="lg:col-span-3 bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+        <div class="px-6 py-4 bg-azul-cope text-white rounded-t-3xl -mx-6 -mt-6 mb-4 flex items-center justify-center">
+          <h3 class="text-xs font-black uppercase tracking-wider text-white text-center">Tipo de Descuadre</h3>
         </div>
         
         <div class="w-full flex flex-col items-center justify-center gap-4 flex-1">
