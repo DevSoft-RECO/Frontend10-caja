@@ -10,7 +10,7 @@
 
       <AdminHeader />
 
-      <main class="flex-1 overflow-x-hidden overflow-y-auto p-6 relative custom-scrollbar bg-gray-50 dark:bg-gray-950 md:rounded-tl-3xl shadow-2xl">
+      <main class="flex-1 overflow-x-hidden overflow-y-auto p-6 relative custom-scrollbar bg-[#e3ecf5] dark:bg-gray-950 md:rounded-tl-3xl shadow-2xl">
         <RouterView v-slot="{ Component }">
             <component :is="Component" />
         </RouterView>
