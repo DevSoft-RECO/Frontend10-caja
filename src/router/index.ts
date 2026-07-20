@@ -334,7 +334,7 @@ const routes: RouteRecordRaw[] = [
 ]
 
 const orderedRoutes = [
-    { path: '/admin/dashboard', permission: 'dashboard_general' },
+    { path: '/admin/dashboard', permission: 'dashboard_general_caja' },
     { path: '/admin/movimientos/apertura', permission: 'cajeros' },
     { path: '/admin/movimientos/caja', permission: 'cajeros' },
     { path: '/admin/movimientos/arqueo', permission: 'cajeros' },
@@ -405,7 +405,7 @@ router.beforeEach(async (to, _from, next) => {
 
         // Redirección si se entra al dashboard pero no se tiene permiso para él
         if (to.path === '/admin/dashboard' || to.path === '/admin') {
-            if (!authStore.hasPermission('dashboard_general')) {
+            if (!authStore.hasPermission('dashboard_general_caja')) {
                 // Buscar la primera ruta a la que sí se tiene permiso
                 const firstAllowed = findFirstAllowedRoute(authStore)
                 if (firstAllowed) {
