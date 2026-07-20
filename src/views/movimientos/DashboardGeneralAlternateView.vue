@@ -32,7 +32,7 @@
           <select
             v-model="agenciaSeleccionadaId"
             @change="onAgenciaChange"
-            class="block w-48 px-2.5 py-1.5 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-955 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-xs font-bold transition-all"
+            class="block w-48 px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-xs font-bold transition-all"
           >
             <option v-for="agencia in agencias" :key="agencia.id" :value="agencia.id">
               {{ agencia.nombre }}

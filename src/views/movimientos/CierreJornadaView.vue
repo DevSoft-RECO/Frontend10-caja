@@ -35,10 +35,10 @@
             <select
               v-model="selectedCajaId"
               @change="onCajaChange"
-              class="block w-full md:w-80 px-3 py-2.5 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
+              class="block w-full md:w-80 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
             >
-              <option value="">-- Seleccionar Caja --</option>
-              <option v-for="caja in cajas" :key="caja.id" :value="caja.id">
+              <option class="dark:bg-gray-700" value="">-- Seleccionar Caja --</option>
+              <option class="dark:bg-gray-700" v-for="caja in cajas" :key="caja.id" :value="caja.id">
                 {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }}) - Turno: {{ caja.usuario_en_turno?.name || 'Sin Cajero' }}
               </option>
             </select>
@@ -49,19 +49,19 @@
             <!-- Billetes -->
             <div v-if="billetesList.length > 0" class="space-y-3">
               <h3 class="text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">Billetes</h3>
-              <div class="border border-gray-150 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+              <div class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
                 <table class="w-full text-left border-collapse">
                   <thead>
-                    <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <tr class="bg-gray-50 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       <th class="p-3 w-1/3">Denominación</th>
                       <th class="p-3 w-1/4 text-center">Cant. Buena</th>
                       <th class="p-3 w-1/4 text-center">Cant. Deteriorada</th>
                       <th class="p-3 text-right">Subtotal</th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-sm">
+                  <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-sm">
                     <tr v-for="denom in billetesList" :key="denom.id">
-                      <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
+                      <td class="p-3 font-semibold text-gray-800 dark:text-gray-300">
                         {{ denom.nombre }} ({{ formatCurrency(denom.valor) }})
                       </td>
                       <td class="p-3">
@@ -70,7 +70,7 @@
                           type="number"
                           min="0"
                           placeholder="0"
-                          class="block w-24 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-650 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
+                          class="block w-24 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
                         />
                       </td>
                       <td class="p-3">
@@ -80,7 +80,7 @@
                           min="0"
                           placeholder="0"
                           :disabled="deshabilitaDeterioradoPorCaja"
-                          class="block w-24 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-650 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm disabled:opacity-40 disabled:bg-gray-100 dark:disabled:bg-gray-850"
+                          class="block w-24 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm disabled:opacity-40 disabled:bg-gray-100 dark:disabled:bg-gray-800"
                         />
                       </td>
                       <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-28">
@@ -95,19 +95,19 @@
             <!-- Monedas -->
             <div v-if="monedasList.length > 0" class="space-y-3">
               <h3 class="text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">Monedas</h3>
-              <div class="border border-gray-150 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+              <div class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
                 <table class="w-full text-left border-collapse">
                   <thead>
-                    <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <tr class="bg-gray-50 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       <th class="p-3 w-1/3">Denominación</th>
                       <th class="p-3 w-1/4 text-center">Cant. Buena</th>
                       <th class="p-3 w-1/4 text-center">Cant. Deteriorada</th>
                       <th class="p-3 text-right">Subtotal</th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-sm">
+                  <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-sm">
                     <tr v-for="denom in monedasList" :key="denom.id">
-                      <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
+                      <td class="p-3 font-semibold text-gray-800 dark:text-gray-300">
                         {{ denom.nombre }} ({{ formatCurrency(denom.valor) }})
                       </td>
                       <td class="p-3">
@@ -116,7 +116,7 @@
                           type="number"
                           min="0"
                           placeholder="0"
-                          class="block w-24 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-650 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
+                          class="block w-24 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
                         />
                       </td>
                       <td class="p-3">
@@ -126,7 +126,7 @@
                           min="0"
                           placeholder="0"
                           :disabled="deshabilitaDeterioradoPorCaja"
-                          class="block w-24 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-650 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm disabled:opacity-40 disabled:bg-gray-100 dark:disabled:bg-gray-850"
+                          class="block w-24 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm disabled:opacity-40 disabled:bg-gray-100 dark:disabled:bg-gray-800"
                         />
                       </td>
                       <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-28">
@@ -173,7 +173,7 @@
                   type="number"
                   placeholder="0.00"
                   step="0.01"
-                  class="block w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-azul-cope text-sm"
+                  class="block w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono font-bold focus:outline-none focus:ring-2 focus:ring-azul-cope text-sm"
                 />
               </div>
             </div>

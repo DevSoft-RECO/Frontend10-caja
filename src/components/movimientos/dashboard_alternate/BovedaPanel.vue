@@ -1,7 +1,7 @@
 <template>
   <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-3xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl">
     <!-- Header Panel -->
-    <div class="p-5 border-b border-gray-150 dark:border-gray-750 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gradient-to-r from-gray-50/50 via-white to-gray-50/50 dark:from-gray-900/50 dark:via-gray-800 dark:to-gray-900/50">
+    <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gradient-to-r from-gray-50/50 via-white to-gray-50/50 dark:from-gray-900/50 dark:via-gray-800 dark:to-gray-900/50">
       <div class="flex items-center gap-3">
         <div class="p-2 bg-azul-cope/10 text-azul-cope rounded-xl">
           <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -13,21 +13,21 @@
             Bóveda Principal
             <span class="text-xs font-normal text-gray-500 dark:text-gray-400">({{ bovedaNombre }})</span>
           </h2>
-          <p class="text-xs text-gray-500 dark:text-gray-400">Flujos físicos y arqueo detallado de Bóveda</p>
+          <p class="text-xs text-gray-550 dark:text-gray-400">Flujos físicos y arqueo detallado de Bóveda</p>
         </div>
       </div>
 
       <!-- Dropdown selector de categoría -->
-      <div class="flex items-center gap-2 bg-slate-50 dark:bg-gray-750 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700">
+      <div class="flex items-center gap-2 bg-slate-50 dark:bg-gray-900 px-3 py-1.5 rounded-xl border border-gray-200 dark:border-gray-700">
         <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider select-none">Ver categoría:</label>
         <select
           v-model="localCategory"
           @change="$emit('category-change', localCategory)"
-          class="bg-transparent text-gray-950 dark:text-white focus:outline-none text-xs font-bold cursor-pointer transition-all border-none pr-6"
+          class="bg-transparent text-gray-900 dark:text-white focus:outline-none text-xs font-bold cursor-pointer transition-all border-none pr-6 dark:bg-gray-900"
         >
-          <option value="operaciones">💼 Operaciones</option>
-          <option value="cajillas">🔑 Cajillas</option>
-          <option value="deteriorado">🍂 Efectivo Deteriorado</option>
+          <option class="dark:bg-gray-900" value="operaciones">💼 Operaciones</option>
+          <option class="dark:bg-gray-900" value="cajillas">🔑 Cajillas</option>
+          <option class="dark:bg-gray-900" value="deteriorado">🍂 Efectivo Deteriorado</option>
         </select>
       </div>
     </div>
