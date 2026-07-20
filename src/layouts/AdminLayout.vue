@@ -10,7 +10,7 @@
 
       <AdminHeader />
 
-      <main class="flex-1 overflow-x-hidden overflow-y-auto p-6 relative custom-scrollbar bg-[#e3ecf5] dark:bg-gray-950 md:rounded-tl-3xl shadow-2xl">
+      <main class="flex-1 overflow-x-hidden overflow-y-auto p-6 relative custom-scrollbar bg-[#e3ecf5] dark:bg-gray-950 md:mr-6 md:rounded-t-3xl shadow-2xl">
         <RouterView v-slot="{ Component }">
             <component :is="Component" />
         </RouterView>
@@ -43,29 +43,13 @@ onUnmounted(() => {
 </script>
 
 <style>
-/* SCROLLBAR OPTIMIZADO PARA TAILWIND 4
-   Usamos variables CSS nativas que TW4 expone automáticamente.
-*/
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  display: none;
+  width: 0px;
+  height: 0px;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: var(--color-gray-300);
-  border-radius: 9999px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-gray-400);
-}
-
-/* Soporte Dark Mode */
-:root.dark .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: var(--color-gray-700);
-}
-:root.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: var(--color-gray-600);
+.custom-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 </style>
