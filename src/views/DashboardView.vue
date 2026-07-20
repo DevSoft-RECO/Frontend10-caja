@@ -52,7 +52,7 @@
       <!-- Left Panel: consolidated cash & chart (col-span-5) -->
       <div class="lg:col-span-5 space-y-6">
         <!-- Gran Total Card -->
-        <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 border border-slate-750 text-white rounded-3xl p-6 shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] group">
+        <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-white rounded-3xl p-6 shadow-xl transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] group">
           <div class="absolute -right-16 -top-16 w-48 h-48 bg-white/5 rounded-full blur-2xl group-hover:scale-110 transition-transform duration-500"></div>
           <div class="relative z-10 space-y-4">
             <span class="inline-flex items-center gap-1.5 text-[9px] font-bold tracking-widest uppercase bg-white/20 px-3 py-1 rounded-full text-white/95">
@@ -90,7 +90,7 @@
         </div>
 
         <!-- Chart Card -->
-        <div class="bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-3xl p-6 shadow-sm flex flex-col items-center">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm flex flex-col items-center">
           <div class="w-full pb-4 border-b border-gray-100 dark:border-gray-700/60 mb-4 flex items-center justify-between">
             <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Distribución de Fondos</h3>
             <span class="w-2.5 h-2.5 rounded-full bg-verde-cope animate-pulse"></span>
@@ -104,7 +104,7 @@
       <!-- Right Panel: List & Progress Bars (col-span-7) -->
       <div class="lg:col-span-7 space-y-6">
         <!-- Top 5 Agencias por Límite de Póliza (Compacto) -->
-        <div class="bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-3xl p-4.5 shadow-sm space-y-3">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-4.5 shadow-sm space-y-3">
           <div class="pb-2.5 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
             <h3 class="text-xs font-black text-gray-900 dark:text-white uppercase tracking-wider">Top 5 Riesgo Límite de Póliza (Bóvedas)</h3>
             <div class="flex items-center gap-2">
@@ -189,7 +189,7 @@
         </div>
 
         <!-- Efectivo en Tránsito Card -->
-        <div class="bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-3xl p-6 shadow-sm space-y-4">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm space-y-4">
           <div class="pb-4 border-b border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
             <h3 class="text-sm font-extrabold text-gray-900 dark:text-white uppercase tracking-wider">Tránsitos Activos Inter-Agencia</h3>
             <span class="px-2 py-0.5 bg-amber-100 text-amber-800 dark:bg-amber-955/25 dark:text-amber-400 text-[10px] font-black uppercase tracking-wider rounded-full font-mono">En Ruta</span>
@@ -238,7 +238,7 @@
     <!-- New Section: Descuadres Overview -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
       <!-- Card for Bar Chart (3/4 = col-span-9) -->
-      <div class="lg:col-span-9 bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+      <div class="lg:col-span-9 bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
         <div>
           <div class="pb-4 border-b border-gray-100 dark:border-gray-700/60 mb-4 flex items-center justify-between">
             <div>
@@ -267,7 +267,7 @@
       </div>
 
       <!-- Card for Pie Chart (1/4 = col-span-3) -->
-      <div class="lg:col-span-3 bg-white dark:bg-gray-800 border border-gray-150 dark:border-gray-700/80 rounded-3xl p-6 shadow-sm flex flex-col items-center justify-between">
+      <div class="lg:col-span-3 bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm flex flex-col items-center justify-between">
         <div class="w-full pb-4 border-b border-gray-100 dark:border-gray-700/60 mb-4">
           <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider text-center">Tipo de Descuadre</h3>
         </div>
