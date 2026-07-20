@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6 w-full">
     <!-- Header -->
-    <div class="flex items-center justify-between pb-2 border-b border-gray-150 dark:border-gray-750">
+    <div class="flex items-center justify-between pb-2">
       <div>
         <h1 class="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
           Movimientos de Caja
@@ -31,7 +31,14 @@
     </div>
 
     <!-- Main Container -->
-    <div class="bg-white dark:bg-gray-800 border border-gray-250 dark:border-gray-700/60 rounded-3xl shadow-sm overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm overflow-hidden">
+      <!-- Corporate Header -->
+      <div class="px-6 py-4 bg-azul-cope text-white flex items-center justify-between">
+        <h2 class="text-xs font-black uppercase tracking-wider text-white">Solicitud de Transferencia de Fondos</h2>
+        <span class="text-[9px] font-bold tracking-widest uppercase bg-white/20 px-3 py-1 rounded-full text-white/95">
+          🏦 Flujo de Doble Entrada
+        </span>
+      </div>
       <!-- Body Form -->
       <form @submit.prevent="submitForm" class="p-6 space-y-6">
         <!-- Alert / Error message -->
@@ -58,7 +65,7 @@
             <select
               v-model="form.origen_caja_id"
               @change="handleOrigenChange"
-              class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-655 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
+              class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
               required
             >
               <option value="">-- Seleccionar Origen --</option>
@@ -74,7 +81,7 @@
             <select
               v-model="form.destino_caja_id"
               @change="handleDestinoChange"
-              class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-655 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
+              class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
               required
             >
               <option value="">-- Seleccionar Destino --</option>
@@ -89,7 +96,7 @@
             <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Categoría <span class="text-red-500">*</span></label>
             <select
               v-model="form.categoria_movimiento"
-              class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-655 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
+              class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
               required
             >
               <option v-for="cat in categoriasDisponibles" :key="cat.value" :value="cat.value">
@@ -137,7 +144,7 @@
 
         <!-- Tabla de doble entrada para Denominaciones (Billetes y Monedas por separado) -->
         <div class="space-y-6">
-          <h3 class="text-sm font-bold text-gray-900 dark:text-white pb-2 border-b border-gray-200 dark:border-gray-700">
+          <h3 class="text-sm font-bold text-gray-900 dark:text-white pb-2 border-b border-gray-100 dark:border-gray-800">
             Detalle de Denominaciones a Trasladar
           </h3>
 
@@ -145,21 +152,21 @@
             <!-- Billetes -->
             <div v-if="billetesList.length > 0" class="space-y-3">
               <h4 class="text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">Billetes</h4>
-              <div class="border border-gray-150 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+              <div class="border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
                 <table class="w-full text-left border-collapse">
                   <thead>
-                    <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-100 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       <th class="p-3 w-2/5">Denominación</th>
                       <th v-if="form.categoria_movimiento !== 'deteriorado'" class="p-3 w-1/4 text-center">Cant. Buena</th>
                       <th v-if="form.categoria_movimiento === 'deteriorado'" class="p-3 w-1/4 text-center">Cant. Deteriorada</th>
                       <th class="p-3 text-right">Subtotal</th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-sm">
+                  <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-sm">
                     <tr v-for="denom in billetesList" :key="denom.id">
                       <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
                         <div>{{ denom.nombre }} ({{ formatCurrency(denom.valor) }})</div>
-                        <div v-if="form.tipo_operacion === 'egreso' && form.origen_caja_id" class="text-[10px] text-gray-400 dark:text-gray-505 font-semibold mt-0.5">
+                        <div v-if="form.tipo_operacion === 'egreso' && form.origen_caja_id" class="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mt-0.5">
                           Disponible en origen: <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ stockMap[denom.id]?.stock_bueno ?? 0 }}</span>
                         </div>
                       </td>
@@ -169,7 +176,7 @@
                           type="number"
                           min="0"
                           placeholder="0"
-                          class="block w-full text-center py-1.5 border border-gray-300 dark:border-gray-655 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
+                          class="block w-full text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
                         />
                       </td>
                       <td v-if="form.categoria_movimiento === 'deteriorado'" class="p-3">
@@ -179,7 +186,7 @@
                           min="0"
                           placeholder="0"
                           :disabled="deshabilitaDeterioradoPorOrigen || deshabilitaDeterioradoPorDestino"
-                          class="block w-full text-center py-1.5 border border-gray-300 dark:border-gray-655 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm disabled:opacity-40 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                          class="block w-full text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-transparent text-sm disabled:opacity-40 disabled:bg-gray-100 dark:disabled:bg-gray-800"
                         />
                       </td>
                       <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-28">
@@ -193,22 +200,22 @@
 
             <!-- Monedas -->
             <div v-if="monedasList.length > 0" class="space-y-3">
-              <h4 class="text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">Monedas</h4>
-              <div class="border border-gray-150 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+              <h4 class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-wider">Monedas</h4>
+              <div class="border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
                 <table class="w-full text-left border-collapse">
                   <thead>
-                    <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <tr class="bg-gray-50 dark:bg-gray-900/80 border-b border-gray-100 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       <th class="p-3 w-2/5">Denominación</th>
                       <th v-if="form.categoria_movimiento !== 'deteriorado'" class="p-3 w-1/4 text-center">Cant. Buena</th>
                       <th v-if="form.categoria_movimiento === 'deteriorado'" class="p-3 w-1/4 text-center">Cant. Deteriorada</th>
                       <th class="p-3 text-right">Subtotal</th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-sm">
+                  <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-sm">
                     <tr v-for="denom in monedasList" :key="denom.id">
-                      <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
+                      <td class="p-3 font-semibold text-gray-800 dark:text-gray-200">
                         <div>{{ denom.nombre }} ({{ formatCurrency(denom.valor) }})</div>
-                        <div v-if="form.tipo_operacion === 'egreso' && form.origen_caja_id" class="text-[10px] text-gray-400 dark:text-gray-505 font-semibold mt-0.5">
+                        <div v-if="form.tipo_operacion === 'egreso' && form.origen_caja_id" class="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mt-0.5">
                           Disponible en origen: <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ stockMap[denom.id]?.stock_bueno ?? 0 }}</span>
                         </div>
                       </td>
@@ -218,7 +225,7 @@
                           type="number"
                           min="0"
                           placeholder="0"
-                          class="block w-full text-center py-1.5 border border-gray-300 dark:border-gray-655 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
+                          class="block w-full text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-transparent text-sm"
                         />
                       </td>
                       <td v-if="form.categoria_movimiento === 'deteriorado'" class="p-3">
@@ -228,7 +235,7 @@
                           min="0"
                           placeholder="0"
                           :disabled="deshabilitaDeterioradoPorOrigen || deshabilitaDeterioradoPorDestino"
-                          class="block w-full text-center py-1.5 border border-gray-300 dark:border-gray-655 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm disabled:opacity-40 disabled:bg-gray-100 dark:disabled:bg-gray-855"
+                          class="block w-full text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-transparent text-sm disabled:opacity-40 disabled:bg-gray-100 dark:disabled:bg-gray-800"
                         />
                       </td>
                       <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-28">
@@ -242,7 +249,7 @@
           </div>
 
           <!-- Gran Total Informativo -->
-          <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl">
+          <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl shadow-inner">
             <span class="text-sm font-bold text-gray-800 dark:text-gray-250 uppercase tracking-wider">Gran Total del Movimiento</span>
             <span class="text-2xl font-extrabold font-mono text-azul-cope dark:text-white">
               {{ formatCurrency(granTotal) }}
@@ -257,7 +264,7 @@
             v-model="form.descripcion"
             rows="3"
             placeholder="Escribe comentarios o detalles sobre este traslado (Ej. Número de bolsa de seguridad, valija)..."
-            class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-605 rounded-xl bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm transition-all"
+            class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm transition-all"
           ></textarea>
         </div>
 

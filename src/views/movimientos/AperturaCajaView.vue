@@ -47,7 +47,7 @@
             <select
               v-model="selectedCajaId"
               @change="onCajaChange"
-              class="block w-full md:w-80 px-3 py-2.5 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
+              class="block w-full md:w-80 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
             >
               <option value="">-- Seleccionar Caja --</option>
               <option v-for="caja in cajas" :key="caja.id" :value="caja.id">
@@ -65,18 +65,18 @@
               <!-- Billetes (Columna Izquierda) -->
               <div v-if="billetesList.length > 0" class="space-y-3">
                 <h3 class="text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">Billetes</h3>
-                <div class="border border-gray-150 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+                <div class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
                   <table class="w-full text-left border-collapse">
                     <thead>
-                      <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      <tr class="bg-gray-50 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         <th class="p-3 w-1/2">Denominación</th>
                         <th class="p-3 w-1/4 text-center">Cant. Buena</th>
                         <th class="p-3 text-right">Subtotal</th>
                       </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-sm">
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-sm">
                       <tr v-for="denom in billetesList" :key="denom.id">
-                        <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
+                        <td class="p-3 font-semibold text-gray-800 dark:text-gray-300">
                           {{ denom.nombre }} ({{ formatCurrency(denom.valor) }})
                         </td>
                         <td class="p-3">
@@ -85,7 +85,7 @@
                             type="number"
                             min="0"
                             placeholder="0"
-                            class="block w-20 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-655 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
+                            class="block w-20 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
                           />
                         </td>
                         <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-24">
@@ -100,18 +100,18 @@
               <!-- Monedas (Columna Derecha) -->
               <div v-if="monedasList.length > 0" class="space-y-3">
                 <h3 class="text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">Monedas</h3>
-                <div class="border border-gray-150 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+                <div class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
                   <table class="w-full text-left border-collapse">
                     <thead>
-                      <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      <tr class="bg-gray-50 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                         <th class="p-3 w-1/2">Denominación</th>
                         <th class="p-3 w-1/4 text-center">Cant. Buena</th>
                         <th class="p-3 text-right">Subtotal</th>
                       </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-150 dark:divide-gray-750 text-sm">
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-sm">
                       <tr v-for="denom in monedasList" :key="denom.id">
-                        <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
+                        <td class="p-3 font-semibold text-gray-800 dark:text-gray-300">
                           {{ denom.nombre }} ({{ formatCurrency(denom.valor) }})
                         </td>
                         <td class="p-3">
@@ -120,7 +120,7 @@
                             type="number"
                             min="0"
                             placeholder="0"
-                            class="block w-20 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-655 rounded-lg bg-white dark:bg-gray-750 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
+                            class="block w-20 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
                           />
                         </td>
                         <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-24">
@@ -137,7 +137,7 @@
             <div class="pt-2"></div>
           </div>
 
-          <div v-else class="text-center py-12 text-gray-450 dark:text-gray-500 italic text-sm">
+          <div v-else class="text-center py-12 text-gray-400 dark:text-gray-500 italic text-sm">
             Selecciona una caja arriba para validar el saldo de apertura.
           </div>
         </div>
@@ -154,12 +154,12 @@
           </div>
 
           <div v-else-if="estadoApertura" class="space-y-4">
-            <div class="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-150 dark:border-gray-750 rounded-2xl flex flex-col items-center justify-center">
+            <div class="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl flex flex-col items-center justify-center">
               <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">Saldo de Cierre Anterior</span>
               <span class="text-2xl font-extrabold font-mono text-gray-900 dark:text-white">
                 {{ formatCurrency(estadoApertura.saldo_final_fisico_declarado) }}
               </span>
-              <span v-if="estadoApertura.fecha_cierre" class="text-[10px] text-gray-450 dark:text-gray-500 mt-1">
+              <span v-if="estadoApertura.fecha_cierre" class="text-[10px] text-gray-500 dark:text-gray-500 mt-1">
                 Registrado el {{ formatOnlyDate(estadoApertura.fecha_cierre) }}
               </span>
             </div>
