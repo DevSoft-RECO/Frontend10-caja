@@ -132,14 +132,7 @@ const routes: RouteRecordRaw[] = [
                     title: 'Autorizaciones de Movimientos'
                 }
             },
-            {
-                path: 'movimientos/dashboard-general',
-                name: 'dashboard-general',
-                component: () => import('@/views/movimientos/DashboardGeneralView.vue'),
-                meta: {
-                    title: 'Dashboard Consolidado'
-                }
-            },
+
             {
                 path: 'movimientos/dashboard-general-alt',
                 name: 'dashboard-general-alt',
@@ -256,15 +249,7 @@ const routes: RouteRecordRaw[] = [
                     permission: 'monitoreo_caja'
                 }
             },
-            {
-                path: 'movimientos/dashboard-general',
-                name: 'dashboard-general',
-                component: () => import('@/views/movimientos/DashboardGeneralView.vue'),
-                meta: {
-                    title: 'Dashboard Consolidado',
-                    permission: 'monitoreo_caja'
-                }
-            },
+
             {
                 path: 'movimientos/dashboard-general-alt',
                 name: 'dashboard-general-alt',
@@ -341,7 +326,7 @@ const orderedRoutes = [
     { path: '/admin/movimientos/arqueo', permission: 'cajeros' },
     { path: '/admin/movimientos/reversiones', permission: 'reversion_caja' },
     { path: '/admin/movimientos/descuadres', permission: 'reporte_descuadres' },
-    { path: '/admin/movimientos/dashboard-general', permission: 'monitoreo_caja' },
+
     { path: '/admin/movimientos/dashboard-general-alt', permission: 'monitoreo_caja' },
     { path: '/admin/movimientos/autorizaciones', permission: 'monitoreo_caja' },
     { path: '/admin/movimientos/autorizaciones-movimientos', permission: 'monitoreo_caja' },

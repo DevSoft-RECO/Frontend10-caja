@@ -175,7 +175,7 @@
                   ></div>
                 </div>
                 <router-link
-                  :to="{ path: '/admin/movimientos/dashboard-general', query: { agencia_id: agencia.id } }"
+                  :to="{ path: '/admin/movimientos/dashboard-general-alt', query: { agencia_id: agencia.id } }"
                   class="p-0.5 bg-gray-50 hover:bg-azul-cope hover:text-white dark:bg-gray-700 dark:hover:bg-azul-cope text-gray-400 rounded-md transition-all cursor-pointer"
                   title="Ver detalle de operaciones"
                 >
