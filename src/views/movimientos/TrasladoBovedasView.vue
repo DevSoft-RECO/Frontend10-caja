@@ -77,7 +77,7 @@
             class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-bold transition-all"
           >
             <option :value="null" disabled class="bg-white dark:bg-gray-800 text-gray-950 dark:text-white">Seleccionar origen</option>
-            <option v-for="caja in bovedasDisponibles" :key="caja.id" :value="caja.id" class="bg-white dark:bg-gray-800 text-gray-950 dark:text-white">
+            <option v-for="caja in bovedasOrigenFiltradas" :key="caja.id" :value="caja.id" class="bg-white dark:bg-gray-800 text-gray-950 dark:text-white">
               {{ caja.nombre }} ({{ caja.agencia?.nombre }})
             </option>
           </select>
@@ -569,6 +569,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import axios from '@/api/axios'
+import { useAuthStore } from '@/stores/auth'
 
 interface Caja {
   id: number
@@ -608,6 +609,8 @@ interface Traslado {
     name: string
   }
 }
+
+const authStore = useAuthStore()
 
 const activeViewTab = ref<'nuevo' | 'tracking'>('nuevo')
 const activeTab = ref<'billete' | 'moneda'>('billete')
@@ -687,8 +690,26 @@ const bovedasDisponibles = computed(() => {
   return cajasList.value.filter(c => c.tipo_caja === 'boveda')
 })
 
+const bovedasOrigenFiltradas = computed(() => {
+  const allBovedas = bovedasDisponibles.value
+  const userAgenciaId = authStore.user?.agencia_id || authStore.user?.agencia?.id
+
+  if (tipoTraslado.value === 'enviar') {
+    return allBovedas.filter(c => Number(c.agencia_id) === Number(userAgenciaId))
+  } else {
+    return allBovedas.filter(c => c.id !== bovedaDestinoId.value)
+  }
+})
+
 const bovedasDestinoFiltradas = computed(() => {
-  return bovedasDisponibles.value.filter(c => c.id !== bovedaOrigenId.value)
+  const allBovedas = bovedasDisponibles.value
+  const userAgenciaId = authStore.user?.agencia_id || authStore.user?.agencia?.id
+
+  if (tipoTraslado.value === 'pedir') {
+    return allBovedas.filter(c => Number(c.agencia_id) === Number(userAgenciaId) && c.id !== bovedaOrigenId.value)
+  } else {
+    return allBovedas.filter(c => c.id !== bovedaOrigenId.value)
+  }
 })
 
 const currentList = computed(() => {
