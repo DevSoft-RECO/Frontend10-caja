@@ -236,8 +236,8 @@
             v-model="bovedaLocalFiltroId"
             class="block w-full sm:w-80 px-3 py-2.5 border border-gray-300 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope text-sm font-bold transition-all"
           >
-            <option :value="null" class="bg-white dark:bg-gray-800 text-gray-950 dark:text-white">-- Ver Todos los Traslados Propios --</option>
-            <option v-for="caja in bovedasDisponibles" :key="caja.id" :value="caja.id" class="bg-white dark:bg-gray-800 text-gray-950 dark:text-white">
+            <option :value="null" class="bg-white dark:bg-gray-800 text-gray-950 dark:text-white">-- Ver Todos los Traslados de mi Agencia --</option>
+            <option v-for="caja in bovedasLocales" :key="caja.id" :value="caja.id" class="bg-white dark:bg-gray-800 text-gray-950 dark:text-white">
               {{ caja.nombre }} ({{ caja.agencia?.nombre }})
             </option>
           </select>
@@ -724,11 +724,25 @@ const totalMonto = computed(() => {
   return denominacionesList.value.reduce((sum, d) => sum + (Number(d.cantidad_enviar) || 0) * d.valor, 0)
 })
 
+const bovedasLocales = computed(() => {
+  const userAgenciaId = authStore.user?.agencia_id || authStore.user?.agencia?.id
+  return bovedasDisponibles.value.filter(c => Number(c.agencia_id) === Number(userAgenciaId))
+})
+
 // Filtrar traslados propios iniciados:
 // - Para 'pedir': la bóveda local es la DESTINO (quien inició la petición).
 // - Para 'enviar': la bóveda local es la ORIGEN (quien inició el envío).
 const trasladosPropiosFiltrados = computed(() => {
+  const userAgenciaId = authStore.user?.agencia_id || authStore.user?.agencia?.id
+
   return trasladosList.value.filter(t => {
+    // El traslado debe pertenecer a la agencia del usuario (origen o destino)
+    const perteneceMiAgencia = 
+      Number(t.origen_boveda?.agencia_id) === Number(userAgenciaId) || 
+      Number(t.destino_boveda?.agencia_id) === Number(userAgenciaId)
+      
+    if (!perteneceMiAgencia) return false
+
     if (bovedaLocalFiltroId.value === null) {
       return true
     }
