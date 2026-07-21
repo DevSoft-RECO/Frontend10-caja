@@ -321,18 +321,17 @@ const routes: RouteRecordRaw[] = [
 
 const orderedRoutes = [
     { path: '/admin/dashboard', permission: 'dashboard_general_caja' },
-    { path: '/admin/movimientos/apertura', permission: 'cajeros' },
-    { path: '/admin/movimientos/caja', permission: 'cajeros' },
-    { path: '/admin/movimientos/arqueo', permission: 'cajeros' },
-    { path: '/admin/movimientos/reversiones', permission: 'reversion_caja' },
-    { path: '/admin/movimientos/descuadres', permission: 'reporte_descuadres' },
-
     { path: '/admin/movimientos/dashboard-general-alt', permission: 'monitoreo_caja' },
     { path: '/admin/movimientos/autorizaciones', permission: 'monitoreo_caja' },
     { path: '/admin/movimientos/autorizaciones-movimientos', permission: 'monitoreo_caja' },
     { path: '/admin/movimientos/cierre', permission: 'monitoreo_caja' },
     { path: '/admin/movimientos/reporte-cierres', permission: 'monitoreo_caja' },
     { path: '/admin/movimientos', permission: 'monitoreo_caja' },
+    { path: '/admin/movimientos/apertura', permission: 'cajeros' },
+    { path: '/admin/movimientos/caja', permission: 'cajeros' },
+    { path: '/admin/movimientos/arqueo', permission: 'cajeros' },
+    { path: '/admin/movimientos/reversiones', permission: 'reversion_caja' },
+    { path: '/admin/movimientos/descuadres', permission: 'reporte_descuadres' },
     { path: '/admin/movimientos/autorizaciones-reversiones', permission: 'autorizaciones' },
     { path: '/admin/movimientos/autorizaciones-traslados', permission: 'autorizaciones' },
     { path: '/admin/movimientos/traslado-bovedas', permission: 'operaciones_adicionales' },
