@@ -82,10 +82,10 @@
     <!-- COMPARADOR / MODAL DE AUTORIZACION -->
     <Transition name="fade">
       <div v-if="comparadorModalOpen && selectedSolicitud" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-950/60 backdrop-blur-sm">
-        <div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-4xl border border-gray-250 dark:border-gray-700 shadow-2xl p-6 space-y-6 overflow-y-auto max-h-[90vh]">
+        <div class="bg-white dark:bg-gray-800 rounded-3xl w-full max-w-4xl border border-gray-200 dark:border-gray-700 shadow-2xl p-6 space-y-6 overflow-y-auto max-h-[90vh]">
           
           <!-- Header Modal -->
-          <div class="flex justify-between items-start pb-4 border-b border-gray-150 dark:border-gray-750">
+          <div class="flex justify-between items-start pb-4 border-b border-gray-200 dark:border-gray-700">
             <div>
               <h3 class="text-xl font-bold text-gray-900 dark:text-white">
                 Auditoría de Apertura: {{ selectedSolicitud.caja?.nombre }}
@@ -94,7 +94,7 @@
                 Solicitado por <span class="font-semibold">{{ selectedSolicitud.usuario?.name }}</span> • Monto Declarado: <span class="font-mono font-bold text-azul-cope">{{ formatCurrency(selectedSolicitud.monto_total) }}</span>
               </p>
             </div>
-            <button @click="comparadorModalOpen = false" class="text-gray-400 hover:text-gray-650 dark:hover:text-gray-200 text-xl font-bold cursor-pointer">&times;</button>
+            <button @click="comparadorModalOpen = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-xl font-bold cursor-pointer">&times;</button>
           </div>
 
           <!-- Comparación de Cierre Anterior contra Declarado -->
@@ -110,17 +110,17 @@
               <!-- Billetes -->
               <div class="space-y-3">
                 <h5 class="text-xs font-bold text-azul-cope uppercase tracking-wider">Billetes</h5>
-                <div class="border border-gray-150 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+                <div class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
                   <table class="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 font-bold text-gray-500 dark:text-gray-400 uppercase">
+                      <tr class="bg-gray-50 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 font-bold text-gray-500 dark:text-gray-400 uppercase">
                         <th class="p-2.5">Denominación</th>
                         <th class="p-2.5 text-center">Saldo de cierre anterior</th>
                         <th class="p-2.5 text-center">Saldo Solicitado</th>
                         <th class="p-2.5 text-right">Subtotal</th>
                       </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-150 dark:divide-gray-750">
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                       <tr v-for="denom in auditBilletes" :key="denom.id">
                         <td class="p-2.5 font-bold text-gray-900 dark:text-gray-100">{{ denom.nombre }}</td>
                         <td class="p-2.5 text-center font-mono text-gray-500">{{ denom.esperado }}</td>
@@ -137,17 +137,17 @@
               <!-- Monedas -->
               <div class="space-y-3">
                 <h5 class="text-xs font-bold text-azul-cope uppercase tracking-wider">Monedas</h5>
-                <div class="border border-gray-150 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
+                <div class="border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden shadow-sm">
                   <table class="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-150 dark:border-gray-700 font-bold text-gray-500 dark:text-gray-400 uppercase">
+                      <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700 font-bold text-gray-500 dark:text-gray-400 uppercase">
                         <th class="p-2.5">Denominación</th>
                         <th class="p-2.5 text-center">Saldo de cierre anterior</th>
                         <th class="p-2.5 text-center">Saldo Solicitado</th>
                         <th class="p-2.5 text-right">Subtotal</th>
                       </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-150 dark:divide-gray-750">
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                       <tr v-for="denom in auditMonedas" :key="denom.id">
                         <td class="p-2.5 font-bold text-gray-900 dark:text-gray-100">{{ denom.nombre }}</td>
                         <td class="p-2.5 text-center font-mono text-gray-500">{{ denom.esperado }}</td>
@@ -164,12 +164,12 @@
           </div>
 
           <!-- Comparador de Totales -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-150 dark:border-gray-750">
-            <div class="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-150 dark:border-gray-750 rounded-2xl flex flex-col items-center">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div class="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl flex flex-col items-center">
               <span class="text-[10px] font-bold text-gray-450 uppercase mb-1">Saldo de cierre anterior</span>
               <span class="text-lg font-bold font-mono text-gray-900 dark:text-white">{{ formatCurrency(montoEsperado) }}</span>
             </div>
-            <div class="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-150 dark:border-gray-750 rounded-2xl flex flex-col items-center">
+            <div class="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl flex flex-col items-center">
               <span class="text-[10px] font-bold text-gray-450 uppercase mb-1">Saldo Solicitado</span>
               <span class="text-lg font-bold font-mono text-azul-cope dark:text-blue-400">{{ formatCurrency(selectedSolicitud.monto_total) }}</span>
             </div>
@@ -188,7 +188,7 @@
               v-model="observaciones"
               rows="2"
               placeholder="Escribe observaciones adicionales para el cajero..."
-              class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-sm focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-gray-900 dark:text-white"
+              class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-gray-900 dark:text-white"
             ></textarea>
           </div>
 
