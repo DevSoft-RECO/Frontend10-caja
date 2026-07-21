@@ -164,7 +164,7 @@
                   </thead>
                   <tbody class="divide-y divide-gray-100 dark:divide-gray-800 text-sm">
                     <tr v-for="denom in billetesList" :key="denom.id">
-                      <td class="p-3 font-semibold text-gray-800 dark:text-gray-250">
+                      <td class="p-3 font-semibold text-gray-800 dark:text-gray-200">
                         <div>{{ denom.nombre }} ({{ formatCurrency(denom.valor) }})</div>
                         <div v-if="form.tipo_operacion === 'egreso' && form.origen_caja_id" class="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mt-0.5">
                           Disponible en origen: <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ stockMap[denom.id]?.stock_bueno ?? 0 }}</span>
