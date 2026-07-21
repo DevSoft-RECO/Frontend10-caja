@@ -32,7 +32,8 @@
           <select
             v-model="agenciaSeleccionadaId"
             @change="onAgenciaChange"
-            class="block w-48 px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-xs font-bold transition-all"
+            :disabled="!authStore.hasRole('Super Admin')"
+            class="block w-48 px-2.5 py-1.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-xs font-bold transition-all disabled:opacity-60 disabled:cursor-not-allowed"
           >
             <option v-for="agencia in agencias" :key="agencia.id" :value="agencia.id">
               {{ agencia.nombre }}
@@ -157,6 +158,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import axios from '@/api/axios'
+import { useAuthStore } from '@/stores/auth'
 
 // Componentes modulares nuevos
 import DashboardBanner from '@/components/movimientos/dashboard_alternate/DashboardBanner.vue'
@@ -197,6 +199,7 @@ interface FlujoEspecial {
 }
 
 // State
+const authStore = useAuthStore()
 const loading = ref(true)
 const error = ref('')
 const fechaHoy = ref('')

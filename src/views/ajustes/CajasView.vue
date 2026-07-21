@@ -43,7 +43,8 @@
         <!-- Filtro de Agencia -->
         <select
           v-model="filterAgencia"
-          class="block w-full sm:w-56 px-3 py-2 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
+          :disabled="!authStore.hasRole('Super Admin')"
+          class="block w-full sm:w-56 px-3 py-2 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed"
         >
           <option value="">Todas las Agencias</option>
           <option v-for="agencia in agencias" :key="agencia.id" :value="agencia.id">
@@ -433,7 +434,8 @@
               <select
                 v-model="form.agencia_id"
                 required
-                class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
+                :disabled="!authStore.hasRole('Super Admin')"
+                class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-955 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 <option value="" disabled selected>Seleccione la agencia</option>
                 <option v-for="agencia in agencias" :key="agencia.id" :value="agencia.id">
@@ -580,6 +582,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import api from '@/api/axios'
+import { useAuthStore } from '@/stores/auth'
 
 interface User {
   id: number
@@ -604,6 +607,8 @@ interface Caja {
   agencia?: Agencia
   usuario_en_turno?: User
 }
+
+const authStore = useAuthStore()
 
 const cajas = ref<Caja[]>([])
 const agencias = ref<Agencia[]>([])
@@ -661,6 +666,12 @@ const fetchData = async () => {
     }))
     agencias.value = agenciasRes.data
     usuarios.value = usuariosRes.data
+
+    // Precargar agencia del usuario si no es Super Admin
+    const userAgenciaId = authStore.user?.agencia_id || authStore.user?.agencia?.id
+    if (userAgenciaId && !authStore.hasRole('Super Admin')) {
+      filterAgencia.value = String(userAgenciaId)
+    }
   } catch (err: any) {
     console.error(err)
     error.value = err.response?.data?.message || 'Error al conectar con la API.'
@@ -677,9 +688,12 @@ const formatCurrency = (val: number | null | undefined) => {
 const openCreateModal = () => {
   editingId.value = null
   submitError.value = ''
+  
+  const userAgenciaId = authStore.user?.agencia_id || authStore.user?.agencia?.id || ''
+  
   form.value = {
     nombre: '',
-    agencia_id: '',
+    agencia_id: userAgenciaId,
     tipo_caja: 'ventanilla',
     estado: true,
     poliza: ''
