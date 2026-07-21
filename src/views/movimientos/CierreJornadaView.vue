@@ -430,10 +430,9 @@ const fetchData = async () => {
       axios.get('/cajas'),
       axios.get('/denominaciones')
     ])
-    // Obtener la agencia del usuario logueado
     const userAgenciaId = authStore.user?.agencia_id || 
                           authStore.user?.agencia?.id || 
-                          cajasRes.data.find((c: any) => c.usuario_id === authStore.user?.id)?.agencia_id
+                          cajasRes.data.find((c: any) => c.usuario_en_turno?.sso_id === authStore.user?.id)?.agencia_id
 
     // Filtrar las cajas activas de la misma agencia que sean ventanillas
     cajas.value = cajasRes.data.filter((c: any) => 

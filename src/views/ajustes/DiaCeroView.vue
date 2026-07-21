@@ -280,7 +280,7 @@ const filteredAgencias = computed(() => {
   }
   const userAgenciaId = authStore.user?.agencia_id || 
                         authStore.user?.agencia?.id || 
-                        cajas.value.find((c: any) => c.usuario_id === authStore.user?.id)?.agencia_id
+                        cajas.value.find((c: any) => c.usuario_en_turno?.sso_id === authStore.user?.id)?.agencia_id
 
   if (!userAgenciaId) return []
   return agencias.value.filter(ag => Number(ag.id) === Number(userAgenciaId))
@@ -364,7 +364,7 @@ const fetchData = async () => {
     if (!authStore.hasRole('Super Admin')) {
       const userAgenciaId = authStore.user?.agencia_id || 
                             authStore.user?.agencia?.id || 
-                            cajas.value.find((c: any) => c.usuario_id === authStore.user?.id)?.agencia_id
+                            cajas.value.find((c: any) => c.usuario_en_turno?.sso_id === authStore.user?.id)?.agencia_id
       if (userAgenciaId) {
         selectedAgenciaId.value = String(userAgenciaId)
       }

@@ -352,7 +352,7 @@ const fetchData = async () => {
       axios.get('/denominaciones')
     ])
     // Filtrar únicamente las cajas asignadas al usuario activo
-    cajas.value = cajasRes.data.filter((c: any) => c.estado && c.usuario_id === authStore.user?.id)
+    cajas.value = cajasRes.data.filter((c: any) => c.estado && c.usuario_en_turno?.sso_id === authStore.user?.id)
     denominaciones.value = denomsRes.data.filter((d: any) => d.activo)
 
     localDenominaciones.value = denominaciones.value.map(d => ({
