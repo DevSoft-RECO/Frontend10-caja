@@ -234,6 +234,20 @@ const menuItems = computed(() => {
             show: authStore.hasPermission('dashboard_general_caja')
         },
         {
+            id: 'control-central',
+            label: 'Control Central',
+            iconSvg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10a2 2 0 01-2 2h-2a2 2 0 01-2-2zm6-10V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />',
+            show: authStore.hasPermission('monitoreo_caja'),
+            children: [
+                { label: 'Dashboard General', route: '/admin/movimientos/dashboard-general-alt' },
+                { label: 'Autorizaciones de Apertura', route: '/admin/movimientos/autorizaciones' },
+                { label: 'Autorizaciones de Movimientos', route: '/admin/movimientos/autorizaciones-movimientos' },
+                { label: 'Cierre de Caja', route: '/admin/movimientos/cierre' },
+                { label: 'Historial de Cierres', route: '/admin/movimientos/reporte-cierres' },
+                { label: 'Historial de Movimientos', route: '/admin/movimientos' }
+            ]
+        },
+        {
             id: 'mi-turno',
             label: 'Mi Turno',
             iconSvg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />',
@@ -254,20 +268,6 @@ const menuItems = computed(() => {
             children: [
                 ...(authStore.hasPermission('reversion_caja') ? [{ label: 'Reversiones de Caja', route: '/admin/movimientos/reversiones' }] : []),
                 ...(authStore.hasPermission('reporte_descuadres') ? [{ label: 'Reporte de Descuadres', route: '/admin/movimientos/descuadres' }] : [])
-            ]
-        },
-        {
-            id: 'control-central',
-            label: 'Control Central',
-            iconSvg: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10a2 2 0 01-2 2h-2a2 2 0 01-2-2zm6-10V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />',
-            show: authStore.hasPermission('monitoreo_caja'),
-            children: [
-                { label: 'Dashboard General', route: '/admin/movimientos/dashboard-general-alt' },
-                { label: 'Autorizaciones de Apertura', route: '/admin/movimientos/autorizaciones' },
-                { label: 'Autorizaciones de Movimientos', route: '/admin/movimientos/autorizaciones-movimientos' },
-                { label: 'Cierre de Caja', route: '/admin/movimientos/cierre' },
-                { label: 'Historial de Cierres', route: '/admin/movimientos/reporte-cierres' },
-                { label: 'Historial de Movimientos', route: '/admin/movimientos' }
             ]
         },
         {
