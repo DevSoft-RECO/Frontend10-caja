@@ -206,46 +206,10 @@
             </div>
           </div>
 
-          <!-- Cajero en Turno Section -->
-          <div class="mt-6 p-4 rounded-xl bg-gray-50 dark:bg-gray-900/60 border border-gray-150 dark:border-gray-750 flex flex-col justify-between">
-            <span class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5">Cajero en Turno</span>
-            
-            <div v-if="caja.usuario_en_turno" class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-xl bg-azul-cope/10 dark:bg-azul-cope/20 text-azul-cope dark:text-blue-400 flex items-center justify-center font-bold text-base shadow-sm shrink-0">
-                {{ caja.usuario_en_turno.name.charAt(0).toUpperCase() }}
-              </div>
-              <div class="overflow-hidden">
-                <div class="text-sm font-bold text-gray-800 dark:text-gray-200 truncate">{{ caja.usuario_en_turno.name }}</div>
-                <div class="text-xs text-gray-400 dark:text-gray-500 truncate">@{{ caja.usuario_en_turno.username }}</div>
-              </div>
-            </div>
-            
-            <div v-else class="flex flex-col items-center justify-center py-2 border border-dashed border-gray-300 dark:border-gray-700 rounded-lg text-center">
-              <span class="text-xs italic text-gray-450 dark:text-gray-500">Sin cajero asignado</span>
-              <button
-                @click="openAssignModal(caja)"
-                class="mt-2 text-xs font-bold text-azul-cope dark:text-blue-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
-              >
-                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-                </svg>
-                Asignar ahora
-              </button>
-            </div>
-          </div>
         </div>
 
         <!-- Actions -->
-        <div class="mt-6 pt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-between">
-          <button
-            @click="openAssignModal(caja)"
-            class="text-xs font-bold text-verde-cope dark:text-green-450 hover:underline flex items-center gap-1 cursor-pointer"
-          >
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-            </svg>
-            Reasignar
-          </button>
+        <div class="mt-6 pt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-end">
 
           <button
             @click="openEditModal(caja)"
@@ -269,7 +233,6 @@
               <th class="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Caja</th>
               <th class="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Agencia</th>
               <th class="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tipo</th>
-              <th class="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Cajero en Turno</th>
               <th class="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Estado</th>
               <th class="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Póliza</th>
               <th class="px-6 py-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-right">Acciones</th>
@@ -315,21 +278,7 @@
                 </span>
               </td>
 
-              <!-- Usuario en Turno -->
-              <td class="px-6 py-4">
-                <div v-if="caja.usuario_en_turno" class="flex items-center gap-2">
-                  <div class="w-7 h-7 rounded-lg bg-azul-cope/10 text-azul-cope dark:bg-gray-700 dark:text-gray-300 flex items-center justify-center font-bold text-xs">
-                    {{ caja.usuario_en_turno.name.charAt(0).toUpperCase() }}
-                  </div>
-                  <div>
-                    <div class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ caja.usuario_en_turno.name }}</div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500">@{{ caja.usuario_en_turno.username }}</div>
-                  </div>
-                </div>
-                <span v-else class="text-xs italic text-gray-450 dark:text-gray-500">
-                  Sin asignar
-                </span>
-              </td>
+              <!-- Tipo -->
 
               <!-- Estado -->
               <td class="px-6 py-4">
@@ -358,16 +307,6 @@
               <!-- Acciones -->
               <td class="px-6 py-4 text-right">
                 <div class="flex items-center justify-end gap-2">
-                  <!-- Asignar Usuario -->
-                  <button
-                    @click="openAssignModal(caja)"
-                    class="p-2 text-gray-400 dark:text-gray-500 hover:text-verde-cope dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-750 transition-colors cursor-pointer"
-                    title="Asignar Cajero"
-                  >
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                    </svg>
-                  </button>
 
                   <!-- Editar -->
                   <button
@@ -423,8 +362,9 @@
                 v-model="form.nombre"
                 type="text"
                 required
-                placeholder="Ej: Ventanilla 1, Bóveda Cobán"
-                class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
+                :disabled="form.tipo_caja === 'ventanilla'"
+                placeholder="Ej: Bóveda Central"
+                class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
               />
             </div>
 
@@ -506,81 +446,11 @@
         </div>
       </div>
     </Transition>
-
-    <!-- MODAL DE ASIGNACIÓN DE CAJERO -->
-    <Transition
-      enter-active-class="transition duration-200 ease-out"
-      enter-from-class="opacity-0 scale-95"
-      enter-to-class="opacity-100 scale-100"
-      leave-active-class="transition duration-150 ease-in"
-      leave-from-class="opacity-100 scale-100"
-      leave-to-class="opacity-0 scale-95"
-    >
-      <div v-if="isAssignModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
-        <div class="w-full max-w-md bg-white dark:bg-gray-800 border border-gray-255 dark:border-gray-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
-          <!-- Modal Header -->
-          <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-150 dark:border-gray-700 flex items-center justify-between">
-            <h3 class="text-base font-bold text-gray-900 dark:text-white">
-              Asignar Cajero en Turno
-            </h3>
-            <button @click="closeAssignModal" class="text-gray-400 dark:text-gray-550 hover:text-gray-650 dark:hover:text-white transition-colors cursor-pointer">
-              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-
-          <!-- Modal Body -->
-          <form @submit.prevent="saveAssignUser" class="p-6 space-y-4">
-            <div v-if="assignError" class="p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800/30 rounded-xl text-xs text-red-700 dark:text-red-400">
-              {{ assignError }}
-            </div>
-
-            <div class="text-sm text-gray-600 dark:text-gray-300">
-              Caja seleccionada: <span class="font-bold text-gray-905 dark:text-white">{{ activeCaja?.nombre }}</span>
-            </div>
-
-            <!-- Seleccionar Usuario -->
-            <div>
-              <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5">Usuario Cajero</label>
-              <select
-                v-model="assignForm.usuario_id"
-                class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
-              >
-                <option :value="null">Ninguno / Desasignar</option>
-                <option v-for="user in usuarios" :key="user.id" :value="user.id">
-                  {{ user.name }} (@{{ user.username }})
-                </option>
-              </select>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="flex justify-end gap-3 pt-5 border-t border-gray-150 dark:border-gray-700">
-              <button
-                type="button"
-                @click="closeAssignModal"
-                class="px-4 py-2 border border-gray-300 dark:border-gray-650 rounded-xl text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                :disabled="submittingAssign"
-                class="px-4 py-2 bg-verde-cope hover:bg-verde-cope/90 text-white rounded-xl text-sm font-semibold shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer"
-              >
-                <span v-if="submittingAssign" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                <span>{{ submittingAssign ? 'Asignando...' : 'Asignar' }}</span>
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import api from '@/api/axios'
 import { useAuthStore } from '@/stores/auth'
 
@@ -633,14 +503,7 @@ const form = ref({
   poliza: '' as number | string | null
 })
 
-// Assign modal states
-const isAssignModalOpen = ref(false)
-const submittingAssign = ref(false)
-const assignError = ref('')
-const activeCaja = ref<Caja | null>(null)
-const assignForm = ref({
-  usuario_id: null as number | null
-})
+// Assign modal states (removed)
 
 const filteredCajas = computed(() => {
   return cajas.value.filter(c => {
@@ -699,6 +562,9 @@ const openCreateModal = () => {
     poliza: ''
   }
   isModalOpen.value = true
+  
+  // Forzar generación del nombre si es ventanilla
+  autoGenerateVentanillaName(userAgenciaId)
 }
 
 const openEditModal = (caja: Caja) => {
@@ -750,41 +616,29 @@ const saveCaja = async () => {
   }
 }
 
-const openAssignModal = (caja: Caja) => {
-  activeCaja.value = caja
-  assignError.value = ''
-  assignForm.value = {
-    usuario_id: caja.usuario_id
-  }
-  isAssignModalOpen.value = true
-}
-
-const closeAssignModal = () => {
-  isAssignModalOpen.value = false
-}
-
-const saveAssignUser = async () => {
-  if (!activeCaja.value) return
-  submittingAssign.value = true
-  assignError.value = ''
-  try {
-    const response = await api.post(`/cajas/${activeCaja.value.id}/asignar-usuario`, assignForm.value)
-    const index = cajas.value.findIndex(c => c.id === activeCaja.value!.id)
-    if (index !== -1) {
-      cajas.value[index] = {
-        ...cajas.value[index],
-        usuario_id: response.data.caja.usuario_id,
-        usuario_en_turno: response.data.caja.usuario_en_turno
+// Auto-generar nombre para ventanillas
+const autoGenerateVentanillaName = (agenciaId: number | string) => {
+  if (editingId.value) return
+  
+  if (form.value.tipo_caja === 'ventanilla' && agenciaId) {
+    const ventanillasAgencia = cajas.value.filter(c => c.agencia_id === Number(agenciaId) && c.tipo_caja === 'ventanilla')
+    let max = 0
+    ventanillasAgencia.forEach(v => {
+      const match = v.nombre.match(/Caja\s+(\d+)/i)
+      if (match) {
+        const num = parseInt(match[1])
+        if (num > max) max = num
       }
-    }
-    closeAssignModal()
-  } catch (err: any) {
-    console.error(err)
-    assignError.value = err.response?.data?.message || 'Error al asignar usuario.'
-  } finally {
-    submittingAssign.value = false
+    })
+    form.value.nombre = `Caja ${max + 1}`
+  } else if (!editingId.value) {
+    form.value.nombre = ''
   }
 }
+
+watch([() => form.value.tipo_caja, () => form.value.agencia_id], ([nuevoTipo, nuevaAgencia]) => {
+  autoGenerateVentanillaName(nuevaAgencia)
+})
 
 const formatTipo = (tipo: string) => {
   if (tipo === 'boveda') return 'Bóveda'
