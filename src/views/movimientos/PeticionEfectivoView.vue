@@ -512,16 +512,12 @@ const fetchInitialData = async () => {
     ])
     cajasList.value = cajasRes.data
     denominacionesList.value = denomsRes.data.map((d: any) => ({ ...d, cantidad_enviar: undefined }))
-    if(bovedasLocales.value.length > 0) bovedaDestinoId.value = bovedasLocales.value[0].id
+    if(bovedasLocales.value.length > 0) {
+      bovedaDestinoId.value = bovedasLocales.value[0].id
+      fetchTraslados()
+    }
   } catch (error) {}
 }
-
-watch(bovedasLocales, (newVal) => {
-  if (newVal.length > 0 && !bovedaDestinoId.value) {
-    bovedaDestinoId.value = newVal[0].id
-    fetchTraslados()
-  }
-}, { immediate: true })
 
 const fetchTraslados = async () => {
   if (!bovedaDestinoId.value) return
