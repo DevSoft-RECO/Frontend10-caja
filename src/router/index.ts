@@ -260,6 +260,25 @@ const routes: RouteRecordRaw[] = [
                 }
             },
             {
+                path: 'movimientos/peticion-efectivo',
+                name: 'peticion-efectivo',
+                component: () => import('@/views/movimientos/PeticionEfectivoView.vue'),
+                meta: {
+                    title: 'Peticiones de Efectivo',
+                    permission: 'operaciones_adicionales'
+                }
+            },
+            {
+                path: 'movimientos/buzon-tesoreria',
+                name: 'buzon-tesoreria',
+                component: () => import('@/views/movimientos/BuzonTesoreriaView.vue'),
+                meta: {
+                    title: 'Buzón de Tesorería',
+                    permission: 'tesorero'
+                }
+            },
+
+            {
                 path: 'movimientos/traslado-bovedas',
                 name: 'traslado-bovedas',
                 component: () => import('@/views/movimientos/TrasladoBovedasView.vue'),
@@ -335,6 +354,9 @@ const orderedRoutes = [
     { path: '/admin/movimientos/autorizaciones-reversiones', permission: 'autorizaciones' },
     { path: '/admin/movimientos/autorizaciones-traslados', permission: 'autorizaciones' },
     { path: '/admin/movimientos/traslado-bovedas', permission: 'operaciones_adicionales' },
+    { path: '/admin/movimientos/peticion-efectivo', permission: 'operaciones_adicionales' },
+    { path: '/admin/movimientos/buzon-tesoreria', permission: 'tesorero' },
+
     { path: '/admin/movimientos/bancos', permission: 'operaciones_adicionales' },
     { path: '/admin/ajustes/denominaciones', role: 'Super Admin' },
     { path: '/admin/ajustes/cajas', permission: 'configuracion_caja' },
