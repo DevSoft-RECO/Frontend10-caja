@@ -296,7 +296,7 @@ const menuItems = computed(() => {
             show: authStore.hasPermission('operaciones_adicionales'),
             children: [
                 { label: 'Petición de Efectivo', route: '/admin/movimientos/peticion-efectivo' },
-                { label: 'Traslado entre Bóvedas', route: '/admin/movimientos/traslado-bovedas' },
+                { label: 'Envío de Efectivo', route: '/admin/movimientos/envio-efectivo' },
                 { label: 'Operación Bancos Externos', route: '/admin/movimientos/bancos' }
             ]
         },

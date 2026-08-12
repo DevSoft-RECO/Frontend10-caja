@@ -279,11 +279,11 @@ const routes: RouteRecordRaw[] = [
             },
 
             {
-                path: 'movimientos/traslado-bovedas',
-                name: 'traslado-bovedas',
-                component: () => import('@/views/movimientos/TrasladoBovedasView.vue'),
+                path: 'movimientos/envio-efectivo',
+                name: 'envio-efectivo',
+                component: () => import('@/views/movimientos/EnvioEfectivoView.vue'),
                 meta: {
-                    title: 'Traslado entre Bóvedas',
+                    title: 'Envío de Efectivo',
                     permission: 'operaciones_adicionales'
                 }
             },
