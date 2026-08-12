@@ -209,7 +209,7 @@
         </div>
 
         <!-- Actions -->
-        <div class="mt-6 pt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-end">
+        <div class="mt-6 pt-3 border-t border-gray-100 dark:border-gray-700/60 flex items-center justify-end gap-2">
 
           <button
             @click="openEditModal(caja)"
@@ -218,6 +218,16 @@
           >
             <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+          
+          <button
+            @click="deleteCaja(caja)"
+            class="p-2 text-gray-500 hover:text-red-500 dark:text-gray-400 dark:hover:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer"
+            title="Eliminar Caja"
+          >
+            <svg class="w-4.5 h-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
           </button>
         </div>
@@ -312,10 +322,21 @@
                   <button
                     @click="openEditModal(caja)"
                     class="p-2 text-gray-400 dark:text-gray-500 hover:text-azul-cope dark:hover:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-750 transition-colors cursor-pointer"
-                    title="Editar"
+                    title="Editar Caja"
                   >
                     <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  
+                  <!-- Eliminar -->
+                  <button
+                    @click="deleteCaja(caja)"
+                    class="p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors cursor-pointer"
+                    title="Eliminar Caja"
+                  >
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
                   </button>
                 </div>
@@ -453,6 +474,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import api from '@/api/axios'
 import { useAuthStore } from '@/stores/auth'
+import Swal from 'sweetalert2'
 
 interface User {
   id: number
@@ -639,6 +661,55 @@ const autoGenerateVentanillaName = (agenciaId: number | string) => {
 watch([() => form.value.tipo_caja, () => form.value.agencia_id], ([nuevoTipo, nuevaAgencia]) => {
   autoGenerateVentanillaName(nuevaAgencia)
 })
+
+const deleteCaja = async (caja: Caja) => {
+  const { value: confirmText } = await Swal.fire({
+    title: '¿Eliminar Caja?',
+    html: `Para eliminar permanentemente la caja <b>"${caja.nombre}"</b>, escribe la palabra <b>confirmar</b>:`,
+    input: 'text',
+    inputPlaceholder: 'confirmar',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Sí, Eliminar',
+    cancelButtonText: 'Cancelar',
+    inputValidator: (value) => {
+      if (value !== 'confirmar') {
+        return 'Debes escribir la palabra "confirmar" exactamente.'
+      }
+    }
+  })
+
+  if (confirmText === 'confirmar') {
+    try {
+      // Mostrar loading
+      Swal.fire({
+        title: 'Eliminando...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading()
+        }
+      })
+      
+      await api.delete(`/cajas/${caja.id}`)
+      cajas.value = cajas.value.filter(c => c.id !== caja.id)
+      
+      Swal.fire(
+        '¡Eliminada!',
+        `La caja "${caja.nombre}" ha sido eliminada correctamente.`,
+        'success'
+      )
+    } catch (err: any) {
+      console.error(err)
+      Swal.fire(
+        'Error',
+        err.response?.data?.message || 'Error al intentar eliminar la caja. Es posible que tenga transacciones.',
+        'error'
+      )
+    }
+  }
+}
 
 const formatTipo = (tipo: string) => {
   if (tipo === 'boveda') return 'Bóveda'
