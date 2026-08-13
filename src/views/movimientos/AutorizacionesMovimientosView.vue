@@ -66,12 +66,14 @@
                 {{ sol.origen?.nombre || 'Bancos / Externo' }}
                 <span class="text-[10px] font-bold text-gray-400 uppercase block">
                   {{ formatTipo(sol.origen?.tipo_caja) }}
+                  <template v-if="sol.origen?.agencia_id"> - Ag: {{ sol.origen.agencia_id }}</template>
                 </span>
               </td>
               <td class="p-3.5">
                 {{ sol.destino?.nombre }}
                 <span class="text-[10px] font-bold text-gray-400 uppercase block">
                   {{ formatTipo(sol.destino?.tipo_caja) }}
+                  <template v-if="sol.destino?.agencia_id"> - Ag: {{ sol.destino.agencia_id }}</template>
                 </span>
               </td>
               <td class="p-3.5">
@@ -130,12 +132,18 @@
             <div class="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-150 dark:border-gray-750 rounded-2xl">
               <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Caja/Bóveda Origen</span>
               <span class="text-sm font-bold text-gray-900 dark:text-white">{{ selectedSolicitud.origen?.nombre || 'Bancos / Externo' }}</span>
-              <span class="text-xs text-gray-500 block mt-0.5">{{ formatTipo(selectedSolicitud.origen?.tipo_caja) }}</span>
+              <span class="text-xs text-gray-500 block mt-0.5">
+                {{ formatTipo(selectedSolicitud.origen?.tipo_caja) }}
+                <template v-if="selectedSolicitud.origen?.agencia_id"> - Ag: {{ selectedSolicitud.origen.agencia_id }}</template>
+              </span>
             </div>
             <div class="p-4 bg-gray-50 dark:bg-gray-900 border border-gray-150 dark:border-gray-750 rounded-2xl">
               <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">Caja/Bóveda Destino</span>
               <span class="text-sm font-bold text-gray-900 dark:text-white">{{ selectedSolicitud.destino?.nombre }}</span>
-              <span class="text-xs text-gray-500 block mt-0.5">{{ formatTipo(selectedSolicitud.destino?.tipo_caja) }}</span>
+              <span class="text-xs text-gray-500 block mt-0.5">
+                {{ formatTipo(selectedSolicitud.destino?.tipo_caja) }}
+                <template v-if="selectedSolicitud.destino?.agencia_id"> - Ag: {{ selectedSolicitud.destino.agencia_id }}</template>
+              </span>
             </div>
           </div>
 
@@ -236,6 +244,7 @@ interface Caja {
   id: number
   nombre: string
   tipo_caja: string
+  agencia_id?: number
 }
 
 interface Denominacion {

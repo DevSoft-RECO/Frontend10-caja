@@ -267,6 +267,7 @@ interface Caja {
   nombre: string
   tipo_caja: 'boveda' | 'general' | 'ventanilla'
   estado: boolean
+  agencia_id?: number
   agencia?: { nombre: string }
 }
 

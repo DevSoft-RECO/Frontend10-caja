@@ -348,6 +348,7 @@ interface Caja {
   nombre: string
   tipo_caja: string
   estado: boolean
+  agencia_id?: number
   agencia?: Agencia
 }
 
@@ -454,11 +455,7 @@ const openDetailsModal = async (cierre: Cierre) => {
   detailsModalOpen.value = true
 }
 
-const formatTipo = (tipo: string) => {
-  if (tipo === 'boveda') return 'Bóveda'
-  if (tipo === 'general') return 'Caja General'
-  return 'Ventanilla'
-}
+
 
 const formatCurrency = (val: number | undefined) => {
   if (val === undefined) return 'Q0.00'

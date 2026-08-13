@@ -434,11 +434,12 @@ const fetchData = async () => {
                           authStore.user?.agencia?.id || 
                           cajasRes.data.find((c: any) => c.usuario_en_turno?.sso_id === authStore.user?.id)?.agencia_id
 
-    // Filtrar las cajas activas de la misma agencia que sean ventanillas
+    // Filtrar las cajas activas de la misma agencia que sean ventanillas (excepto Super Admin)
+    const isSuperAdmin = authStore.hasRole('Super Admin')
     cajas.value = cajasRes.data.filter((c: any) => 
       c.estado && 
       c.tipo_caja === 'ventanilla' && 
-      Number(c.agencia_id) === Number(userAgenciaId)
+      (isSuperAdmin || Number(c.agencia_id) === Number(userAgenciaId))
     )
     denominaciones.value = denomsRes.data.filter((d: any) => d.activo)
 
