@@ -296,15 +296,7 @@ const routes: RouteRecordRaw[] = [
                     permission: 'operaciones_adicionales'
                 }
             },
-            {
-                path: 'movimientos/autorizaciones-traslados',
-                name: 'autorizaciones-traslados',
-                component: () => import('@/views/movimientos/AutorizacionesTrasladosView.vue'),
-                meta: {
-                    title: 'Bandeja de Traslados Entrantes',
-                    permission: 'autorizaciones'
-                }
-            },
+
             {
                 path: 'movimientos/bancos',
                 name: 'bancos-operaciones',
