@@ -44,8 +44,8 @@
                 required
               >
                 <option value="">-- Seleccionar Origen --</option>
-                <option v-for="caja in cajas" :key="caja.id" :value="caja.id" :disabled="!caja.estado && caja.tipo_caja !== 'general'">
-                  {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }})
+                <option v-for="caja in cajasFiltradas" :key="caja.id" :value="caja.id" :disabled="!caja.estado">
+                  {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }}) - Ag: {{ caja.agencia_id }}
                 </option>
               </select>
             </div>
@@ -60,8 +60,8 @@
                 required
               >
                 <option value="">-- Seleccionar Destino --</option>
-                <option v-for="caja in cajas" :key="caja.id" :value="caja.id" :disabled="caja.id === Number(form.origen_caja_id) || (!caja.estado && caja.tipo_caja !== 'general')">
-                  {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }})
+                <option v-for="caja in cajasFiltradas" :key="caja.id" :value="caja.id" :disabled="caja.id === Number(form.origen_caja_id) || !caja.estado">
+                  {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }}) - Ag: {{ caja.agencia_id }}
                 </option>
               </select>
             </div>
@@ -302,6 +302,10 @@ const form = ref({
 })
 
 const localDenominaciones = ref<Denominacion[]>([])
+
+const cajasFiltradas = computed(() => {
+  return props.cajas.filter(c => c.tipo_caja !== 'general')
+})
 
 const origenCajaSeleccionada = computed(() => {
   if (!form.value.origen_caja_id) return null
