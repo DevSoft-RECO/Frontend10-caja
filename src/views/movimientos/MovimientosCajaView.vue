@@ -70,7 +70,7 @@
             >
               <option value="">-- Seleccionar Origen --</option>
               <option v-for="caja in cajasFiltradasOrigen" :key="caja.id" :value="caja.id" :disabled="!caja.estado && caja.tipo_caja !== 'general'">
-                {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }})
+                {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }}) - Ag: {{ caja.agencia_id }}
               </option>
             </select>
           </div>
@@ -86,7 +86,7 @@
             >
               <option value="">-- Seleccionar Destino --</option>
               <option v-for="caja in cajasFiltradasDestino" :key="caja.id" :value="caja.id" :disabled="!caja.estado">
-                {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }})
+                {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }}) - Ag: {{ caja.agencia_id }}
               </option>
             </select>
           </div>
@@ -349,13 +349,20 @@ const cajasFiltradasOrigen = computed(() => {
   // 1. Buscar la caja asignada al cajero activo
   const miCaja = cajas.value.find(c => c.usuario_id === userId)
   if (!miCaja) {
-    // Si no es cajero (ej. administrador), mostrar todo
-    return cajas.value.filter(c => c.estado)
+    // Si no es cajero (ej. administrador), mostrar todo excluyendo 'general', y filtrando por agencia si no es Super Admin
+    const userAgencia = authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
+    return cajas.value.filter(c => {
+      if (!c.estado || c.tipo_caja === 'general') return false
+      if (!authStore.hasRole('Super Admin') && userAgencia) {
+        return c.agencia_id === Number(userAgencia)
+      }
+      return true
+    })
   }
 
-  // 2. Retornar solo su propia caja y la bóveda de su agencia
+  // 2. Retornar solo su propia caja y la bóveda de su agencia, excluyendo 'general'
   return cajas.value.filter(c => {
-    return c.estado && (c.id === miCaja.id || (c.tipo_caja === 'boveda' && c.agencia_id === miCaja.agencia_id))
+    return c.estado && c.tipo_caja !== 'general' && (c.id === miCaja.id || (c.tipo_caja === 'boveda' && c.agencia_id === miCaja.agencia_id))
   })
 })
 
@@ -371,8 +378,15 @@ const cajasFiltradasDestino = computed(() => {
 
   const miCaja = cajas.value.find(c => c.usuario_id === userId)
   if (!miCaja) {
-    // Si no es cajero, permitir cualquiera menos el origen
-    return cajas.value.filter(c => c.estado && c.id !== Number(form.value.origen_caja_id))
+    // Si no es cajero, permitir cualquiera menos el origen, y excluir 'general', y filtrando por agencia si no es Super Admin
+    const userAgencia = authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
+    return cajas.value.filter(c => {
+      if (!c.estado || c.tipo_caja === 'general' || c.id === Number(form.value.origen_caja_id)) return false
+      if (!authStore.hasRole('Super Admin') && userAgencia) {
+        return c.agencia_id === Number(userAgencia)
+      }
+      return true
+    })
   }
 
   if (!form.value.origen_caja_id) return []
@@ -381,7 +395,7 @@ const cajasFiltradasDestino = computed(() => {
 
   // De Bóveda -> A mi Caja asignada
   if (origenId !== miCaja.id) {
-    return cajas.value.filter(c => c.estado && c.id === miCaja.id)
+    return cajas.value.filter(c => c.estado && c.tipo_caja !== 'general' && c.id === miCaja.id)
   }
 
   // De mi Caja asignada -> A Bóveda
