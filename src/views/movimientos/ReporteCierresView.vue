@@ -21,9 +21,9 @@
           @change="fetchCierres"
           class="block w-full sm:w-64 px-3 py-2 border border-gray-300 dark:border-gray-650 rounded-xl bg-white dark:bg-gray-750 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
         >
-          <option value="">Todas las Cajas / Bóvedas</option>
-          <option v-for="caja in cajas" :key="caja.id" :value="caja.id">
-            {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }})
+          <option value="">Todas las Bóvedas</option>
+          <option v-for="caja in bovedasDisponibles" :key="caja.id" :value="caja.id">
+            {{ caja.nombre }} - Ag: {{ caja.agencia_id }}
           </option>
         </select>
       </div>
@@ -329,8 +329,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import axios from '@/api/axios'
+import { useAuthStore } from '@/stores/auth'
 
 interface User {
   id: number
@@ -399,6 +400,10 @@ const filterCaja = ref('')
 const detailsModalOpen = ref(false)
 const selectedCierre = ref<Cierre | null>(null)
 
+const bovedasDisponibles = computed(() => {
+  return cajas.value.filter(c => c.tipo_caja === 'boveda')
+})
+
 // Acciones
 const fetchCierres = async () => {
   loading.value = true
@@ -416,6 +421,7 @@ const fetchCierres = async () => {
     const res = await axios.get('/cajas/cierres-diarios', { params })
     cierres.value = res.data
   } catch (err: any) {
+    console.error('Error al consultar históricos de cierres:', err)
     error.value = 'Error al consultar históricos de cierres.'
   } finally {
     loading.value = false
@@ -433,7 +439,7 @@ const fetchCajas = async () => {
     const res = await axios.get('/cajas', { params })
     cajas.value = res.data.data || res.data
   } catch (err) {
-    console.error('Error al cargar catálogo de cajas.')
+    console.error('Error al cargar catálogo de cajas:', err)
   }
 }
 
