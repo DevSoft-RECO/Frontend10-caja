@@ -658,7 +658,7 @@ const autoGenerateVentanillaName = (agenciaId: number | string) => {
   }
 }
 
-watch([() => form.value.tipo_caja, () => form.value.agencia_id], ([nuevoTipo, nuevaAgencia]) => {
+watch([() => form.value.tipo_caja, () => form.value.agencia_id], ([, nuevaAgencia]) => {
   autoGenerateVentanillaName(nuevaAgencia)
 })
 
