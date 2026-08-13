@@ -312,7 +312,7 @@ const filteredVentanillas = computed(() => {
   let result = cajas.value.filter(c => c.tipo_caja === 'ventanilla')
   
   const userAgencia = authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
-  if (userAgencia) {
+  if (!authStore.hasRole('Super Admin') && userAgencia) {
     result = result.filter(c => c.agencia_id === Number(userAgencia))
   }
   
@@ -329,7 +329,7 @@ const fetchData = async () => {
   try {
     const params: any = {}
     const userAgencia = authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
-    if (userAgencia) {
+    if (!authStore.hasRole('Super Admin') && userAgencia) {
       params.agencia_id = userAgencia
     }
     const { data } = await api.get('/cajas', { params })
