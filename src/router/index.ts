@@ -174,7 +174,7 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('@/views/ajustes/CajasView.vue'),
                 meta: {
                     title: 'Cajas',
-                    role: 'Super Admin'
+                    permission: 'configuracion_caja'
                 }
             },
             {
@@ -360,7 +360,7 @@ const orderedRoutes = [
 
     { path: '/admin/movimientos/bancos', permission: 'operaciones_adicionales' },
     { path: '/admin/ajustes/denominaciones', role: 'Super Admin' },
-    { path: '/admin/ajustes/cajas', role: 'Super Admin' },
+    { path: '/admin/ajustes/cajas', permission: 'configuracion_caja' },
     { path: '/admin/ajustes/dia-cero', permission: 'configuracion_caja' }
 ]
 
