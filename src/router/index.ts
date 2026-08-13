@@ -160,6 +160,15 @@ const routes: RouteRecordRaw[] = [
                 }
             },
             {
+                path: 'control-central/asignar-ventanillas',
+                name: 'asignar-ventanillas',
+                component: () => import('@/views/control/AsignarVentanillasView.vue'),
+                meta: {
+                    title: 'Asignar Ventanillas',
+                    permission: 'monitoreo_caja'
+                }
+            },
+            {
                 path: 'ajustes/cajas',
                 name: 'cajas',
                 component: () => import('@/views/ajustes/CajasView.vue'),

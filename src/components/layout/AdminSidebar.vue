@@ -240,6 +240,7 @@ const menuItems = computed(() => {
             show: authStore.hasPermission('monitoreo_caja'),
             children: [
                 { label: 'Dashboard General', route: '/admin/movimientos/dashboard-general-alt' },
+                { label: 'Asignar Ventanillas', route: '/admin/control-central/asignar-ventanillas' },
                 { label: 'Autorizaciones de Apertura', route: '/admin/movimientos/autorizaciones' },
                 { label: 'Autorizaciones de Movimientos', route: '/admin/movimientos/autorizaciones-movimientos' },
                 { label: 'Cierre de Caja', route: '/admin/movimientos/cierre' },
