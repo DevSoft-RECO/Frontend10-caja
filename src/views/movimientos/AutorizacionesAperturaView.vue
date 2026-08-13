@@ -218,6 +218,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import axios from '@/api/axios'
+import { useAuthStore } from '@/stores/auth'
 
 interface User {
   id: number
@@ -284,7 +285,14 @@ const diferencia = computed(() => {
 const fetchSolicitudes = async () => {
   loading.value = true
   try {
-    const res = await axios.get('/cajas/solicitudes/pendientes')
+    const params: any = {}
+    const authStore = useAuthStore()
+    const userAgencia = authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
+    if (!authStore.hasRole('Super Admin') && userAgencia) {
+      params.agencia_id = userAgencia
+    }
+
+    const res = await axios.get('/cajas/solicitudes/pendientes', { params })
     solicitudes.value = res.data
   } catch (err) {
     console.error('Error al cargar bandeja de autorizaciones')
@@ -308,9 +316,16 @@ const openComparadorModal = async (sol: SolicitudApertura) => {
     montoEsperado.value = cierreInfo.saldo_final_fisico_declarado
 
     // 2. Obtener denominaciones y la solicitud fresca con sus detalles
+    const params: any = {}
+    const authStore = useAuthStore()
+    const userAgencia = authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
+    if (!authStore.hasRole('Super Admin') && userAgencia) {
+      params.agencia_id = userAgencia
+    }
+
     const [denomsRes, solicitudesRes] = await Promise.all([
       axios.get('/denominaciones'),
-      axios.get('/cajas/solicitudes/pendientes')
+      axios.get('/cajas/solicitudes/pendientes', { params })
     ])
     
     const denoms = denomsRes.data.filter((d: any) => d.activo)
