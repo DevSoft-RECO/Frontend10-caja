@@ -407,6 +407,12 @@ const fetchCierres = async () => {
     const params: any = {}
     if (filterCaja.value) params.caja_id = filterCaja.value
 
+    const authStore = useAuthStore()
+    const userAgencia = authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
+    if (!authStore.hasRole('Super Admin') && !authStore.hasPermission('auditor_caja') && userAgencia) {
+      params.agencia_id = userAgencia
+    }
+
     const res = await axios.get('/cajas/cierres-diarios', { params })
     cierres.value = res.data
   } catch (err: any) {
@@ -418,8 +424,14 @@ const fetchCierres = async () => {
 
 const fetchCajas = async () => {
   try {
-    const res = await axios.get('/cajas')
-    cajas.value = res.data
+    const params: any = {}
+    const authStore = useAuthStore()
+    const userAgencia = authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
+    if (!authStore.hasRole('Super Admin') && !authStore.hasPermission('auditor_caja') && userAgencia) {
+      params.agencia_id = userAgencia
+    }
+    const res = await axios.get('/cajas', { params })
+    cajas.value = res.data.data || res.data
   } catch (err) {
     console.error('Error al cargar catálogo de cajas.')
   }
