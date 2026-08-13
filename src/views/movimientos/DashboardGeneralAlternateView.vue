@@ -281,7 +281,8 @@ const onCierreSuccess = () => {
 
 // Agencias
 const agencias = ref<any[]>([])
-const agenciaSeleccionadaId = ref<number | null>(null)
+const userAgencia = authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
+const agenciaSeleccionadaId = ref<number | null>(userAgencia ? Number(userAgencia) : null)
 
 const onAgenciaChange = () => {
   fetchData()
