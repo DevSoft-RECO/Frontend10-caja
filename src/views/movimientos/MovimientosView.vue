@@ -268,6 +268,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import axios from '@/api/axios'
+import { useAuthStore } from '@/stores/auth'
 
 // Componentes modularizados
 import DetalleMovimientoModal from './components/DetalleMovimientoModal.vue'
@@ -352,8 +353,15 @@ const fetchData = async () => {
   loading.value = true
   error.value = ''
   try {
+    const params: any = {}
+    const authStore = useAuthStore()
+    const userAgencia = authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
+    if (!authStore.hasRole('Super Admin') && !authStore.hasPermission('auditor_caja') && userAgencia) {
+      params.agencia_id = userAgencia
+    }
+
     const [cajasRes, denomsRes] = await Promise.all([
-      axios.get('/cajas'),
+      axios.get('/cajas', { params }),
       axios.get('/denominaciones')
     ])
     cajas.value = cajasRes.data
@@ -376,6 +384,12 @@ const fetchMovimientos = async () => {
     if (filters.value.destino_caja_id) params.destino_caja_id = filters.value.destino_caja_id
     if (filters.value.fecha_desde) params.fecha_desde = filters.value.fecha_desde
     if (filters.value.fecha_hasta) params.fecha_hasta = filters.value.fecha_hasta
+
+    const authStore = useAuthStore()
+    const userAgencia = authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
+    if (!authStore.hasRole('Super Admin') && !authStore.hasPermission('auditor_caja') && userAgencia) {
+      params.agencia_id = userAgencia
+    }
 
     const res = await axios.get('/movimientos', { params })
     movimientos.value = res.data.data
