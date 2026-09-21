@@ -11,13 +11,13 @@
         </p>
       </div>
       <div class="flex items-center gap-3">
-        <div class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-xl text-xs font-bold border border-gray-250 dark:border-gray-700/60">
+        <div class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-xl text-xs font-bold border border-gray-200 dark:border-gray-700/60">
           <span class="w-2.5 h-2.5 rounded-full bg-verde-cope"></span>
           Terminal Activa
         </div>
         <button
           @click="submitForm"
-          :disabled="submitting || granTotal === 0"
+          :disabled="submitting || granTotal === 0 || !cajaOperativa || !miBoveda"
           class="px-5 py-2.5 bg-azul-cope hover:bg-azul-cope/90 text-white font-bold rounded-xl text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <svg v-if="submitting" class="w-4 h-4 animate-spin text-white" fill="none" viewBox="0 0 24 24">
@@ -31,7 +31,7 @@
     </div>
 
     <!-- Main Container -->
-    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-sm overflow-hidden border border-gray-100 dark:border-gray-700/60">
       <!-- Corporate Header -->
       <div class="px-6 py-4 bg-azul-cope text-white flex items-center justify-between">
         <h2 class="text-xs font-black uppercase tracking-wider text-white">Solicitud de Transferencia de Fondos</h2>
@@ -39,10 +39,11 @@
           🏦 Flujo de Doble Entrada
         </span>
       </div>
+
       <!-- Body Form -->
       <form @submit.prevent="submitForm" class="p-6 space-y-6">
         <!-- Alert / Error message -->
-        <div v-if="formError" class="p-4 bg-red-50 dark:bg-red-950/10 border border-red-200 dark:border-red-900/30 rounded-xl flex items-start gap-3">
+        <div v-if="formError" class="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-xl flex items-start gap-3">
           <svg class="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
@@ -50,103 +51,159 @@
         </div>
 
         <!-- Success Message -->
-        <div v-if="successMsg" class="p-4 bg-green-50 dark:bg-green-950/10 border border-green-200 dark:border-green-900/30 rounded-xl flex items-start gap-3">
+        <div v-if="successMsg" class="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/30 rounded-xl flex items-start gap-3">
           <svg class="w-5 h-5 text-green-600 dark:text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <span class="text-xs font-semibold text-green-800 dark:text-green-300">{{ successMsg }}</span>
         </div>
 
-        <!-- Fila Origen, Destino, Categoria -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <!-- Origen -->
-          <div>
-            <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Caja/Bóveda Origen <span class="text-red-500">*</span></label>
-            <select
-              v-model="form.origen_caja_id"
-              @change="handleOrigenChange"
-              class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
-              required
-            >
-              <option value="">-- Seleccionar Origen --</option>
-              <option v-for="caja in cajasFiltradasOrigen" :key="caja.id" :value="caja.id" :disabled="!caja.estado && caja.tipo_caja !== 'general'">
-                {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }}) - Ag: {{ caja.agencia_id }}
-              </option>
-            </select>
-          </div>
+        <!-- Aviso si no hay ventanilla o bóveda -->
+        <div v-if="!cajaOperativa" class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-xl flex items-center gap-3 text-xs font-semibold text-amber-800 dark:text-amber-300">
+          <span>⚠️ No tienes una caja de ventanilla asignada o activa para operar. Selecciona una ventanilla a continuación o solicita asignación en administración.</span>
+        </div>
 
-          <!-- Destino -->
-          <div>
-            <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Caja/Bóveda Destino <span class="text-red-500">*</span></label>
-            <select
-              v-model="form.destino_caja_id"
-              @change="handleDestinoChange"
-              class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
-              required
-            >
-              <option value="">-- Seleccionar Destino --</option>
-              <option v-for="caja in cajasFiltradasDestino" :key="caja.id" :value="caja.id" :disabled="!caja.estado">
-                {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }}) - Ag: {{ caja.agencia_id }}
-              </option>
-            </select>
-          </div>
+        <div v-if="cajaOperativa && !miBoveda" class="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900/30 rounded-xl flex items-center gap-3 text-xs font-semibold text-red-800 dark:text-red-300">
+          <span>❌ No se encontró una Bóveda activa para la agencia de tu caja. No se pueden realizar traslados institucionales sin bóveda receptora/emisora.</span>
+        </div>
 
-          <!-- Categoría -->
-          <div>
-            <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Categoría <span class="text-red-500">*</span></label>
-            <select
-              v-model="form.categoria_movimiento"
-              class="block w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm font-semibold transition-all"
-              required
+        <!-- Selector de Ventanilla para Administradores / Super Admins sin caja fija -->
+        <div v-if="!miCajaAsignada && ventanillasDisponibles.length > 0" class="p-4 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/30 rounded-2xl space-y-2">
+          <label class="block text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">
+            Ventanilla / Caja de Operación (Modo Supervisor / Admin)
+          </label>
+          <select
+            v-model="cajaOperativaSeleccionadaId"
+            class="block w-full md:w-1/2 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-950 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope text-sm font-semibold transition-all"
+          >
+            <option v-for="caja in ventanillasDisponibles" :key="caja.id" :value="String(caja.id)">
+              {{ caja.nombre }} - {{ caja.agencia?.nombre || 'Agencia ' + caja.agencia_id }} ({{ caja.usuario_en_turno?.name || 'Sin cajero en turno' }})
+            </option>
+          </select>
+        </div>
+
+        <!-- 1. SELECCIÓN DE TIPO DE MOVIMIENTO -->
+        <div class="space-y-2">
+          <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+            Tipo de Movimiento <span class="text-red-500">*</span>
+          </label>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <button
+              v-for="tipo in tiposMovimiento"
+              :key="tipo.value"
+              type="button"
+              @click="seleccionarTipoMovimiento(tipo.value)"
+              :class="[
+                'p-4 rounded-2xl border text-left transition-all relative flex flex-col justify-between cursor-pointer',
+                form.categoria_movimiento === tipo.value
+                  ? 'border-azul-cope bg-blue-50/40 dark:bg-azul-cope/10 ring-2 ring-azul-cope/30 shadow-sm'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-900/60'
+              ]"
             >
-              <option v-for="cat in categoriasDisponibles" :key="cat.value" :value="cat.value">
-                {{ cat.label }}
-              </option>
-            </select>
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <span class="text-lg">{{ tipo.icon }}</span>
+                  <span
+                    :class="[
+                      'text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full',
+                      form.categoria_movimiento === tipo.value
+                        ? 'bg-azul-cope text-white'
+                        : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
+                    ]"
+                  >
+                    {{ tipo.badge }}
+                  </span>
+                </div>
+                <div class="font-extrabold text-sm text-gray-900 dark:text-white">
+                  {{ tipo.label }}
+                </div>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                  {{ tipo.descripcion }}
+                </p>
+              </div>
+            </button>
           </div>
         </div>
 
-        <!-- Fila Operación e Indicador Informativo -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-          <div>
-            <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Dirección de Operación</label>
-            <div class="flex">
-              <span 
-                v-if="form.tipo_operacion === 'egreso'"
-                class="px-4 py-2 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-900/50 rounded-xl text-xs font-extrabold flex items-center gap-1.5 uppercase tracking-wider"
-              >
-                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                Egreso (Sale de la Bóveda hacia Ventanilla)
+        <!-- 2. TARJETAS INFORMATIVAS: FLUJO Y DIRECCIÓN DEL DINERO (ORIGEN ➔ DESTINO) -->
+        <div class="grid grid-cols-1 md:grid-cols-11 gap-4 items-center bg-gray-50/80 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-200 dark:border-gray-700/60">
+          <!-- Caja Origen -->
+          <div class="md:col-span-5 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-red-100 dark:bg-red-950/40 text-red-700 dark:text-red-400 flex items-center gap-1">
+                <span>🔴</span> Salida / Origen
               </span>
-              <span 
-                v-else
-                class="px-4 py-2 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/50 rounded-xl text-xs font-extrabold flex items-center gap-1.5 uppercase tracking-wider"
-              >
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                Ingreso (Entra de Ventanilla a la Bóveda)
+              <span class="text-[10px] font-bold text-gray-500 uppercase px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-md">
+                {{ formatTipo(cajaOrigenInfo?.tipo_caja) }}
               </span>
+            </div>
+            
+            <div class="text-base font-black text-gray-900 dark:text-white tracking-tight">
+              {{ cajaOrigenInfo?.nombre || 'Buscando caja origen...' }}
+            </div>
+
+            <div class="text-xs text-gray-600 dark:text-gray-300 flex flex-col gap-1 border-t border-gray-100 dark:border-gray-700/60 pt-2 mt-1">
+              <div class="flex items-center gap-1.5">
+                <span class="text-gray-400 font-semibold">👤 Encargado:</span>
+                <span class="font-bold text-gray-800 dark:text-gray-200">{{ getEncargadoNombre(cajaOrigenInfo) }}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-gray-400 font-semibold">🏢 Agencia:</span>
+                <span class="font-bold text-gray-800 dark:text-gray-200">{{ getAgenciaNombre(cajaOrigenInfo) }}</span>
+              </div>
             </div>
           </div>
 
-          <!-- Cartel de Reglas UX Dinámicas -->
-          <div v-if="deshabilitaDeterioradoPorOrigen || deshabilitaDeterioradoPorDestino" class="p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-105 dark:border-blue-900/30 rounded-xl text-xs text-blue-800 dark:text-blue-300 font-semibold flex items-center gap-2">
-            <svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span v-if="deshabilitaDeterioradoPorOrigen">
-              Origen es una Bóveda. No se permite egresar efectivo deteriorado. Columna deshabilitada.
+          <!-- Indicador Central de Dirección -->
+          <div class="md:col-span-1 flex flex-col items-center justify-center py-1">
+            <div class="w-10 h-10 rounded-full bg-azul-cope text-white flex items-center justify-center shadow-md animate-pulse">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </div>
+            <span class="text-[9px] font-black text-azul-cope dark:text-blue-400 uppercase tracking-widest mt-1 text-center">
+              {{ form.tipo_operacion === 'egreso' ? 'Egreso' : 'Ingreso' }}
             </span>
-            <span v-else-if="deshabilitaDeterioradoPorDestino">
-              Destino es una Ventanilla. No se permite enviar efectivo deteriorado. Columna deshabilitada.
-            </span>
+          </div>
+
+          <!-- Caja Destino -->
+          <div class="md:col-span-5 bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+                <span>🟢</span> Entrada / Destino
+              </span>
+              <span class="text-[10px] font-bold text-gray-500 uppercase px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-md">
+                {{ formatTipo(cajaDestinoInfo?.tipo_caja) }}
+              </span>
+            </div>
+
+            <div class="text-base font-black text-gray-900 dark:text-white tracking-tight">
+              {{ cajaDestinoInfo?.nombre || 'Buscando caja destino...' }}
+            </div>
+
+            <div class="text-xs text-gray-600 dark:text-gray-300 flex flex-col gap-1 border-t border-gray-100 dark:border-gray-700/60 pt-2 mt-1">
+              <div class="flex items-center gap-1.5">
+                <span class="text-gray-400 font-semibold">👤 Encargado:</span>
+                <span class="font-bold text-gray-800 dark:text-gray-200">{{ getEncargadoNombre(cajaDestinoInfo) }}</span>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <span class="text-gray-400 font-semibold">🏢 Agencia:</span>
+                <span class="font-bold text-gray-800 dark:text-gray-200">{{ getAgenciaNombre(cajaDestinoInfo) }}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Tabla de doble entrada para Denominaciones (Billetes y Monedas por separado) -->
+        <!-- 3. DETALLE DE DENOMINACIONES (BILLETES Y MONEDAS) -->
         <div class="space-y-6">
-          <h3 class="text-sm font-bold text-gray-900 dark:text-white pb-2 border-b border-gray-100 dark:border-gray-800">
-            Detalle de Denominaciones a Trasladar
-          </h3>
+          <div class="flex items-center justify-between pb-2 border-b border-gray-100 dark:border-gray-800">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-white">
+              Detalle de Denominaciones a Trasladar
+            </h3>
+            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+              {{ form.categoria_movimiento === 'deteriorado' ? 'Modalidad: Efectivo Deteriorado' : 'Modalidad: Operaciones (Efectivo Bueno)' }}
+            </span>
+          </div>
 
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Billetes -->
@@ -155,7 +212,7 @@
               <div class="border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden shadow-sm">
                 <table class="w-full text-left border-collapse">
                   <thead>
-                    <tr class="bg-gray-55 dark:bg-gray-900/80 border-b border-gray-100 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <tr class="bg-gray-50 dark:bg-gray-900/80 border-b border-gray-100 dark:border-gray-800 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                       <th class="p-3 w-2/5">Denominación</th>
                       <th v-if="form.categoria_movimiento !== 'deteriorado'" class="p-3 w-1/4 text-center">Cant. Buena</th>
                       <th v-if="form.categoria_movimiento === 'deteriorado'" class="p-3 w-1/4 text-center">Cant. Deteriorada</th>
@@ -166,8 +223,18 @@
                     <tr v-for="denom in billetesList" :key="denom.id">
                       <td class="p-3 font-semibold text-gray-800 dark:text-gray-200">
                         <div>{{ denom.nombre }} ({{ formatCurrency(denom.valor) }})</div>
-                        <div v-if="form.tipo_operacion === 'egreso' && form.origen_caja_id" class="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mt-0.5">
-                          Disponible en origen: <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ stockMap[denom.id]?.stock_bueno ?? 0 }}</span>
+                        <!-- Stock disponible informativo según el tipo de movimiento -->
+                        <div class="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mt-0.5">
+                          <span v-if="form.categoria_movimiento === 'abastecimiento'">
+                            <span v-if="(stockMap[denom.id]?.stock_bueno ?? 0) > 0" class="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
+                              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                              Con existencia en Bóveda
+                            </span>
+                            <span v-else class="inline-flex items-center gap-1 font-bold text-gray-400 dark:text-gray-500">
+                              <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                              Sin existencia en Bóveda
+                            </span>
+                          </span>
                         </div>
                       </td>
                       <td v-if="form.categoria_movimiento !== 'deteriorado'" class="p-3">
@@ -185,8 +252,7 @@
                           type="number"
                           min="0"
                           placeholder="0"
-                          :disabled="deshabilitaDeterioradoPorOrigen || deshabilitaDeterioradoPorDestino"
-                          class="block w-full text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-transparent text-sm disabled:opacity-40 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                          class="block w-full text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-transparent text-sm"
                         />
                       </td>
                       <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-28">
@@ -215,8 +281,18 @@
                     <tr v-for="denom in monedasList" :key="denom.id">
                       <td class="p-3 font-semibold text-gray-800 dark:text-gray-200">
                         <div>{{ denom.nombre }} ({{ formatCurrency(denom.valor) }})</div>
-                        <div v-if="form.tipo_operacion === 'egreso' && form.origen_caja_id" class="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mt-0.5">
-                          Disponible en origen: <span class="font-bold text-emerald-600 dark:text-emerald-400">{{ stockMap[denom.id]?.stock_bueno ?? 0 }}</span>
+                        <!-- Stock disponible informativo según el tipo de movimiento -->
+                        <div class="text-[10px] text-gray-400 dark:text-gray-500 font-semibold mt-0.5">
+                          <span v-if="form.categoria_movimiento === 'abastecimiento'">
+                            <span v-if="(stockMap[denom.id]?.stock_bueno ?? 0) > 0" class="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400">
+                              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                              Con existencia en Bóveda
+                            </span>
+                            <span v-else class="inline-flex items-center gap-1 font-bold text-gray-400 dark:text-gray-500">
+                              <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                              Sin existencia en Bóveda
+                            </span>
+                          </span>
                         </div>
                       </td>
                       <td v-if="form.categoria_movimiento !== 'deteriorado'" class="p-3">
@@ -234,8 +310,7 @@
                           type="number"
                           min="0"
                           placeholder="0"
-                          :disabled="deshabilitaDeterioradoPorOrigen || deshabilitaDeterioradoPorDestino"
-                          class="block w-full text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-600 focus:border-transparent text-sm disabled:opacity-40 disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                          class="block w-full text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-transparent text-sm"
                         />
                       </td>
                       <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-28">
@@ -250,25 +325,23 @@
 
           <!-- Gran Total Informativo -->
           <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl shadow-inner">
-            <span class="text-sm font-bold text-gray-800 dark:text-gray-250 uppercase tracking-wider">Gran Total del Movimiento</span>
+            <span class="text-sm font-bold text-gray-800 dark:text-gray-200 uppercase tracking-wider">Gran Total del Movimiento</span>
             <span class="text-2xl font-extrabold font-mono text-azul-cope dark:text-white">
               {{ formatCurrency(granTotal) }}
             </span>
           </div>
         </div>
 
-        <!-- Descripción / Comentarios -->
+        <!-- 4. DESCRIPCIÓN / COMENTARIOS -->
         <div>
           <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Comentarios / Bitácora Opcional</label>
           <textarea
             v-model="form.descripcion"
-            rows="3"
+            rows="2"
             placeholder="Escribe comentarios o detalles sobre este traslado (Ej. Número de bolsa de seguridad, valija)..."
             class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm transition-all"
           ></textarea>
         </div>
-
-        <!-- Acciones de Formulario -->
       </form>
     </div>
   </div>
@@ -286,7 +359,8 @@ interface Caja {
   estado: boolean
   agencia_id?: number
   usuario_id?: number | null
-  agencia?: { nombre: string }
+  agencia?: { id?: number; nombre: string }
+  usuario_en_turno?: { id: number; name: string } | null
 }
 
 interface Denominacion {
@@ -302,17 +376,146 @@ const formError = ref('')
 const successMsg = ref('')
 const submitting = ref(false)
 
+const authStore = useAuthStore()
+
 const cajas = ref<Caja[]>([])
 const denominaciones = ref<Denominacion[]>([])
 const localDenominaciones = ref<Denominacion[]>([])
+
 const form = ref({
   origen_caja_id: '',
   destino_caja_id: '',
   tipo_operacion: 'egreso' as 'ingreso' | 'egreso',
-  categoria_movimiento: 'abastecimiento',
+  categoria_movimiento: 'abastecimiento' as 'abastecimiento' | 'devolucion' | 'deteriorado',
   descripcion: '',
 })
 
+// Catálogo de tipos de movimiento disponibles para el usuario operativo
+const tiposMovimiento = [
+  {
+    value: 'abastecimiento' as const,
+    label: 'Abastecimiento de Efectivo',
+    descripcion: 'Solicitar efectivo operativo de Bóveda hacia tu Ventanilla.',
+    icon: '📥',
+    badge: 'Bóveda ➔ Ventanilla'
+  },
+  {
+    value: 'devolucion' as const,
+    label: 'Devolución de Efectivo',
+    descripcion: 'Enviar excedente de efectivo bueno desde tu Ventanilla hacia Bóveda.',
+    icon: '📤',
+    badge: 'Ventanilla ➔ Bóveda'
+  },
+  {
+    value: 'deteriorado' as const,
+    label: 'Devolución de Deteriorado',
+    descripcion: 'Enviar billetes y monedas dañadas a Bóveda (Deteriorado).',
+    icon: '⚠️',
+    badge: 'Ventanilla ➔ Bóveda'
+  }
+]
+
+// 1. Identificar caja asignada al cajero logueado
+const miCajaAsignada = computed(() => {
+  const userId = authStore.user?.id
+  if (!userId) return null
+  return cajas.value.find(c => c.usuario_id === userId && c.tipo_caja === 'ventanilla') || null
+})
+
+// Selector para admins que no tienen ventanilla propia asignada
+const cajaOperativaSeleccionadaId = ref<string>('')
+
+// Ventanillas elegibles para administradores
+const ventanillasDisponibles = computed(() => {
+  const userAgencia = authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
+  return cajas.value.filter(c => {
+    if (!c.estado || c.tipo_caja !== 'ventanilla') return false
+    if (!authStore.hasRole('Super Admin') && userAgencia) {
+      return c.agencia_id === Number(userAgencia)
+    }
+    return true
+  })
+})
+
+// Caja operativa activa (la ventanilla asignada o la elegida por el supervisor)
+const cajaOperativa = computed(() => {
+  if (miCajaAsignada.value) return miCajaAsignada.value
+  if (cajaOperativaSeleccionadaId.value) {
+    return cajas.value.find(c => c.id === Number(cajaOperativaSeleccionadaId.value)) || null
+  }
+  // Primer ventanilla de la lista disponible como fallback
+  return ventanillasDisponibles.value[0] || null
+})
+
+// 2. Identificar la Bóveda de la agencia de la caja operativa
+const miBoveda = computed(() => {
+  const agenciaId = cajaOperativa.value?.agencia_id || authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
+  if (!agenciaId) return null
+  return cajas.value.find(c => c.tipo_caja === 'boveda' && c.agencia_id === Number(agenciaId) && c.estado) 
+    || cajas.value.find(c => c.tipo_caja === 'boveda' && c.agencia_id === Number(agenciaId)) 
+    || null
+})
+
+// Sincronizar automáticamente Origen, Destino y Tipo de Operación
+const sincronizarRutas = () => {
+  if (!cajaOperativa.value || !miBoveda.value) {
+    form.value.origen_caja_id = ''
+    form.value.destino_caja_id = ''
+    return
+  }
+
+  if (form.value.categoria_movimiento === 'abastecimiento') {
+    // Sale de Bóveda hacia la Ventanilla (Operaciones)
+    form.value.origen_caja_id = String(miBoveda.value.id)
+    form.value.destino_caja_id = String(cajaOperativa.value.id)
+    form.value.tipo_operacion = 'egreso'
+  } else {
+    // Devolución o Deteriorado: Sale de Ventanilla hacia Bóveda
+    form.value.origen_caja_id = String(cajaOperativa.value.id)
+    form.value.destino_caja_id = String(miBoveda.value.id)
+    form.value.tipo_operacion = 'ingreso'
+  }
+}
+
+watch([() => form.value.categoria_movimiento, cajaOperativa, miBoveda], () => {
+  sincronizarRutas()
+}, { immediate: true })
+
+const seleccionarTipoMovimiento = (tipo: 'abastecimiento' | 'devolucion' | 'deteriorado') => {
+  form.value.categoria_movimiento = tipo
+  // Limpiar campos de cantidad al alternar entre bueno y deteriorado
+  localDenominaciones.value.forEach(d => {
+    d.cantidad_buena = 0
+    d.cantidad_deteriorada = 0
+  })
+  sincronizarRutas()
+}
+
+// Información reactiva de las cajas Origen y Destino para pintar en la interfaz
+const cajaOrigenInfo = computed(() => {
+  if (!form.value.origen_caja_id) return null
+  return cajas.value.find(c => c.id === Number(form.value.origen_caja_id)) || null
+})
+
+const cajaDestinoInfo = computed(() => {
+  if (!form.value.destino_caja_id) return null
+  return cajas.value.find(c => c.id === Number(form.value.destino_caja_id)) || null
+})
+
+const getEncargadoNombre = (caja: Caja | null) => {
+  if (!caja) return 'Sin asignar'
+  if (caja.tipo_caja === 'boveda') {
+    return caja.usuario_en_turno?.name || 'Custodio de Bóveda'
+  }
+  return caja.usuario_en_turno?.name || (caja.usuario_id === authStore.user?.id ? authStore.user?.name : 'Sin asignar')
+}
+
+const getAgenciaNombre = (caja: Caja | null) => {
+  if (!caja) return 'Sin asignar'
+  return caja.agencia?.nombre || `Agencia #${caja.agencia_id || 'N/A'}`
+}
+
+// Consulta de Stock en tiempo real para la caja origen
 const stockMap = ref<Record<number, { stock_bueno: number, stock_deteriorado: number }>>({})
 
 const fetchStock = async () => {
@@ -336,111 +539,7 @@ const fetchStock = async () => {
 
 watch(() => form.value.origen_caja_id, fetchStock)
 
-const origenCajaSeleccionada = computed(() => {
-  if (!form.value.origen_caja_id) return null
-  return cajas.value.find(c => c.id === Number(form.value.origen_caja_id)) || null
-})
-
-const cajasFiltradasOrigen = computed(() => {
-  const authStore = useAuthStore()
-  const userId = authStore.user?.id
-  if (!userId) return []
-
-  // 1. Buscar la caja asignada al cajero activo
-  const miCaja = cajas.value.find(c => c.usuario_id === userId)
-  if (!miCaja) {
-    // Si no es cajero (ej. administrador), mostrar todo excluyendo 'general', y filtrando por agencia si no es Super Admin
-    const userAgencia = authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
-    return cajas.value.filter(c => {
-      if (!c.estado || c.tipo_caja === 'general') return false
-      if (!authStore.hasRole('Super Admin') && userAgencia) {
-        return c.agencia_id === Number(userAgencia)
-      }
-      return true
-    })
-  }
-
-  // 2. Retornar solo su propia caja y la bóveda de su agencia, excluyendo 'general'
-  return cajas.value.filter(c => {
-    return c.estado && c.tipo_caja !== 'general' && (c.id === miCaja.id || (c.tipo_caja === 'boveda' && c.agencia_id === miCaja.agencia_id))
-  })
-})
-
-const destinoCajaSeleccionada = computed(() => {
-  if (!form.value.destino_caja_id) return null
-  return cajas.value.find(c => c.id === Number(form.value.destino_caja_id)) || null
-})
-
-const cajasFiltradasDestino = computed(() => {
-  const authStore = useAuthStore()
-  const userId = authStore.user?.id
-  if (!userId) return []
-
-  const miCaja = cajas.value.find(c => c.usuario_id === userId)
-  if (!miCaja) {
-    // Si no es cajero, permitir cualquiera menos el origen, y excluir 'general', y filtrando por agencia si no es Super Admin
-    const userAgencia = authStore.user?.agencia_id || authStore.user?.id_agencia || authStore.user?.agencia?.id
-    return cajas.value.filter(c => {
-      if (!c.estado || c.tipo_caja === 'general' || c.id === Number(form.value.origen_caja_id)) return false
-      if (!authStore.hasRole('Super Admin') && userAgencia) {
-        return c.agencia_id === Number(userAgencia)
-      }
-      return true
-    })
-  }
-
-  if (!form.value.origen_caja_id) return []
-
-  const origenId = Number(form.value.origen_caja_id)
-
-  // De Bóveda -> A mi Caja asignada
-  if (origenId !== miCaja.id) {
-    return cajas.value.filter(c => c.estado && c.tipo_caja !== 'general' && c.id === miCaja.id)
-  }
-
-  // De mi Caja asignada -> A Bóveda
-  return cajas.value.filter(c => c.estado && c.tipo_caja === 'boveda' && c.agencia_id === miCaja.agencia_id)
-})
-
-// Categorías según la regla del origen y destino
-const categoriasDisponibles = computed(() => {
-  const o = origenCajaSeleccionada.value
-  const d = destinoCajaSeleccionada.value
-
-  if (o && (o.tipo_caja === 'boveda' || o.tipo_caja === 'general') && d && d.tipo_caja === 'ventanilla') {
-    return [{ value: 'abastecimiento', label: 'Abastecimiento' }]
-  }
-
-  if (o && o.tipo_caja === 'ventanilla' && d && (d.tipo_caja === 'boveda' || d.tipo_caja === 'general')) {
-    return [
-      { value: 'devolucion', label: 'Devolución' },
-      { value: 'deteriorado', label: 'Deteriorado' }
-    ]
-  }
-
-  return [
-    { value: 'abastecimiento', label: 'Abastecimiento' },
-    { value: 'devolucion', label: 'Devolución' },
-    { value: 'deteriorado', label: 'Deteriorado' }
-  ]
-})
-
-watch(categoriasDisponibles, (newVal) => {
-  const exists = newVal.some(c => c.value === form.value.categoria_movimiento)
-  if (!exists && newVal.length > 0) {
-    form.value.categoria_movimiento = newVal[0].value
-  }
-}, { immediate: true })
-
-watch(() => form.value.categoria_movimiento, (newCat) => {
-  if (newCat === 'devolucion' || newCat === 'deteriorado') {
-    form.value.tipo_operacion = 'ingreso'
-  } else if (newCat === 'abastecimiento') {
-    form.value.tipo_operacion = 'egreso'
-  }
-})
-
-// Load catalogs on mounted
+// Cargar catálogos iniciales
 onMounted(async () => {
   try {
     const [cajasRes, denomsRes] = await Promise.all([
@@ -450,6 +549,11 @@ onMounted(async () => {
     cajas.value = cajasRes.data
     denominaciones.value = denomsRes.data.filter((d: any) => d.activo)
     
+    // Si no tiene caja asignada, auto-seleccionar la primera ventanilla disponible
+    if (!miCajaAsignada.value && ventanillasDisponibles.value.length > 0) {
+      cajaOperativaSeleccionadaId.value = String(ventanillasDisponibles.value[0].id)
+    }
+
     resetForm()
   } catch (err) {
     formError.value = 'Error al cargar catálogos y denominaciones.'
@@ -469,27 +573,18 @@ const resetForm = () => {
     cantidad_buena: 0,
     cantidad_deteriorada: 0
   }))
+  sincronizarRutas()
 }
 
-// Divide localDenominaciones
+// Billetes y Monedas
 const billetesList = computed(() => localDenominaciones.value.filter(d => d.tipo === 'billete'))
 const monedasList = computed(() => localDenominaciones.value.filter(d => d.tipo === 'moneda'))
 
-const deshabilitaDeterioradoPorOrigen = computed(() => {
-  return origenCajaSeleccionada.value?.tipo_caja === 'boveda'
-})
-
-const deshabilitaDeterioradoPorDestino = computed(() => {
-  return destinoCajaSeleccionada.value?.tipo_caja === 'ventanilla'
-})
-
 const calculaSubtotalDenominacion = (d: Denominacion) => {
   if (form.value.categoria_movimiento === 'deteriorado') {
-    const deteriorada = d.cantidad_deteriorada || 0
-    return d.valor * ((deshabilitaDeterioradoPorOrigen.value || deshabilitaDeterioradoPorDestino.value) ? 0 : deteriorada)
+    return d.valor * (d.cantidad_deteriorada || 0)
   } else {
-    const buena = d.cantidad_buena || 0
-    return d.valor * buena
+    return d.valor * (d.cantidad_buena || 0)
   }
 }
 
@@ -499,51 +594,40 @@ const granTotal = computed(() => {
   }, 0)
 })
 
-const handleOrigenChange = () => {
-  form.value.destino_caja_id = ''
-  
-  // Auto-seleccionar si solo hay una opción válida de destino
-  const validDestinos = cajasFiltradasDestino.value
-  if (validDestinos.length === 1) {
-    form.value.destino_caja_id = String(validDestinos[0].id)
-  }
-  
-  evaluarLimpiezaDeteriorados()
-}
-
-const handleDestinoChange = () => {
-  evaluarLimpiezaDeteriorados()
-}
-
-const evaluarLimpiezaDeteriorados = () => {
-  if (deshabilitaDeterioradoPorOrigen.value || deshabilitaDeterioradoPorDestino.value) {
-    localDenominaciones.value.forEach(d => {
-      d.cantidad_deteriorada = 0
-    })
-  }
-}
-
 const submitForm = async () => {
   formError.value = ''
   successMsg.value = ''
   submitting.value = true
 
-  // Validar si es un egreso que no supere el stock disponible
-  if (form.value.tipo_operacion === 'egreso') {
+  if (!cajaOperativa.value) {
+    formError.value = 'No se ha detectado una ventanilla activa para operar.'
+    submitting.value = false
+    return
+  }
+
+  if (!miBoveda.value) {
+    formError.value = 'No se ha detectado una Bóveda activa para procesar la transacción.'
+    submitting.value = false
+    return
+  }
+
+  const isDeteriorados = form.value.categoria_movimiento === 'deteriorado'
+
+  // Validar stock disponible únicamente para Abastecimiento (porque sale de Bóveda)
+  // Para Devolución y Deteriorado no hay restricción ya que son ingresos que alimentan el inventario de Bóveda
+  if (form.value.categoria_movimiento === 'abastecimiento') {
     for (const d of localDenominaciones.value) {
       const cantReq = d.cantidad_buena || 0
       if (cantReq > 0) {
         const disponible = stockMap.value[d.id]?.stock_bueno || 0
         if (cantReq > disponible) {
-          formError.value = `Stock insuficiente en la caja origen para la denominación ${d.nombre}. Solicitado: ${cantReq}, Disponible: ${disponible}.`
+          formError.value = `No hay suficiente existencia en Bóveda para cubrir la cantidad solicitada en la denominación ${d.nombre}.`
           submitting.value = false
           return
         }
       }
     }
   }
-
-  const isDeteriorados = form.value.categoria_movimiento === 'deteriorado'
 
   const detallesPayload = localDenominaciones.value
     .filter(d => {
@@ -556,9 +640,7 @@ const submitForm = async () => {
     .map(d => ({
       denominacion_id: d.id,
       cantidad_buena: isDeteriorados ? 0 : (d.cantidad_buena || 0),
-      cantidad_deteriorada: isDeteriorados 
-        ? ((deshabilitaDeterioradoPorOrigen.value || deshabilitaDeterioradoPorDestino.value) ? 0 : (d.cantidad_deteriorada || 0))
-        : 0
+      cantidad_deteriorada: isDeteriorados ? (d.cantidad_deteriorada || 0) : 0
     }))
 
   if (detallesPayload.length === 0) {
@@ -569,8 +651,8 @@ const submitForm = async () => {
 
   try {
     await axios.post('/movimientos/solicitar', {
-      origen_caja_id: form.value.origen_caja_id ? Number(form.value.origen_caja_id) : null,
-      destino_caja_id: form.value.destino_caja_id ? Number(form.value.destino_caja_id) : null,
+      origen_caja_id: Number(form.value.origen_caja_id),
+      destino_caja_id: Number(form.value.destino_caja_id),
       tipo_operacion: form.value.tipo_operacion,
       categoria_movimiento: form.value.categoria_movimiento,
       descripcion: form.value.descripcion || null,
@@ -586,10 +668,11 @@ const submitForm = async () => {
   }
 }
 
-const formatTipo = (tipo: string) => {
+const formatTipo = (tipo?: string) => {
   if (tipo === 'boveda') return 'Bóveda'
   if (tipo === 'general') return 'Caja General'
-  return 'Ventanilla'
+  if (tipo === 'ventanilla') return 'Ventanilla'
+  return tipo || 'Caja'
 }
 
 const formatCurrency = (val: number | undefined) => {
