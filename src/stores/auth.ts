@@ -173,7 +173,12 @@ export const useAuthStore = defineStore('auth', () => {
 
         const userPerms = user.value.permissions || user.value.permisos || []
         if (Array.isArray(userPerms)) {
-            return userPerms.includes(permission)
+            if (userPerms.includes(permission)) return true
+            // Soporte flexible para singular o plural del permiso de denominaciones
+            if ((permission === 'denominaciones' || permission === 'denominacion') &&
+                (userPerms.includes('denominaciones') || userPerms.includes('denominacion'))) {
+                return true
+            }
         }
 
         return false

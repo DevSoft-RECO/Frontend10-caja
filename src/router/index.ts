@@ -49,7 +49,7 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('@/views/ajustes/DenominacionesView.vue'),
                 meta: {
                     title: 'Denominaciones',
-                    role: 'Super Admin'
+                    permission: 'denominaciones'
                 }
             },
             {
@@ -156,7 +156,7 @@ const routes: RouteRecordRaw[] = [
                 component: () => import('@/views/ajustes/DenominacionesView.vue'),
                 meta: {
                     title: 'Denominaciones',
-                    role: 'Super Admin'
+                    permission: 'denominaciones'
                 }
             },
             {
@@ -339,7 +339,13 @@ const routes: RouteRecordRaw[] = [
     { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 
-const orderedRoutes = [
+interface OrderedRouteItem {
+    path: string;
+    permission?: string;
+    role?: string;
+}
+
+const orderedRoutes: OrderedRouteItem[] = [
     { path: '/admin/dashboard', permission: 'dashboard_general_caja' },
     { path: '/admin/movimientos/dashboard-general-alt', permission: 'monitoreo_caja' },
     { path: '/admin/movimientos/autorizaciones', permission: 'monitoreo_caja' },
@@ -359,7 +365,7 @@ const orderedRoutes = [
     { path: '/admin/movimientos/buzon-tesoreria', permission: 'tesorero' },
 
     { path: '/admin/movimientos/bancos', permission: 'operaciones_adicionales' },
-    { path: '/admin/ajustes/denominaciones', role: 'Super Admin' },
+    { path: '/admin/ajustes/denominaciones', permission: 'denominaciones' },
     { path: '/admin/ajustes/cajas', permission: 'configuracion_caja' },
     { path: '/admin/ajustes/dia-cero', permission: 'configuracion_caja' }
 ]
