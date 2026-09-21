@@ -22,7 +22,22 @@
               Arqueo de Entrada
             </h2>
             <div v-if="selectedCajaId && estadoAperturaCargado" class="flex gap-2">
+              <span
+                v-if="estadoApertura?.esta_abierta"
+                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-green-100 dark:bg-green-950/50 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-800 shadow-sm"
+              >
+                <span class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                Caja Abierta
+              </span>
+              <span
+                v-else-if="estadoApertura?.solicitud_pendiente"
+                class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800 shadow-sm"
+              >
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                Apertura en Revisión
+              </span>
               <button
+                v-else
                 type="button"
                 @click="submitApertura(null)"
                 :disabled="submitting"
@@ -41,8 +56,21 @@
             {{ successMsg }}
           </div>
 
+          <!-- Alerta si no tiene ninguna caja asignada -->
+          <div v-if="cajas.length === 0" class="p-5 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/40 rounded-2xl text-amber-900 dark:text-amber-200 text-xs space-y-1">
+            <p class="font-bold flex items-center gap-1.5 text-sm">
+              <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              No tienes una caja de ventanilla asignada
+            </p>
+            <p class="text-amber-700 dark:text-amber-300 leading-relaxed">
+              Actualmente tu usuario no tiene una ventanilla asignada para el turno. Solicita a tu supervisor o administrador que te asigne una ventanilla en el módulo de Asignar Ventanillas para realizar la apertura.
+            </p>
+          </div>
+
           <!-- Select Box -->
-          <div>
+          <div v-else>
             <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Seleccionar Caja a Abrir <span class="text-red-500">*</span></label>
             <select
               v-model="selectedCajaId"
@@ -54,6 +82,87 @@
                 {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }}) - Turno: {{ caja.usuario_en_turno?.name || 'Sin Cajero' }}
               </option>
             </select>
+          </div>
+
+          <!-- Banners de Estado Operativo (Caja Abierta o Pendiente) -->
+          <div v-if="selectedCajaId && estadoAperturaCargado && estadoApertura?.esta_abierta" class="p-5 bg-gradient-to-r from-green-50 via-emerald-50 to-teal-50 dark:from-green-950/30 dark:via-emerald-950/20 dark:to-teal-950/20 border-2 border-green-400/60 dark:border-green-700/60 rounded-2xl shadow-sm space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-green-600 text-white rounded-xl shadow-md shrink-0">
+                  <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h3 class="text-base font-extrabold text-green-950 dark:text-green-100">
+                      Esta Caja ya se encuentra Abierta y Operativa
+                    </h3>
+                    <span class="px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-green-500 text-white shadow-sm">
+                      En Operación
+                    </span>
+                  </div>
+                  <p class="text-xs text-green-800 dark:text-green-300 mt-0.5">
+                    La apertura oficial de la jornada ya fue realizada. La ventanilla está habilitada para registrar operaciones de cobro y pago.
+                  </p>
+                </div>
+              </div>
+
+              <router-link
+                to="/admin/movimientos/caja"
+                class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-azul-cope hover:bg-azul-cope/90 text-white text-xs font-bold rounded-xl shadow transition-all whitespace-nowrap"
+              >
+                Ir a Movimientos
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </router-link>
+            </div>
+
+            <div v-if="estadoApertura.apertura_hoy" class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2 border-t border-green-200/80 dark:border-green-800/60 text-xs">
+              <div class="bg-white/60 dark:bg-gray-800/60 rounded-lg p-2.5">
+                <span class="text-gray-500 dark:text-gray-400 block text-[10px] uppercase font-bold">Monto de Apertura</span>
+                <span class="font-mono font-extrabold text-green-700 dark:text-green-300 text-sm">
+                  {{ formatCurrency(estadoApertura.apertura_hoy.monto_total) }}
+                </span>
+              </div>
+              <div class="bg-white/60 dark:bg-gray-800/60 rounded-lg p-2.5">
+                <span class="text-gray-500 dark:text-gray-400 block text-[10px] uppercase font-bold">Fecha / Hora</span>
+                <span class="font-medium text-gray-800 dark:text-gray-200">
+                  {{ formatDateTime(estadoApertura.apertura_hoy.fecha_transaccion) }}
+                </span>
+              </div>
+              <div class="bg-white/60 dark:bg-gray-800/60 rounded-lg p-2.5">
+                <span class="text-gray-500 dark:text-gray-400 block text-[10px] uppercase font-bold">Cajero en Turno</span>
+                <span class="font-semibold text-gray-800 dark:text-gray-200">
+                  {{ estadoApertura.apertura_hoy.usuario || 'Asignado' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div v-else-if="selectedCajaId && estadoAperturaCargado && estadoApertura?.solicitud_pendiente" class="p-5 bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/20 border-2 border-amber-400/60 dark:border-amber-700/60 rounded-2xl shadow-sm flex items-start gap-3">
+            <div class="p-2.5 bg-amber-500 text-white rounded-xl shadow-md shrink-0">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-extrabold text-amber-950 dark:text-amber-100">
+                  Solicitud de Apertura Pendiente de Aprobación
+                </h3>
+                <span class="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-full bg-amber-500 text-white shadow-sm">
+                  En Revisión
+                </span>
+              </div>
+              <p class="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                Ya has enviado una solicitud de apertura por 
+                <strong>{{ formatCurrency(estadoApertura.solicitud_pendiente.monto_total) }}</strong> el
+                <strong>{{ formatDateTime(estadoApertura.solicitud_pendiente.created_at) }}</strong>.
+                El encargado de Bóveda debe autorizar y despachar el efectivo antes de que puedas empezar a operar.
+              </p>
+            </div>
           </div>
 
           <!-- Declaracion de efectivo físico -->
@@ -85,7 +194,8 @@
                             type="number"
                             min="0"
                             placeholder="0"
-                            class="block w-20 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
+                            :disabled="isBlockedApertura"
+                            class="block w-20 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm transition-all disabled:opacity-60 disabled:bg-gray-100 dark:disabled:bg-gray-800/80 disabled:cursor-not-allowed"
                           />
                         </td>
                         <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-24">
@@ -120,7 +230,8 @@
                             type="number"
                             min="0"
                             placeholder="0"
-                            class="block w-20 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm"
+                            :disabled="isBlockedApertura"
+                            class="block w-20 mx-auto text-center py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-azul-cope focus:border-transparent text-sm transition-all disabled:opacity-60 disabled:bg-gray-100 dark:disabled:bg-gray-800/80 disabled:cursor-not-allowed"
                           />
                         </td>
                         <td class="p-3 text-right font-mono font-bold text-gray-900 dark:text-white w-24">
@@ -177,8 +288,20 @@
               </span>
             </div>
 
+            <!-- Alerta Caja Abierta -->
+            <div v-if="estadoApertura.esta_abierta" class="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800/40 rounded-xl text-xs text-green-800 dark:text-green-300 font-semibold leading-relaxed space-y-1">
+              <p class="font-bold flex items-center gap-1">🟢 Caja Operativa</p>
+              Esta ventanilla se encuentra actualmente abierta y lista para atender transacciones.
+            </div>
+
+            <!-- Alerta Solicitud Pendiente -->
+            <div v-else-if="estadoApertura.solicitud_pendiente" class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-xl text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed space-y-1">
+              <p class="font-bold flex items-center gap-1">⏳ Esperando Autorización</p>
+              La solicitud fue enviada a la bóveda. Espera a que el custodio confirme la entrega de efectivo.
+            </div>
+
             <!-- Alerta descuadre -->
-            <div v-if="descuadreDetectado" class="p-4 bg-amber-50 dark:bg-amber-950/10 border border-amber-250 dark:border-amber-900/30 rounded-xl text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed space-y-1">
+            <div v-else-if="descuadreDetectado" class="p-4 bg-amber-50 dark:bg-amber-950/10 border border-amber-250 dark:border-amber-900/30 rounded-xl text-xs text-amber-800 dark:text-amber-300 font-semibold leading-relaxed space-y-1">
               <p class="font-bold flex items-center gap-1">⚠️ Descuadre Detectado</p>
               El conteo actual difiere del cierre de ayer. La solicitud será enviada para auditoría y aprobación de Bóveda.
             </div>
@@ -186,7 +309,7 @@
             <!-- Alerta todo cuadrado -->
             <div v-else-if="selectedCajaId" class="p-4 bg-green-50 dark:bg-green-950/10 border border-green-250 dark:border-green-900/30 rounded-xl text-xs text-green-800 dark:text-green-300 font-semibold leading-relaxed">
               <p class="font-bold flex items-center gap-1">✓ Saldos Cuadrados</p>
-              El arqueo de inicio coincide al 100% con el cierre anterior. Puedes abrir tu caja con normalidad.
+              El arqueo de inicio coincide al 100% con el cierre anterior. Puedes solicitar la apertura de tu caja.
             </div>
           </div>
         </div>
@@ -237,6 +360,17 @@ interface EstadoApertura {
   saldo_final_fisico_declarado: number
   fecha_cierre?: string
   detalles: CierreDetalle[]
+  esta_abierta: boolean
+  apertura_hoy?: {
+    monto_total: number
+    fecha_transaccion: string
+    usuario?: string | null
+  } | null
+  solicitud_pendiente?: {
+    id: number
+    monto_total: number
+    created_at: string
+  } | null
 }
 
 // State
@@ -254,9 +388,11 @@ const estadoAperturaCargado = ref(false)
 
 const localDenominaciones = ref<Denominacion[]>([])
 
-
-
 // Computeds
+const isBlockedApertura = computed(() => {
+  return Boolean(estadoApertura.value?.esta_abierta || estadoApertura.value?.solicitud_pendiente)
+})
+
 const billetesList = computed(() => localDenominaciones.value.filter(d => d.tipo === 'billete'))
 const monedasList = computed(() => localDenominaciones.value.filter(d => d.tipo === 'moneda'))
 
@@ -344,6 +480,46 @@ const onCajaChange = async () => {
   }
 }
 
+const isMiCaja = (c: any, user: any) => {
+  if (!c.estado || c.tipo_caja !== 'ventanilla') return false
+  if (!user) return false
+
+  const userId = user.id ? String(user.id) : null
+  const userSsoId = user.sso_id ? String(user.sso_id) : null
+  const userLocalId = user.local_id ? String(user.local_id) : null
+  const username = user.username ? String(user.username).toLowerCase() : null
+  const userEmail = user.email ? String(user.email).toLowerCase() : null
+
+  // Comparación por sso_id en usuario_en_turno
+  const matchSso = c.usuario_en_turno?.sso_id && (
+    String(c.usuario_en_turno.sso_id) === userId ||
+    (userSsoId && String(c.usuario_en_turno.sso_id) === userSsoId)
+  )
+
+  // Comparación por username
+  const matchUsername = c.usuario_en_turno?.username && username && (
+    String(c.usuario_en_turno.username).toLowerCase() === username
+  )
+
+  // Comparación por email
+  const matchEmail = c.usuario_en_turno?.email && userEmail && (
+    String(c.usuario_en_turno.email).toLowerCase() === userEmail
+  )
+
+  // Comparación por ID
+  const matchUserId = c.usuario_id && (
+    String(c.usuario_id) === userId ||
+    (userLocalId && String(c.usuario_id) === userLocalId)
+  )
+
+  const matchTurnoId = c.usuario_en_turno?.id && (
+    String(c.usuario_en_turno.id) === userId ||
+    (userLocalId && String(c.usuario_en_turno.id) === userLocalId)
+  )
+
+  return Boolean(matchSso || matchUsername || matchEmail || matchUserId || matchTurnoId)
+}
+
 const fetchData = async () => {
   try {
     const authStore = useAuthStore()
@@ -351,8 +527,24 @@ const fetchData = async () => {
       axios.get('/cajas'),
       axios.get('/denominaciones')
     ])
+
+    const user = authStore.user
+    const misCajas = cajasRes.data.filter((c: any) => isMiCaja(c, user))
+
     // Filtrar únicamente las cajas asignadas al usuario activo
-    cajas.value = cajasRes.data.filter((c: any) => c.estado && c.usuario_en_turno?.sso_id === authStore.user?.id)
+    if (misCajas.length > 0) {
+      cajas.value = misCajas
+    } else if (authStore.hasRole('Super Admin')) {
+      const userAgenciaId = authStore.user?.agencia_id || authStore.user?.agencia?.id
+      cajas.value = cajasRes.data.filter((c: any) => 
+        c.estado && 
+        c.tipo_caja === 'ventanilla' && 
+        (!userAgenciaId || Number(c.agencia_id) === Number(userAgenciaId))
+      )
+    } else {
+      cajas.value = []
+    }
+
     denominaciones.value = denomsRes.data.filter((d: any) => d.activo)
 
     localDenominaciones.value = denominaciones.value.map(d => ({
@@ -371,9 +563,16 @@ const fetchData = async () => {
   }
 }
 
-
-
 const submitApertura = async (supervisorId: number | null) => {
+  if (isBlockedApertura.value) {
+    if (estadoApertura.value?.esta_abierta) {
+      error.value = 'Esta caja ya se encuentra abierta y operativa hoy.'
+    } else {
+      error.value = 'Ya existe una solicitud de apertura pendiente para esta caja.'
+    }
+    return
+  }
+
   error.value = ''
   successMsg.value = ''
   submitting.value = true
@@ -431,6 +630,18 @@ const formatOnlyDate = (dateStr: string) => {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit'
+  })
+}
+
+const formatDateTime = (dateStr: string) => {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  return d.toLocaleString('es-GT', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
   })
 }
 
