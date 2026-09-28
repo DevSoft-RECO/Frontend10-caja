@@ -117,6 +117,14 @@ const routes: RouteRecordRaw[] = [
                 }
             },
             {
+                path: 'movimientos/historial-arqueos',
+                name: 'historial-arqueos',
+                component: () => import('@/views/movimientos/HistorialArqueosView.vue'),
+                meta: {
+                    title: 'Historial de Arqueos'
+                }
+            },
+            {
                 path: 'movimientos/autorizaciones',
                 name: 'autorizaciones-apertura',
                 component: () => import('@/views/movimientos/AutorizacionesAperturaView.vue'),

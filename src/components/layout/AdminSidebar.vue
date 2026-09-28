@@ -245,6 +245,7 @@ const menuItems = computed(() => {
                 { label: 'Autorizaciones de Movimientos', route: '/admin/movimientos/autorizaciones-movimientos' },
                 { label: 'Cierre de Caja', route: '/admin/movimientos/cierre' },
                 { label: 'Historial de Cierres', route: '/admin/movimientos/reporte-cierres' },
+                { label: 'Historial de Arqueos', route: '/admin/movimientos/historial-arqueos' },
                 { label: 'Historial de Movimientos', route: '/admin/movimientos' }
             ]
         },
