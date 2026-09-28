@@ -50,13 +50,7 @@
           <span class="text-xs font-semibold text-red-800 dark:text-red-300">{{ formError }}</span>
         </div>
 
-        <!-- Success Message -->
-        <div v-if="successMsg" class="p-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900/30 rounded-xl flex items-start gap-3">
-          <svg class="w-5 h-5 text-green-600 dark:text-green-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span class="text-xs font-semibold text-green-800 dark:text-green-300">{{ successMsg }}</span>
-        </div>
+
 
         <!-- Aviso si no hay ventanilla o bóveda -->
         <div v-if="!cajaOperativa" class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-xl flex items-center gap-3 text-xs font-semibold text-amber-800 dark:text-amber-300">
@@ -332,16 +326,7 @@
           </div>
         </div>
 
-        <!-- 4. DESCRIPCIÓN / COMENTARIOS -->
-        <div>
-          <label class="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Comentarios / Bitácora Opcional</label>
-          <textarea
-            v-model="form.descripcion"
-            rows="2"
-            placeholder="Escribe comentarios o detalles sobre este traslado (Ej. Número de bolsa de seguridad, valija)..."
-            class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-sm transition-all"
-          ></textarea>
-        </div>
+
       </form>
     </div>
   </div>
@@ -349,6 +334,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
+import Swal from 'sweetalert2'
 import axios from '@/api/axios'
 import { useAuthStore } from '@/stores/auth'
 
@@ -373,7 +359,6 @@ interface Denominacion {
 }
 
 const formError = ref('')
-const successMsg = ref('')
 const submitting = ref(false)
 
 const authStore = useAuthStore()
@@ -387,7 +372,6 @@ const form = ref({
   destino_caja_id: '',
   tipo_operacion: 'egreso' as 'ingreso' | 'egreso',
   categoria_movimiento: 'abastecimiento' as 'abastecimiento' | 'devolucion' | 'deteriorado',
-  descripcion: '',
 })
 
 // Catálogo de tipos de movimiento disponibles para el usuario operativo
@@ -566,7 +550,6 @@ const resetForm = () => {
     destino_caja_id: '',
     tipo_operacion: 'egreso',
     categoria_movimiento: 'abastecimiento',
-    descripcion: '',
   }
   localDenominaciones.value = denominaciones.value.map(d => ({
     ...d,
@@ -596,17 +579,30 @@ const granTotal = computed(() => {
 
 const submitForm = async () => {
   formError.value = ''
-  successMsg.value = ''
   submitting.value = true
 
   if (!cajaOperativa.value) {
-    formError.value = 'No se ha detectado una ventanilla activa para operar.'
+    const msg = 'No se ha detectado una ventanilla activa para operar.'
+    formError.value = msg
+    Swal.fire({
+      icon: 'warning',
+      title: 'Ventanilla No Asignada',
+      text: msg,
+      confirmButtonColor: '#004A98'
+    })
     submitting.value = false
     return
   }
 
   if (!miBoveda.value) {
-    formError.value = 'No se ha detectado una Bóveda activa para procesar la transacción.'
+    const msg = 'No se ha detectado una Bóveda activa para procesar la transacción.'
+    formError.value = msg
+    Swal.fire({
+      icon: 'warning',
+      title: 'Bóveda No Encontrada',
+      text: msg,
+      confirmButtonColor: '#004A98'
+    })
     submitting.value = false
     return
   }
@@ -621,7 +617,14 @@ const submitForm = async () => {
       if (cantReq > 0) {
         const disponible = stockMap.value[d.id]?.stock_bueno || 0
         if (cantReq > disponible) {
-          formError.value = `No hay suficiente existencia en Bóveda para cubrir la cantidad solicitada en la denominación ${d.nombre}.`
+          const msg = `No hay suficiente existencia en Bóveda para cubrir la cantidad solicitada en la denominación ${d.nombre}.`
+          formError.value = msg
+          Swal.fire({
+            icon: 'warning',
+            title: 'Existencia Insuficiente',
+            text: msg,
+            confirmButtonColor: '#004A98'
+          })
           submitting.value = false
           return
         }
@@ -644,7 +647,14 @@ const submitForm = async () => {
     }))
 
   if (detallesPayload.length === 0) {
-    formError.value = 'Debe ingresar al menos una cantidad mayor a cero en los billetes o monedas.'
+    const msg = 'Debe ingresar al menos una cantidad mayor a cero en los billetes o monedas.'
+    formError.value = msg
+    Swal.fire({
+      icon: 'info',
+      title: 'Monto en Cero',
+      text: msg,
+      confirmButtonColor: '#004A98'
+    })
     submitting.value = false
     return
   }
@@ -655,14 +665,25 @@ const submitForm = async () => {
       destino_caja_id: Number(form.value.destino_caja_id),
       tipo_operacion: form.value.tipo_operacion,
       categoria_movimiento: form.value.categoria_movimiento,
-      descripcion: form.value.descripcion || null,
       detalles: detallesPayload
     })
     
-    successMsg.value = 'La solicitud de traslado ha sido enviada exitosamente. Esperando aprobación de Bóveda.'
+    await Swal.fire({
+      icon: 'success',
+      title: '¡Solicitud Exitosa!',
+      text: 'La solicitud de traslado ha sido enviada exitosamente. Esperando aprobación de Bóveda.',
+      confirmButtonColor: '#004A98'
+    })
     resetForm()
   } catch (err: any) {
-    formError.value = err.response?.data?.message || 'Error al procesar la transacción.'
+    const errorMsg = err.response?.data?.message || 'Error al procesar la transacción.'
+    formError.value = errorMsg
+    Swal.fire({
+      icon: 'error',
+      title: 'Error en la Solicitud',
+      text: errorMsg,
+      confirmButtonColor: '#d33'
+    })
   } finally {
     submitting.value = false
   }
