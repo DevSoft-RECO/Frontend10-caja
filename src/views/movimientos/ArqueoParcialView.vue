@@ -17,16 +17,17 @@
       <!-- Formulario de Declaración Física -->
       <div class="lg:col-span-2 space-y-6">
         <div class="bg-white/80 dark:bg-gray-800/80 backdrop-blur border border-gray-200 dark:border-gray-700 rounded-3xl p-6 shadow-sm space-y-6">
-          <h2 class="text-lg font-bold text-gray-900 dark:text-white pb-3 border-b border-gray-100 dark:border-gray-700/60">
-            Declaración de Efectivo Físico
-          </h2>
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700/60">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white">
+              Declaración de Efectivo Físico
+            </h2>
+            <span v-if="selectedCajaId && historialHoy.length > 0" class="text-xs font-semibold text-gray-500 dark:text-gray-400">
+              Mostrando último arqueo realizado
+            </span>
+          </div>
 
           <div v-if="error" class="p-4 bg-red-50 dark:bg-red-950/10 border border-red-200 dark:border-red-900/30 rounded-xl text-xs font-semibold text-red-800 dark:text-red-300">
             {{ error }}
-          </div>
-
-          <div v-if="successMsg" class="p-4 bg-green-50 dark:bg-green-950/10 border border-green-200 dark:border-green-900/30 rounded-xl text-xs font-bold text-green-800 dark:text-green-300">
-            {{ successMsg }}
           </div>
 
           <!-- Caja Selector -->
@@ -45,6 +46,29 @@
 
           <!-- Denomination list double entry table -->
           <div class="space-y-6" v-if="selectedCajaId">
+            <!-- Banner informativo del arqueo visualizado -->
+            <div v-if="arqueoSeleccionado" class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3.5 bg-blue-50/70 dark:bg-azul-cope/10 border border-blue-200 dark:border-blue-900/40 rounded-2xl gap-2">
+              <div class="flex items-center gap-2.5">
+                <span class="text-base">📌</span>
+                <div class="text-xs">
+                  <span class="font-extrabold text-azul-cope dark:text-blue-300">
+                    {{ esUltimoArqueo ? 'Último Arqueo Realizado Hoy' : 'Arqueo Anterior Cargado' }}
+                  </span>
+                  <span class="text-gray-600 dark:text-gray-300">
+                    — Registrado a las {{ formatHora(arqueoSeleccionado.fecha_hora) }} (Total: {{ formatCurrency(Number(arqueoSeleccionado.total_fisico_declarado)) }})
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                @click="comenzarNuevoArqueo"
+                class="text-xs font-bold text-azul-cope dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer shrink-0"
+                title="Poner cantidades en cero para ingresar un nuevo arqueo"
+              >
+                <span>➕</span> Iniciar Conteo en Cero
+              </button>
+            </div>
+
             <!-- Billetes -->
             <div v-if="billetesList.length > 0" class="space-y-3">
               <h3 class="text-xs font-bold text-azul-cope dark:text-blue-400 uppercase tracking-wider">Billetes</h3>
@@ -142,12 +166,14 @@
               <button
                 @click="limpiarArqueo"
                 :disabled="submitting"
-                class="px-5 py-2.5 bg-red-50 hover:bg-red-100 text-red-650 font-semibold rounded-xl text-sm border border-red-200 transition-all cursor-pointer disabled:opacity-40"
+                type="button"
+                class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold rounded-xl text-sm transition-all cursor-pointer disabled:opacity-40"
               >
-                Limpiar Arqueo Activo
+                Poner en Cero
               </button>
               <button
                 @click="submitArqueo"
+                type="button"
                 :disabled="submitting || totalDeclarado === 0"
                 class="px-6 py-2.5 bg-verde-cope hover:bg-verde-cope/90 text-white font-bold rounded-xl text-sm shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-40"
               >
@@ -166,8 +192,9 @@
         </div>
       </div>
 
-      <!-- Resumen Lateral Informativo -->
+      <!-- Resumen Lateral Informativo e Historial del Día -->
       <div class="space-y-6">
+        <!-- Tarjeta de Resumen del Conteo -->
         <div class="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-3xl p-6 shadow-sm">
           <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">Resumen del Conteo</h3>
 
@@ -186,6 +213,106 @@
             </div>
           </div>
         </div>
+
+        <!-- LISTA DE TODOS LOS ARQUEOS QUE REALIZÓ EL USUARIO DURANTE EL DÍA -->
+        <div class="bg-white border border-gray-200 dark:bg-gray-800 dark:border-gray-700 rounded-3xl p-6 shadow-sm space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-gray-700">
+            <div>
+              <h3 class="text-sm font-extrabold text-gray-900 dark:text-white flex items-center gap-1.5">
+                <span>📋</span> Arqueos Realizados Hoy
+              </h3>
+              <p class="text-[11px] text-gray-500 dark:text-gray-400 capitalize">
+                {{ formatFechaHoy() }}
+              </p>
+            </div>
+            <span class="px-2.5 py-1 bg-azul-cope/10 text-azul-cope dark:bg-azul-cope/20 dark:text-blue-400 text-xs font-extrabold rounded-full">
+              {{ historialHoy.length }} {{ historialHoy.length === 1 ? 'arqueo' : 'arqueos' }}
+            </span>
+          </div>
+
+          <!-- Estado de carga -->
+          <div v-if="loadingHistorial" class="py-8 text-center text-xs text-gray-400 flex flex-col items-center gap-2">
+            <svg class="w-5 h-5 animate-spin text-azul-cope" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Cargando arqueos de hoy...</span>
+          </div>
+
+          <!-- Estado vacío -->
+          <div v-else-if="!selectedCajaId" class="py-8 text-center text-xs text-gray-400 italic">
+            Selecciona una caja para ver sus arqueos del día.
+          </div>
+
+          <div v-else-if="historialHoy.length === 0" class="py-8 text-center space-y-2">
+            <span class="text-3xl">📭</span>
+            <p class="text-xs font-semibold text-gray-700 dark:text-gray-300">
+              Sin arqueos hoy
+            </p>
+            <p class="text-[11px] text-gray-400 dark:text-gray-500 max-w-[200px] mx-auto">
+              No se han guardado arqueos el día de hoy para esta caja. Cada nuevo arqueo se listará aquí.
+            </p>
+          </div>
+
+          <!-- Listado de arqueos de hoy -->
+          <div v-else class="space-y-2.5 max-h-[460px] overflow-y-auto pr-1">
+            <div
+              v-for="(item, index) in historialHoy"
+              :key="item.id"
+              @click="cargarArqueoEnFormulario(item)"
+              :class="[
+                'p-3.5 rounded-2xl border transition-all cursor-pointer relative',
+                arqueoSeleccionadoId === item.id
+                  ? 'border-azul-cope bg-blue-50/50 dark:bg-azul-cope/15 ring-2 ring-azul-cope/30 shadow-sm'
+                  : 'border-gray-200 dark:border-gray-700/80 hover:border-gray-300 dark:hover:border-gray-600 bg-gray-50/50 dark:bg-gray-900/40'
+              ]"
+            >
+              <div class="flex items-center justify-between mb-1.5">
+                <div class="flex items-center gap-1.5">
+                  <span class="text-xs font-black text-gray-700 dark:text-gray-300">
+                    #{{ historialHoy.length - index }}
+                  </span>
+                  <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                    <span>🕒</span> {{ formatHora(item.fecha_hora) }}
+                  </span>
+                </div>
+
+                <!-- Insignia Último / Activo -->
+                <span
+                  v-if="index === 0"
+                  class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 flex items-center gap-1"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  Último Realizado
+                </span>
+                <span
+                  v-else-if="arqueoSeleccionadoId === item.id"
+                  class="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-azul-cope dark:bg-blue-950/60 dark:text-blue-300"
+                >
+                  Cargado
+                </span>
+              </div>
+
+              <div class="flex items-baseline justify-between mt-2 pt-2 border-t border-gray-150 dark:border-gray-700/60">
+                <span class="text-[11px] text-gray-500 dark:text-gray-400">Total Físico:</span>
+                <span class="text-sm font-mono font-black text-gray-900 dark:text-white">
+                  {{ formatCurrency(Number(item.total_fisico_declarado)) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botón de comenzar nuevo arqueo en cero -->
+          <div v-if="historialHoy.length > 0" class="pt-2">
+            <button
+              type="button"
+              @click="comenzarNuevoArqueo"
+              class="w-full py-2 px-3 border border-dashed border-gray-300 dark:border-gray-600 hover:border-azul-cope dark:hover:border-blue-400 text-gray-600 dark:text-gray-300 hover:text-azul-cope dark:hover:text-blue-400 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <span>➕</span> Iniciar Nuevo Conteo en Cero
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -193,6 +320,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, watch } from 'vue'
+import Swal from 'sweetalert2'
 import axios from '@/api/axios'
 import { useAuthStore } from '@/stores/auth'
 
@@ -219,15 +347,37 @@ interface Denominacion {
   cantidad_deteriorada: number
 }
 
+interface ConteoParcialDetalle {
+  id: number
+  conteo_parcial_id: number
+  denominacion_id: number
+  estado_dinero: 'bueno' | 'deteriorado'
+  cantidad: number
+  subtotal: number
+  denominacion?: Denominacion
+}
+
+interface ConteoParcialItem {
+  id: number
+  caja_id: number
+  usuario_id: number
+  fecha_hora: string
+  total_fisico_declarado: number | string
+  usuario?: User
+  detalles: ConteoParcialDetalle[]
+}
+
 // State
 const cajas = ref<Caja[]>([])
 const denominaciones = ref<Denominacion[]>([])
 const selectedCajaId = ref('')
 const error = ref('')
-const successMsg = ref('')
 const submitting = ref(false)
+const loadingHistorial = ref(false)
 
 const localDenominaciones = ref<Denominacion[]>([])
+const historialHoy = ref<ConteoParcialItem[]>([])
+const arqueoSeleccionadoId = ref<number | null>(null)
 
 // Computeds
 const billetesList = computed(() => localDenominaciones.value.filter(d => d.tipo === 'billete'))
@@ -255,6 +405,18 @@ const totalDeclarado = computed(() => {
   return localDenominaciones.value.reduce((acc, d) => acc + calculaSubtotal(d), 0)
 })
 
+// Arqueo actualmente seleccionado
+const arqueoSeleccionado = computed(() => {
+  if (!arqueoSeleccionadoId.value) return null
+  return historialHoy.value.find(item => item.id === arqueoSeleccionadoId.value) || null
+})
+
+// Verifica si el arqueo cargado es el último realizado
+const esUltimoArqueo = computed(() => {
+  if (!historialHoy.value.length || !arqueoSeleccionadoId.value) return false
+  return historialHoy.value[0].id === arqueoSeleccionadoId.value
+})
+
 // Resetear deteriorados a 0 si la caja elegida es boveda
 watch(deshabilitaDeterioradoPorCaja, (newVal) => {
   if (newVal) {
@@ -264,40 +426,54 @@ watch(deshabilitaDeterioradoPorCaja, (newVal) => {
   }
 })
 
-// Cargar el conteo existente si ya hay uno para la caja elegida
-watch(selectedCajaId, async (newId) => {
-  error.value = ''
-  successMsg.value = ''
-  if (!newId) {
-    resetForm()
+// Cargar un arqueo específico en el formulario principal
+const cargarArqueoEnFormulario = (arqueo: ConteoParcialItem) => {
+  arqueoSeleccionadoId.value = arqueo.id
+  localDenominaciones.value.forEach(d => {
+    const detBueno = arqueo.detalles.find((det: any) => det.denominacion_id === d.id && det.estado_dinero === 'bueno')
+    const detDet = arqueo.detalles.find((det: any) => det.denominacion_id === d.id && det.estado_dinero === 'deteriorado')
+    
+    d.cantidad_buena = detBueno ? detBueno.cantidad : 0
+    d.cantidad_deteriorada = detDet ? detDet.cantidad : 0
+  })
+}
+
+// Iniciar un nuevo arqueo en blanco (cantidades en 0)
+const comenzarNuevoArqueo = () => {
+  arqueoSeleccionadoId.value = null
+  resetForm()
+}
+
+// Consultar el historial de arqueos del día de hoy para la caja seleccionada
+const cargarHistorial = async (cajaId: string | number) => {
+  if (!cajaId) {
+    historialHoy.value = []
+    comenzarNuevoArqueo()
     return
   }
 
+  loadingHistorial.value = true
+  error.value = ''
   try {
-    const res = await axios.get(`/cajas/conteos-parciales?caja_id=${newId}`)
-    const conteos = res.data
-    
-    // Si hay registros, tomamos el primero (ya que es único por caja)
-    if (conteos && conteos.length > 0) {
-      const activeArqueo = conteos[0]
-      localDenominaciones.value.forEach(d => {
-        // Encontrar los detalles del arqueo para esta denominación
-        const detBueno = activeArqueo.detalles.find((det: any) => det.denominacion_id === d.id && det.estado_dinero === 'bueno')
-        const detDet = activeArqueo.detalles.find((det: any) => det.denominacion_id === d.id && det.estado_dinero === 'deteriorado')
-        
-        d.cantidad_buena = detBueno ? detBueno.cantidad : 0
-        d.cantidad_deteriorada = detDet ? detDet.cantidad : 0
-      })
+    const res = await axios.get(`/cajas/conteos-parciales?caja_id=${cajaId}`)
+    historialHoy.value = res.data || []
+
+    // Si existen arqueos hoy, por defecto mantenemos cargado el último realizado
+    if (historialHoy.value.length > 0) {
+      cargarArqueoEnFormulario(historialHoy.value[0])
     } else {
-      // Si no hay arqueo previo, limpiar los inputs
-      localDenominaciones.value.forEach(d => {
-        d.cantidad_buena = 0
-        d.cantidad_deteriorada = 0
-      })
+      comenzarNuevoArqueo()
     }
   } catch (err) {
-    error.value = 'No se pudo verificar el historial de arqueo parcial para esta caja.'
+    error.value = 'No se pudo verificar el historial de arqueos parciales de hoy para esta caja.'
+  } finally {
+    loadingHistorial.value = false
   }
+}
+
+// Escuchar cambios de caja seleccionada
+watch(selectedCajaId, async (newId) => {
+  await cargarHistorial(newId)
 })
 
 // Acciones
@@ -308,23 +484,31 @@ const resetForm = () => {
     cantidad_deteriorada: 0
   }))
   error.value = ''
-  successMsg.value = ''
 }
 
 const limpiarArqueo = async () => {
   if (!selectedCajaId.value) return
-  error.value = ''
-  successMsg.value = ''
-  submitting.value = true
+  
+  const result = await Swal.fire({
+    title: '¿Poner Formulario en Cero?',
+    text: 'Se limpiarán las cantidades en pantalla para ingresar un nuevo conteo físico. Los arqueos previos del día seguirán registrados en tu historial.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#004A98',
+    cancelButtonColor: '#6B7280',
+    confirmButtonText: 'Sí, poner en cero',
+    cancelButtonText: 'Cancelar'
+  })
 
-  try {
-    await axios.delete(`/cajas/conteos-parciales/${selectedCajaId.value}`)
-    successMsg.value = 'Arqueo Parcial limpiado correctamente en el sistema.'
-    resetForm()
-  } catch (err: any) {
-    error.value = err.response?.data?.message || 'Error al intentar limpiar el arqueo de esta caja.'
-  } finally {
-    submitting.value = false
+  if (result.isConfirmed) {
+    comenzarNuevoArqueo()
+    Swal.fire({
+      icon: 'info',
+      title: 'Formulario Limpio',
+      text: 'Listo para ingresar un nuevo conteo físico.',
+      timer: 1400,
+      showConfirmButton: false
+    })
   }
 }
 
@@ -356,7 +540,6 @@ const fetchData = async () => {
 
 const submitArqueo = async () => {
   error.value = ''
-  successMsg.value = ''
   submitting.value = true
 
   const detalles = localDenominaciones.value
@@ -381,7 +564,14 @@ const submitArqueo = async () => {
     })
 
   if (detalles.length === 0) {
-    error.value = 'Debe declarar cantidades en al menos una denominación.'
+    const msg = 'Debe declarar cantidades en al menos una denominación.'
+    error.value = msg
+    Swal.fire({
+      icon: 'warning',
+      title: 'Monto en Cero',
+      text: msg,
+      confirmButtonColor: '#004A98'
+    })
     submitting.value = false
     return
   }
@@ -392,9 +582,24 @@ const submitArqueo = async () => {
       detalles
     })
 
-    successMsg.value = '¡Arqueo Parcial guardado exitosamente!'
+    await Swal.fire({
+      icon: 'success',
+      title: '¡Arqueo Guardado!',
+      text: 'El nuevo arqueo parcial ha sido registrado exitosamente en el historial del día.',
+      confirmButtonColor: '#004A98'
+    })
+
+    // Recargar el historial de hoy para que el nuevo conteo encabece la lista y quede como último realizado
+    await cargarHistorial(selectedCajaId.value)
   } catch (err: any) {
-    error.value = err.response?.data?.message || 'Error al procesar el arqueo.'
+    const errorMsg = err.response?.data?.message || 'Error al procesar el arqueo.'
+    error.value = errorMsg
+    Swal.fire({
+      icon: 'error',
+      title: 'Error al Guardar',
+      text: errorMsg,
+      confirmButtonColor: '#d33'
+    })
   } finally {
     submitting.value = false
   }
@@ -408,6 +613,26 @@ const formatTipo = (tipo: string) => {
 
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('es-GT', { style: 'currency', currency: 'GTQ' }).format(val)
+}
+
+const formatHora = (dateStr: string) => {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  return d.toLocaleTimeString('es-GT', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: true
+  })
+}
+
+const formatFechaHoy = () => {
+  return new Date().toLocaleDateString('es-GT', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
 }
 
 onMounted(() => {
