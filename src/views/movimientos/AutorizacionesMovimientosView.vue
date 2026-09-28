@@ -196,33 +196,80 @@
             </div>
           </div>
 
-          <!-- Observaciones / Feedback -->
-          <div class="space-y-2">
-            <label class="block text-xs font-bold text-gray-500 uppercase">Observaciones de Aprobación o Motivo de Rechazo</label>
-            <textarea
-              v-model="observaciones"
-              rows="2"
-              placeholder="Añade justificación o comentarios sobre esta revisión (Obligatorio en caso de rechazo)..."
-              class="block w-full px-3 py-2 border border-gray-300 dark:border-gray-655 rounded-xl bg-white dark:bg-gray-750 text-sm focus:outline-none focus:ring-2 focus:ring-azul-cope focus:border-transparent text-gray-900 dark:text-white font-semibold"
-            ></textarea>
-          </div>
+          <!-- Sección de Motivo de Rechazo (Solo se muestra cuando se rechaza) -->
+          <Transition name="fade">
+            <div v-if="modoRechazo" class="p-4 bg-red-50/70 dark:bg-red-950/25 border-2 border-red-200 dark:border-red-900/40 rounded-2xl space-y-2">
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-bold text-red-700 dark:text-red-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  Motivo del Rechazo <span class="text-red-600 font-extrabold">* (Obligatorio)</span>
+                </label>
+                <span class="text-[10px] font-semibold text-red-600 dark:text-red-400">Requerido para el solicitante</span>
+              </div>
+              <textarea
+                v-model="observaciones"
+                rows="3"
+                placeholder="Describe la razón o justificación por la que se rechaza esta solicitud..."
+                class="block w-full px-3 py-2.5 border border-red-300 dark:border-red-800 rounded-xl bg-white dark:bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-900 dark:text-white font-medium"
+              ></textarea>
+              <p v-if="!observaciones.trim()" class="text-[11px] text-red-600 dark:text-red-400 font-semibold italic">
+                ⚠️ Debes ingresar el motivo para habilitar la confirmación del rechazo.
+              </p>
+            </div>
+          </Transition>
 
-          <!-- Acciones de Aprobación -->
-          <div class="flex justify-end gap-3 pt-2 border-t border-gray-150 dark:border-gray-750/70">
-            <button
-              @click="procesar('rechazado')"
-              :disabled="submitting || (selectedSolicitud.categoria_movimiento === 'deteriorado' && !observaciones)"
-              class="px-5 py-2.5 bg-red-650 hover:bg-red-600 text-white font-bold rounded-xl text-xs shadow transition-all cursor-pointer disabled:opacity-40"
-            >
-              Rechazar Solicitud
-            </button>
-            <button
-              @click="procesar('aprobado')"
-              :disabled="submitting"
-              class="px-6 py-2.5 bg-verde-cope hover:bg-verde-cope/95 text-white font-bold rounded-xl text-xs shadow transition-all cursor-pointer disabled:opacity-40"
-            >
-              Autorizar Traslado
-            </button>
+          <!-- Acciones de Aprobación / Rechazo -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-gray-150 dark:border-gray-750/70">
+            <div class="text-xs text-gray-400">
+              <span v-if="!modoRechazo">Audita las denominaciones antes de confirmar la operación.</span>
+              <span v-else class="text-red-600 font-semibold text-xs">Indica la razón del rechazo arriba.</span>
+            </div>
+
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <!-- Modo Normal (No Rechazo) -->
+              <template v-if="!modoRechazo">
+                <button
+                  type="button"
+                  @click="iniciarRechazo"
+                  :disabled="submitting"
+                  class="px-5 py-2.5 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-650 dark:text-red-400 border border-red-200 dark:border-red-800/40 font-bold rounded-xl text-xs transition-all cursor-pointer disabled:opacity-40"
+                >
+                  Rechazar Solicitud
+                </button>
+                <button
+                  type="button"
+                  @click="confirmarAprobacion"
+                  :disabled="submitting"
+                  class="px-6 py-2.5 bg-verde-cope hover:bg-verde-cope/95 text-white font-bold rounded-xl text-xs shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-40 flex items-center gap-1.5"
+                >
+                  <span v-if="submitting" class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  <span>✓ Autorizar Traslado</span>
+                </button>
+              </template>
+
+              <!-- Modo Rechazo Activo -->
+              <template v-else>
+                <button
+                  type="button"
+                  @click="cancelarModoRechazo"
+                  :disabled="submitting"
+                  class="px-4 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-650 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 font-bold rounded-xl text-xs transition-all cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  @click="confirmarRechazo"
+                  :disabled="submitting || !observaciones.trim()"
+                  class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xs shadow-md transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+                >
+                  <span v-if="submitting" class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  <span>Confirmar Rechazo</span>
+                </button>
+              </template>
+            </div>
           </div>
         </div>
       </div>
@@ -234,6 +281,7 @@
 import { ref, onMounted, computed } from 'vue'
 import axios from '@/api/axios'
 import { useAuthStore } from '@/stores/auth'
+import Swal from 'sweetalert2'
 
 interface User {
   id: number
@@ -281,6 +329,7 @@ const submitting = ref(false)
 const solicitudes = ref<SolicitudMovimiento[]>([])
 const selectedSolicitud = ref<SolicitudMovimiento | null>(null)
 const comparadorModalOpen = ref(false)
+const modoRechazo = ref(false)
 const observaciones = ref('')
 
 const fetchSolicitudes = async () => {
@@ -302,6 +351,7 @@ onMounted(() => {
 const openAuditarModal = async (sol: SolicitudMovimiento) => {
   selectedSolicitud.value = sol
   comparadorModalOpen.value = true
+  modoRechazo.value = false
   observaciones.value = ''
   
   // Realizar consulta fresca para asegurar la carga completa de relaciones anidadas
@@ -316,27 +366,93 @@ const openAuditarModal = async (sol: SolicitudMovimiento) => {
   }
 }
 
-const procesar = async (accion: 'aprobado' | 'rechazado') => {
+const iniciarRechazo = () => {
+  modoRechazo.value = true
+  observaciones.value = ''
+}
+
+const cancelarModoRechazo = () => {
+  modoRechazo.value = false
+  observaciones.value = ''
+}
+
+const confirmarAprobacion = async () => {
   if (!selectedSolicitud.value) return
 
-  if (accion === 'rechazado' && !observaciones.value.trim()) {
-    alert('Debe ingresar un motivo de rechazo en las observaciones.')
+  const confirmResult = await Swal.fire({
+    title: '¿Autorizar Traslado?',
+    html: `¿Confirmas la aprobación del traslado de <b class="text-green-600 font-mono">${formatCurrency(selectedSolicitud.value.monto_total)}</b> desde <b>${selectedSolicitud.value.origen?.nombre || 'Bóveda'}</b> hacia <b>${selectedSolicitud.value.destino?.nombre}</b>?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#00A34D',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Sí, Autorizar',
+    cancelButtonText: 'Cancelar'
+  })
+
+  if (!confirmResult.isConfirmed) return
+
+  await ejecutarProcesar('aprobado')
+}
+
+const confirmarRechazo = async () => {
+  if (!selectedSolicitud.value) return
+
+  if (!observaciones.value.trim()) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Motivo Requerido',
+      text: 'Debes ingresar un motivo de rechazo en el campo de texto antes de continuar.',
+      confirmButtonColor: '#002B49'
+    })
     return
   }
 
+  const confirmResult = await Swal.fire({
+    title: '¿Confirmar Rechazo?',
+    html: `¿Estás seguro de que deseas rechazar la solicitud de <b>${selectedSolicitud.value.categoria_movimiento}</b> por <b>${formatCurrency(selectedSolicitud.value.monto_total)}</b>?<br><br><span class="text-xs text-gray-500 italic font-semibold">"${observaciones.value.trim()}"</span>`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Sí, Rechazar Solicitud',
+    cancelButtonText: 'Volver'
+  })
+
+  if (!confirmResult.isConfirmed) return
+
+  await ejecutarProcesar('rechazado')
+}
+
+const ejecutarProcesar = async (accion: 'aprobado' | 'rechazado') => {
+  if (!selectedSolicitud.value) return
   submitting.value = true
+
   try {
     const res = await axios.post(`/movimientos/solicitudes/${selectedSolicitud.value.id}/procesar`, {
       accion,
-      observaciones: observaciones.value
+      observaciones: observaciones.value.trim()
     })
     
-    alert(res.data.message || 'Solicitud procesada correctamente.')
+    await Swal.fire({
+      icon: 'success',
+      title: accion === 'aprobado' ? '¡Traslado Autorizado!' : '¡Solicitud Rechazada!',
+      text: res.data.message || (accion === 'aprobado' ? 'El traslado ha sido autorizado e impactado en Libro Mayor.' : 'La solicitud ha sido rechazada correctamente.'),
+      confirmButtonColor: '#002B49'
+    })
+
     comparadorModalOpen.value = false
+    modoRechazo.value = false
     selectedSolicitud.value = null
+    observaciones.value = ''
     fetchSolicitudes()
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Error al procesar la solicitud.')
+    Swal.fire({
+      icon: 'error',
+      title: 'Error al procesar',
+      text: err.response?.data?.message || 'Ocurrió un error inesperado al procesar la solicitud.',
+      confirmButtonColor: '#002B49'
+    })
   } finally {
     submitting.value = false
   }
@@ -376,16 +492,35 @@ const esSuperAdmin = computed(() => {
 })
 
 const confirmEliminar = async (id: number) => {
-  if (!confirm('¿Estás seguro de que deseas eliminar permanentemente esta solicitud de movimiento? Esta acción no se puede deshacer.')) {
-    return
-  }
+  const confirmResult = await Swal.fire({
+    title: '¿Eliminar Solicitud?',
+    text: '¿Estás seguro de que deseas eliminar permanentemente esta solicitud de movimiento? Esta acción no se puede deshacer.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Sí, Eliminar',
+    cancelButtonText: 'Cancelar'
+  })
+
+  if (!confirmResult.isConfirmed) return
 
   try {
     const res = await axios.delete(`/movimientos/solicitudes/${id}`)
-    alert(res.data.message || 'Solicitud eliminada con éxito.')
+    Swal.fire({
+      icon: 'success',
+      title: 'Eliminada',
+      text: res.data.message || 'Solicitud de movimiento eliminada con éxito.',
+      confirmButtonColor: '#002B49'
+    })
     fetchSolicitudes()
   } catch (err: any) {
-    alert(err.response?.data?.message || 'Error al eliminar la solicitud.')
+    Swal.fire({
+      icon: 'error',
+      title: 'Error al eliminar',
+      text: err.response?.data?.message || 'No se pudo eliminar la solicitud.',
+      confirmButtonColor: '#002B49'
+    })
   }
 }
 </script>
