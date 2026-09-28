@@ -31,7 +31,7 @@
           </div>
 
           <!-- Caja Selector -->
-          <div>
+          <div v-if="cajas.length > 0">
             <label class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Seleccionar Caja a Auditar <span class="text-red-500">*</span></label>
             <select
               v-model="selectedCajaId"
@@ -42,6 +42,10 @@
                 {{ caja.nombre }} ({{ formatTipo(caja.tipo_caja) }}) - Turno: {{ caja.usuario_en_turno?.name || 'Sin Cajero' }}
               </option>
             </select>
+          </div>
+
+          <div v-else class="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-xl text-xs font-semibold text-amber-800 dark:text-amber-300">
+            ⚠️ No tienes una ventanilla activa asignada en tu agencia para operar arqueos. Solicita tu asignación en administración.
           </div>
 
           <!-- Denomination list double entry table -->
@@ -512,15 +516,85 @@ const limpiarArqueo = async () => {
   }
 }
 
+const isMiCaja = (c: any, user: any) => {
+  if (!c.estado || c.tipo_caja !== 'ventanilla') return false
+  if (!user) return false
+
+  // Validar también que pertenezca estrictamente a la agencia del usuario si tiene agencia asignada
+  const userAgenciaId = user.agencia_id || user.id_agencia || user.agencia?.id
+  if (userAgenciaId && c.agencia_id && Number(c.agencia_id) !== Number(userAgenciaId)) {
+    return false
+  }
+
+  const userId = user.id ? String(user.id) : null
+  const userSsoId = user.sso_id ? String(user.sso_id) : null
+  const userLocalId = user.local_id ? String(user.local_id) : null
+  const username = user.username ? String(user.username).toLowerCase() : null
+  const userEmail = user.email ? String(user.email).toLowerCase() : null
+
+  // Comparación por sso_id en usuario_en_turno
+  const matchSso = c.usuario_en_turno?.sso_id && (
+    String(c.usuario_en_turno.sso_id) === userId ||
+    (userSsoId && String(c.usuario_en_turno.sso_id) === userSsoId)
+  )
+
+  // Comparación por username
+  const matchUsername = c.usuario_en_turno?.username && username && (
+    String(c.usuario_en_turno.username).toLowerCase() === username
+  )
+
+  // Comparación por email
+  const matchEmail = c.usuario_en_turno?.email && userEmail && (
+    String(c.usuario_en_turno.email).toLowerCase() === userEmail
+  )
+
+  // Comparación por ID de usuario asignado a la caja
+  const matchUserId = c.usuario_id && (
+    String(c.usuario_id) === userId ||
+    (userLocalId && String(c.usuario_id) === userLocalId)
+  )
+
+  // Comparación por ID del cajero en turno
+  const matchTurnoId = c.usuario_en_turno?.id && (
+    String(c.usuario_en_turno.id) === userId ||
+    (userLocalId && String(c.usuario_en_turno.id) === userLocalId)
+  )
+
+  return Boolean(matchSso || matchUsername || matchEmail || matchUserId || matchTurnoId)
+}
+
 const fetchData = async () => {
   try {
     const authStore = useAuthStore()
+    const user = authStore.user
+    const userAgenciaId = user?.agencia_id || user?.id_agencia || user?.agencia?.id
+
+    const params: any = {}
+    if (!authStore.hasRole('Super Admin') && userAgenciaId) {
+      params.agencia_id = userAgenciaId
+    }
+
     const [cajasRes, denomsRes] = await Promise.all([
-      axios.get('/cajas'),
+      axios.get('/cajas', { params }),
       axios.get('/denominaciones')
     ])
-    // Filtrar únicamente las cajas asignadas al usuario activo
-    cajas.value = cajasRes.data.filter((c: any) => c.estado && c.usuario_en_turno?.sso_id === authStore.user?.id)
+
+    // Filtrar estrictamente únicamente las cajas asignadas al usuario activo en su agencia
+    const misCajas = cajasRes.data.filter((c: any) => isMiCaja(c, user))
+
+    if (misCajas.length > 0) {
+      cajas.value = misCajas
+    } else if (authStore.hasRole('Super Admin')) {
+      // Si es Super Admin y no tiene caja asignada, permitirle seleccionar ventanillas de su agencia
+      cajas.value = cajasRes.data.filter((c: any) => 
+        c.estado && 
+        c.tipo_caja === 'ventanilla' && 
+        (!userAgenciaId || Number(c.agencia_id) === Number(userAgenciaId))
+      )
+    } else {
+      cajas.value = []
+    }
+
     denominaciones.value = denomsRes.data.filter((d: any) => d.activo)
 
     localDenominaciones.value = denominaciones.value.map(d => ({
